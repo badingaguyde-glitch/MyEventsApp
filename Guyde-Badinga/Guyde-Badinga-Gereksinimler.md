@@ -26,6 +26,6 @@
    - **API Metodu:** `GET /events/category/{categoryId}`
    - **Açıklama:** Kullanıcıların belirli bir kategoriye ait etkinlikleri filtreleyerek listelemesini sağlar. Kullanıcı, ilgili kategoriye ait etkinlikleri keşfetmek için bu işlemi kullanabilir.
 
-4. **İlgi Alanına Göre Etkinlik Önerme **
+8. **İlgi Alanına Göre Etkinlik Önerme **
    - **API Metodu:** `GET /events/suggested`
    - **Açıklama:** Kullanıcının ilgi alanlarına göre önerilen etkinlikleri listelemesini sağlar. Kullanıcı, ilgili etkinlikleri keşfetmek için bu işlemi kullanabilir.
