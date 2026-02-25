@@ -31,7 +31,7 @@
 ## Proje Ekibi
 
 **Grup Adı:** 
-> Belirlediğiniz grup adı buraya yazılacaktır.
+> BANTU
 
 **Ekip Üyeleri:** 
 - Guyde Freny Badinga
