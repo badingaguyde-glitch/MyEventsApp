@@ -1,15 +1,31 @@
-1. **Üye Olma**
-   - **API Metodu:** `POST /auth/register`
-   - **Açıklama:** Kullanıcıların yeni hesaplar oluşturarak sisteme kayıt olmasını sağlar. Kişisel bilgilerin toplanmasını ve hesap oluşturma işlemlerini içerir. Kullanıcılar email adresi ve şifre belirleyerek hesap oluşturur.
+1. **Yeni Etkinlik Oluşturma**
+   - **API Metodu:** `POST `
+   - **Açıklama:** Kullanıcının yeni bir etkinlik oluşturmasını sağlar. Etkinlik adı, açıklaması, tarihi, saati, yeri ve kapasitesi girilir.
 
-2. **Profil Görüntüleme**
-   - **API Metodu:** `GET /users/{userId}`
-   - **Açıklama:** Kullanıcının profil bilgilerini görüntülemesini sağlar. Kullanıcı adı, email, telefon gibi kişisel bilgiler ve hesap durumu gösterilir. Kullanıcılar kendi profil bilgilerini görüntüleyebilir veya yöneticiler diğer kullanıcıların bilgilerini inceleyebilir. Güvenlik için giriş yapmış olmak gerekir.
+2. **Etkinlik Bilgilerini Güncelleme**
+   - **API Metodu:** `PUT`
+   - **Açıklama:**Etkinlik sahibinin oluşturduğu etkinliğin bilgilerini güncellemesini sağlar.
 
-3. **Profil Güncelleme**
-   - **API Metodu:** `PUT /users/{userId}`
-   - **Açıklama:** Kullanıcının profil bilgilerini güncellemesini sağlar. Kullanıcılar ad, soyad, email, telefon gibi kişisel bilgilerini değiştirebilir. Güvenlik için giriş yapmış olmak gerekir ve kullanıcılar yalnızca kendi bilgilerini güncelleyebilir.
+3. **Etkinlik İptal Etme**
+   - **API Metodu:** `DELETE`
+   - **Açıklama:**Etkinlik sahibinin oluşturduğu etkinliği iptal edip sistemden kaldırmasını sağlar.
 
-4. **Hesap Silme**
-   - **API Metodu:** `DELETE /users/{userId}`
-   - **Açıklama:** Kullanıcının hesabını sistemden kalıcı olarak silmesini sağlar. Kullanıcı hesabını kapatmak istediğinde veya yönetici tarafından hesap kapatılması gerektiğinde kullanılır. Bu işlem geri alınamaz ve kullanıcının tüm verileri silinir. Güvenlik için giriş yapmış olmak gerekir.
+4. **Etkinliğe Katılım Bildirimi**
+   - **API Metodu:** `POST`
+   - **Açıklama:** Kullanıcının bir etkinliğe katılmak için bilet satın almasını ve katılım bildirimi yapmasını sağlar.
+
+5. **Kullanıcının Biletlerini Listeleme**
+   - **API Metodu:** `GET`
+   - **Açıklama:** Kullanıcının satın aldığı tüm biletleri ve katılacağı etkinlikleri listeler.
+
+6. **Katılım Kodunu Doğrulama**
+   - **API Metodu:** `POST`
+   - **Açıklama:** Etkinlik yöneticisinin, kullanıcının gösterdiği kodu girerek katılımı onaylamasını sağlar.
+
+7. **Etkinlik Katılımcılarını Listeleme**
+   - **API Metodu:** `GET`
+   - **Açıklama:** Etkinlik sahibinin, etkinliğine katılacak tüm kullanıcıları listelemesini sağlar.
+
+8. **Bilet İptal Etme**
+   - **API Metodu:** `DELETE`
+   - **Açıklama:** Kullanıcının satın aldığı bileti iptal ederek etkinlikten vazgeçmesini sağlar.

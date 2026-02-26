@@ -54,6 +54,37 @@ Tüm gereksinimlerinizi çıkardıktan sonra beraber tartışıyoruz ve son gere
    - **API Metodu:** `GET /events/suggested`
    - **Açıklama:** Kullanıcının ilgi alanlarına göre önerilen etkinlikleri listelemesini sağlar. Kullanıcı, ilgili etkinlikleri keşfetmek için bu işlemi kullanabilir.
 
+9. **Yeni Etkinlik Oluşturma**
+   - **API Metodu:** `POST `
+   - **Açıklama:** Kullanıcının yeni bir etkinlik oluşturmasını sağlar. Etkinlik adı, açıklaması, tarihi, saati, yeri ve kapasitesi girilir.
+
+10. **Etkinlik Bilgilerini Güncelleme**
+   - **API Metodu:** `PUT`
+   - **Açıklama:**Etkinlik sahibinin oluşturduğu etkinliğin bilgilerini güncellemesini sağlar.
+
+11. **Etkinlik İptal Etme**
+   - **API Metodu:** `DELETE`
+   - **Açıklama:**Etkinlik sahibinin oluşturduğu etkinliği iptal edip sistemden kaldırmasını sağlar.
+
+12. **Etkinliğe Katılım Bildirimi**
+   - **API Metodu:** `POST`
+   - **Açıklama:** Kullanıcının bir etkinliğe katılmak için bilet satın almasını ve katılım bildirimi yapmasını sağlar.
+
+13. **Kullanıcının Biletlerini Listeleme**
+   - **API Metodu:** `GET`
+   - **Açıklama:** Kullanıcının satın aldığı tüm biletleri ve katılacağı etkinlikleri listeler.
+
+14. **Katılım Kodunu Doğrulama**
+   - **API Metodu:** `POST`
+   - **Açıklama:** Etkinlik yöneticisinin, kullanıcının gösterdiği kodu girerek katılımı onaylamasını sağlar.
+
+15. **Etkinlik Katılımcılarını Listeleme**
+   - **API Metodu:** `GET`
+   - **Açıklama:** Etkinlik sahibinin, etkinliğine katılacak tüm kullanıcıları listelemesini sağlar.
+
+16. **Bilet İptal Etme**
+   - **API Metodu:** `DELETE`
+   - **Açıklama:** Kullanıcının satın aldığı bileti iptal ederek etkinlikten vazgeçmesini sağlar.
 # Gereksinim Dağılımları
 
 1. [Guyde Badinga'nın Gereksinimleri](Guyde-Badinga/Guyde-Badinga-Gereksinimler.md)
