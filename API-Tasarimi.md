@@ -917,3 +917,8 @@ curl -X POST https://api.yazmuh.com/v1/orders \
 ### Validasyon
 - [OpenAPI Validator](https://apitools.dev/swagger-parser/online/) - Spec doğrulama
 - [Spectral](https://stoplight.io/open-source/spectral) - API linting
+
+## Rest API Tasarımı
+
+Projemizde kullanılan REST API tasarımı aşağıdaki YAML dosyasında bulunmaktadır:  
+[OpenAPI YAML Dosyası](docs/openapi.yaml)
