@@ -6,12 +6,16 @@
 
 ## Proje Hakkında
 
-![Ürün Tanıtım Görseli](Product.png)
+![Ürün Tanıtım Görseli](BANTU.jpg)
 
 **Proje Tanımı:** 
-> Projenin ne iş yaptığını anlatan bir paragraflık tanıtım metni buraya yazılacaktır.
+> BANTU MY EVENT, etkinlik organizasyonu ve biletleme süreçlerini dijital ortama taşıyarak kullanıcıların etkinliklere kolayca erişmesini sağlayan yenilikçi bir platformdur. Kullanıcı dostu arayüzümüz sayesinde katılımcılar tek bir platform üzerinden tüm etkinlikleri görüntüleyebilir, bilet satın alabilir ve katılım sağladıkları etkinlikleri takip edebilirler.
 
-**Örnek:** ASY isimli e-ticaret sitemiz, online alışveriş deneyimini kolay ve keyifli hale getirmek için tasarlandı. Geniş ürün yelpazemiz sayesinde müşterilerimize en iyi seçenekleri sunarken, kullanıcı dostu arayüzümüz ile de alışveriş yapmayı daha rahat hale getiriyoruz. Sitemizde yer alan ürünler, kaliteli ve güvenilir markaların en yeni ve trend ürünlerinden oluşuyor. Müşterilerimiz, aradıkları ürünleri hızlı ve kolay bir şekilde bulabilirken, aynı zamanda satın alma süreçlerinde de sorunsuz bir deneyim yaşayacaklar. Hızlı teslimat seçenekleri, güvenli ödeme sistemleri ve müşteri memnuniyetine önem veren satış sonrası hizmetlerimizle, ASY olarak müşterilerimizin beklentilerini en üst seviyede karşılamayı hedefliyoruz. Her zaman en iyi fiyatlarla, kaliteli ürünleri müşterilerimize sunmak için çalışıyoruz ve müşteri memnuniyeti bizim için her zaman önceliklidir. ASY e-ticaret sitemize hoş geldiniz, size hizmet vermek için sabırsızlanıyoruz.
+Platformumuz, etkinlik düzenlemek isteyen kullanıcılar için de kapsamlı çözümler sunmaktadır. Etkinlik oluşturma, kapasite yönetimi, katılımcı takibi ve yoklama doğrulama gibi tüm operasyonel süreçler tek bir panel üzerinden yönetilebilmektedir. Her bilet satın alımında benzersiz bir katılım kodu oluşturularak, etkinlik gününde hızlı ve güvenli bir giriş deneyimi sağlanmaktadır.
+
+Güvenli ödeme altyapımız, kullanıcı verilerini koruyan gizlilik politikamız ve kesintisiz hizmet anlayışımızla, hem etkinlik düzenleyicilerin hem de katılımcıların beklentilerini en üst seviyede karşılamayı hedefliyoruz. Ayrıca yapay zeka destekli öneri sistemimiz sayesinde kullanıcılarımıza ilgi alanlarına ve geçmiş katılımlarına göre kişiselleştirilmiş etkinlik önerileri sunuyoruz.
+
+BANTU MY EVENT  olarak, sanat, kültür, eğlence ve iş dünyasından binlerce etkinliği bir araya getirerek, insanların unutulmaz anlar yaşamasına aracılık etmekten gurur duyuyoruz. Platformumuza hoş geldiniz, size en iyi etkinlik deneyimini sunmak için sabırsızlanıyoruz!
 
 **Proje Kategorisi:** 
 > Projenin hangi alanda yapıldığını belirten bir kategori. Örnek: E-Ticaret, Sosyal Medya vb.
