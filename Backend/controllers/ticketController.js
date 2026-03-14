@@ -71,3 +71,156 @@ exports.buyTicket = async (req, res) => {
         });
     }
 };
+
+// @desc    Get user's tickets (Kullanıcının Biletlerini Listeleme)
+// @route   GET /api/tickets/my-tickets
+// @access  Private
+
+exports.getUserTickets = async (req, res) => {
+    try {
+        const tickets = await Ticket.find({ 
+            user: req.user.id,
+            status: { $ne: 'cancelled' }
+        })
+        .populate({
+            path: 'event',
+            populate: {
+                path: 'organizer',
+                select: 'firstName lastName email'
+            }
+        })
+        .sort({ purchaseDate: -1 });
+
+        // Add event status info
+        const ticketsWithInfo = tickets.map(ticket => {
+            const event = ticket.event;
+            const now = new Date();
+            const eventDate = new Date(event.date);
+            
+            let eventStatus = 'upcoming';
+            if (eventDate < now) {
+                eventStatus = 'past';
+            } else if (ticket.status === 'used') {
+                eventStatus = 'attended';
+            }
+
+            return {
+                ...ticket.toObject(),
+                eventStatus
+            };
+        });
+
+        res.json(ticketsWithInfo);
+    } catch (error) {
+        console.error('Get user tickets error:', error);
+        res.status(500).json({ 
+            message: 'Server error',
+            error: error.message 
+        });
+    }
+};
+
+// @desc    Verify ticket (Katılım Kodunu Doğrulama)
+// @route   POST /api/tickets/verify
+// @access  Private
+exports.verifyTicket = async (req, res) => {
+    try {
+        const { eventId, ticketCode } = req.body;
+
+        if (!eventId || !ticketCode) {
+            return res.status(400).json({ 
+                message: 'Event ID and ticket code required' 
+            });
+        }
+
+        // Check if event exists and user is organizer
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Check if user is event organizer or admin
+        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Not authorized to verify tickets for this event' 
+            });
+        }
+
+        // Find ticket
+        const ticket = await Ticket.findOne({ 
+            ticketCode: ticketCode.toUpperCase(),
+            event: eventId
+        }).populate('user', 'firstName lastName email');
+
+        if (!ticket) {
+            return res.status(404).json({ 
+                valid: false,
+                message: 'Invalid ticket code for this event' 
+            });
+        }
+
+        // Check ticket status
+        if (ticket.status === 'used') {
+            return res.json({ 
+                valid: false,
+                message: 'Ticket has already been used',
+                ticket: {
+                    ticketCode: ticket.ticketCode,
+                    user: ticket.user,
+                    checkInTime: ticket.checkInTime
+                }
+            });
+        }
+
+        if (ticket.status === 'cancelled') {
+            return res.json({ 
+                valid: false,
+                message: 'Ticket has been cancelled',
+                ticket: {
+                    ticketCode: ticket.ticketCode,
+                    user: ticket.user
+                }
+            });
+        }
+
+        // Check if event date has passed
+        const eventDate = new Date(event.date);
+        const now = new Date();
+        
+        // If event date is in the future, just verify without checking in
+        if (eventDate > now) {
+            return res.json({ 
+                valid: true,
+                message: 'Valid ticket (Event not started yet)',
+                ticket: {
+                    ticketCode: ticket.ticketCode,
+                    user: ticket.user,
+                    purchaseDate: ticket.purchaseDate
+                }
+            });
+        }
+
+        // Mark ticket as used
+        ticket.status = 'used';
+        ticket.checkInTime = now;
+        ticket.checkedInBy = req.user.id;
+        await ticket.save();
+
+        res.json({ 
+            valid: true,
+            message: 'Ticket verified and checked in successfully',
+            ticket: {
+                ticketCode: ticket.ticketCode,
+                user: ticket.user,
+                checkInTime: ticket.checkInTime
+            }
+        });
+    } catch (error) {
+        console.error('Verify ticket error:', error);
+        res.status(500).json({ 
+            valid: false,
+            message: 'Server error during verification',
+            error: error.message 
+        });
+    }
+};
