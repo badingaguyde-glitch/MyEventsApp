@@ -3,7 +3,6 @@ var router=express.Router();
 var ctrlEvent=require('../controller/EventControllers');
 var ctrlTicket=require('../controller/TicketControllers');
 var ctrlUser=require('../controller/UserControllers');
-
 router.route('/user')
 .post(ctrlUser.registerUser)
 .put(ctrlUser.updateProfile);
@@ -22,47 +21,42 @@ router.route('/events/category/')
 .get(ctrlEvent.filterByCategory);
 
 // Route with ID parameter - get event by ID (public)
-router.route('/:id')
+router.route('/events/:eventid')
     .get(ctrlEvent.getEventById);
 
 // Protected routes (require authentication)
-router.route('/')
-    .post(protect, ctrlEvent.createEvent);
+router.route('/events')
+    .post(ctrlUser.requireAuth, ctrlEvent.createEvent);
 
-router.route('/organizer/me')
-    .get(protect, ctrlEvent.getMyEvents);
+router.route('/events')
+    .get(ctrlUser.requireAdminOrOwner, ctrlEvent.getMyEvents);
 
-router.route('/:id')
-    .put(protect, ctrlEvent.updateEvent)
-    .delete(protect, ctrlEvent.deleteEvent);
+router.route('/events/:eventid')
+    .put(ctrlUser.requireAdminOrOwner, ctrlEvent.updateEvent)
+    .delete(ctrlUser.requireAdminOrOwner, ctrlEvent.deleteEvent);
 
-router.route('/:id/participants')
-    .get(protect, ctrlEvent.getEventParticipants);
+router.route('/events/:eventid/participants')
+    .get(ctrlUser.requireAdminOrOwner, ctrlEvent.getEventParticipants);
 
 
     // Ticket routes
 router.route('/tickets')
-    .post(protect, ctrlTicket.buyTicket);
-
-router.route('/tickets/my-tickets')
-    .get(protect, ctrlTicket.getUserTickets);
+.post(ctrlUser.requireAuth, ctrlTicket.buyTicket)
+.get(ctrlUser.requireAuth, ctrlTicket.getUserTickets);
 
 router.route('/tickets/verify')
-    .post(protect, ctrlTicket.verifyTicket);
+.post(ctrlUser.requireAuth, ctrlTicket.verifyTicket);
 
 router.route('/tickets/bulk-verify')
-    .post(protect, ctrlTicket.bulkVerifyTickets);
-
-router.route('/tickets/event/:eventId/participants')
-    .get(protect, ctrlTicket.getEventParticipants);
+.post(ctrlUser.requireAdmin, ctrlTicket.bulkVerifyTickets);
 
 router.route('/tickets/event/:eventId/availability')
-    .get(ctrlTicket.checkAvailability);
+.get(ctrlTicket.checkAvailability);
 
 router.route('/tickets/code/:code')
-    .get(protect, ctrlTicket.getTicketByCode);
+.get(ctrlUser.requireAuth, ctrlTicket.getTicketByCode);
 
-router.route('/tickets/:id')
-    .delete(protect, ctrlTicket.cancelTicket);
+router.route('/tickets/:ticketid')
+.delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 module.exports = router;

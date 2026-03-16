@@ -225,56 +225,6 @@ const verifyTicket = async (req, res) => {
     }
 };
 
-// @desc    Get event participants (for event organizer)
-// @route   GET /api/tickets/event/:eventId/participants
-// @access  Private
-const getEventParticipants = async (req, res) => {
-    try {
-        const { eventId } = req.params;
-
-        const event = await Event.findById(eventId);
-        if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
-        }
-
-        // Check if user is organizer or admin
-        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Not authorized to view participants' 
-            });
-        }
-
-        const tickets = await Ticket.find({ 
-            event: eventId,
-            status: { $ne: 'cancelled' }
-        })
-        .populate('user', 'firstName lastName email')
-        .sort({ purchaseDate: -1 });
-
-        const stats = {
-            total: tickets.length,
-            checkedIn: tickets.filter(t => t.status === 'used').length,
-            active: tickets.filter(t => t.status === 'active').length
-        };
-
-        res.json({
-            event: {
-                id: event._id,
-                title: event.title,
-                capacity: event.capacity
-            },
-            stats,
-            participants: tickets
-        });
-    } catch (error) {
-        console.error('Get event participants error:', error);
-        res.status(500).json({ 
-            message: 'Server error',
-            error: error.message 
-        });
-    }
-};
-
 // @desc    Cancel ticket (Bilet İptal Etme)
 // @route   DELETE /api/tickets/:id
 // @access  Private
