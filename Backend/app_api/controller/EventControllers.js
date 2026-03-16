@@ -3,6 +3,59 @@ var Event= mongoose.model('Event');
 var Ticket= mongoose.model('Ticket');
 var User= mongoose.model('User');
 
+
+
+// @desc    Create new event (Yeni Etkinlik Oluşturma)
+// @route   POST /api/events
+// @access  Private
+const createEvent = async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            category,
+            date,
+            time,
+            location,
+            capacity,
+            price,
+            image,
+            coordinates
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !description || !category || !date || !time || !location || !capacity) {
+            return res.status(400).json({ 
+                message: 'Please provide all required fields' 
+            });
+        }
+
+        // Create event
+        const event = await Event.create({
+            title,
+            description,
+            category,
+            date,
+            time,
+            location,
+            capacity,
+            price: price || 0,
+            image: image || 'default-event.jpg',
+            coordinates: coordinates || [0, 0],
+            organizer: req.user.id,
+            status: 'active'
+        });
+
+        res.status(201).json(event);
+    } catch (error) {
+        console.error('Create event error:', error);
+        res.status(500).json({ 
+            message: 'Server error during event creation',
+            error: error.message 
+        });
+    }
+};
+
 const getAllEvents = async (req,res)=>{
     try {
         const { category, search, city, date, priceMin, priceMax } = req.query;
@@ -197,10 +250,240 @@ const getNearbyEvents = async (req, res) => {
     }
 };
 
+// @desc    Get event by ID
+// @route   GET /api/events/:id
+// @access  Public
+const getEventById = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id)
+            .populate('organizer', 'firstName lastName email');
+
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Get ticket count
+        const soldTickets = await Ticket.countDocuments({
+            event: event._id,
+            status: { $ne: 'cancelled' }
+        });
+
+        const eventData = {
+            ...event.toObject(),
+            availableSpots: event.capacity - soldTickets,
+            isSoldOut: event.capacity <= soldTickets
+        };
+
+        res.json(eventData);
+    } catch (error) {
+        console.error('Get event by ID error:', error);
+        res.status(500).json({ 
+            message: 'Server error',
+            error: error.message 
+        });
+    }
+};
+
+// @desc    Update event (Etkinlik Bilgilerini Güncelleme)
+// @route   PUT /api/events/:id
+// @access  Private
+const updateEvent = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Check if user is the organizer
+        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Not authorized to update this event' 
+            });
+        }
+
+        // Update fields
+        const {
+            title,
+            description,
+            category,
+            date,
+            time,
+            location,
+            capacity,
+            price,
+            image,
+            status,
+            coordinates
+        } = req.body;
+
+        event.title = title || event.title;
+        event.description = description || event.description;
+        event.category = category || event.category;
+        event.date = date || event.date;
+        event.time = time || event.time;
+        event.location = location || event.location;
+        event.capacity = capacity || event.capacity;
+        event.price = price !== undefined ? price : event.price;
+        event.image = image || event.image;
+        event.status = status || event.status;
+        event.coordinates = coordinates || event.coordinates;
+
+        const updatedEvent = await event.save();
+        res.json(updatedEvent);
+    } catch (error) {
+        console.error('Update event error:', error);
+        res.status(500).json({ 
+            message: 'Server error during event update',
+            error: error.message 
+        });
+    }
+};
+
+
+// @desc    Delete event (Etkinlik İptal Etme)
+// @route   DELETE /api/events/:id
+// @access  Private
+const deleteEvent = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Check if user is the organizer
+        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Not authorized to delete this event' 
+            });
+        }
+
+        // Cancel all tickets for this event
+        await Ticket.updateMany(
+            { event: event._id, status: 'active' },
+            { status: 'cancelled' }
+        );
+
+        // Delete or mark event as cancelled
+        event.status = 'cancelled';
+        await event.save();
+
+        res.json({ 
+            message: 'Event cancelled successfully',
+            event 
+        });
+    } catch (error) {
+        console.error('Delete event error:', error);
+        res.status(500).json({ 
+            message: 'Server error during event deletion',
+            error: error.message 
+        });
+    }
+};
+
+// @desc    Get events by organizer
+// @route   GET /api/events/organizer/me
+// @access  Private
+const getMyEvents = async (req, res) => {
+    try {
+        const events = await Event.find({ organizer: req.user.id })
+            .sort({ date: -1 });
+
+        // Get ticket counts for each event
+        const eventsWithStats = await Promise.all(
+            events.map(async (event) => {
+                const soldTickets = await Ticket.countDocuments({
+                    event: event._id,
+                    status: { $ne: 'cancelled' }
+                });
+                
+                const checkedIn = await Ticket.countDocuments({
+                    event: event._id,
+                    status: 'used'
+                });
+
+                return {
+                    ...event.toObject(),
+                    soldTickets,
+                    checkedIn,
+                    availableSpots: event.capacity - soldTickets
+                };
+            })
+        );
+
+        res.json(eventsWithStats);
+    } catch (error) {
+        console.error('Get my events error:', error);
+        res.status(500).json({ 
+            message: 'Server error',
+            error: error.message 
+        });
+    }
+};
+
+// @desc    Get event participants (Etkinlik Katılımcılarını Listeleme)
+// @route   GET /api/events/:id/participants
+// @access  Private
+const getEventParticipants = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Check if user is organizer or admin
+        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Not authorized to view participants' 
+            });
+        }
+
+        const tickets = await Ticket.find({ 
+            event: event._id,
+            status: { $ne: 'cancelled' }
+        })
+        .populate('user', 'firstName lastName email')
+        .sort({ purchaseDate: -1 });
+
+        const participants = tickets.map(ticket => ({
+            ticketId: ticket._id,
+            ticketCode: ticket.ticketCode,
+            user: ticket.user,
+            purchaseDate: ticket.purchaseDate,
+            status: ticket.status,
+            checkInTime: ticket.checkInTime,
+            checkedInBy: ticket.checkedInBy
+        }));
+
+        res.json({
+            event: {
+                id: event._id,
+                title: event.title,
+                totalTickets: tickets.length,
+                capacity: event.capacity
+            },
+            participants
+        });
+    } catch (error) {
+        console.error('Get event participants error:', error);
+        res.status(500).json({ 
+            message: 'Server error',
+            error: error.message 
+        });
+    }
+};
 
 module.exports = {
+    createEvent,
     getAllEvents,
     searchEvents,
     filterByCategory,
-    getNearbyEvents
+    getNearbyEvents,
+    getEventById,
+    updateEvent,
+    deleteEvent, 
+    getMyEvents,
+    getEventParticipants 
 };
