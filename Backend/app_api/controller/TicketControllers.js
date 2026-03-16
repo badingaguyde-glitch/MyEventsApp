@@ -452,7 +452,6 @@ module.exports = {
     buyTicket,
     getUserTickets,
     verifyTicket,
-    getEventParticipants,
     cancelTicket,
     getTicketByCode,
     checkAvailability,
