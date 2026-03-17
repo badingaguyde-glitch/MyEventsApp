@@ -5,19 +5,24 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 
-const requireAuth=(req,res,next)=>{
-    const authHeader=req.headers.authorization;
-    if(!authHeader || !authHeader.startsWith('Bearer ')){
-        return res.status(401).json({message:'Authorization header missing or malformed'});
+const requireAuth = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authorization header missing or malformed' });
     }
-    const token= authHeader.split(' ')[1];
-    try{
-        const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        req.user={id:decoded.id};
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Fetch full user from DB so req.user.role is always available
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+        req.user = { id: user._id.toString(), role: user.role, email: user.email };
         next();
-    }catch(error){
-        console.error('Auth error: ',error);
-        res.status(401).json({message:'Invalid or expired token'});
+    } catch (error) {
+        console.error('Auth error: ', error);
+        res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
 
@@ -46,7 +51,7 @@ const registerUser= async (req, res)=>{
             return res.status(400).json({message:'Email already in use'});
         }
         const salt= await bcrypt.genSalt(10);
-        const hasshedPassword= await bcrypt.hass(password,salt);
+        const hasshedPassword= await bcrypt.hash(password,salt);
 
         const user= await User.create({
             name, lastName, email, password:hasshedPassword, interests:interests || []
@@ -131,7 +136,7 @@ const updateProfile = async (req, res) => {
             email: updatedUser.email,
             interests: updatedUser.interests,
             role: updatedUser.role,
-            token: generateToken(updatedUser._id)
+            token: jwt.sign({id:updatedUser._id}, process.env.JWT_SECRET, {expiresIn:'1d'})
         });
     } catch (error) {
         console.error('Update profile error:', error);
@@ -150,7 +155,7 @@ const deleteUser = async(req,res)=>{
         }
 
         await Ticket.deleteMany({user:user._id});
-        await user.remove();
+        await user.deleteOne();
         res.json({message:'User and associated tickets deleted successfully'});
     } catch (error) {
         console.error('Delete user error:', error);

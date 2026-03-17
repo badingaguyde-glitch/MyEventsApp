@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ticketSchema = new mongoose.Schema({
-    ticketCode:{type:String, required:true, unique: true},
+    ticketCode:{type:String,  unique: true},
     event:{type:mongoose.Schema.Types.ObjectId, ref:'Event', required:true},
     user:{type:mongoose.Schema.Types.ObjectId, ref:'User', required:true},
     status:{type:String, required:true, enum:['active', 'used', 'cancelled'], default:'active'},
@@ -10,7 +10,7 @@ const ticketSchema = new mongoose.Schema({
     price:{type:Number, required:true, min:0}
 });
 
-ticketSchema.pre('save', async function(next) {
+ticketSchema.pre('save', async function() {
     if (!this.ticketCode) {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code;
@@ -27,7 +27,6 @@ ticketSchema.pre('save', async function(next) {
         
         this.ticketCode = code;
     }
-    next();
 });
 
 module.exports = mongoose.model('Ticket', ticketSchema);

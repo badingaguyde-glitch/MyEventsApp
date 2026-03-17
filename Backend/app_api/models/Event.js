@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const eventSchema= new mongoose.Schema({
     title:{type:String, required:true, trim: true},
     description:{type:String, required:true},
-    category:{type:String, required:true, trim: true, enum:['concert', 'theater', 'conference', 'sports', 'work shop', 'other']},
+    category:[{type:String, required:true, trim: true}],
     date:{type:Date, required:true},
+    capacity:{type:Number, required:true, min:1},
     location:{
         venue:{type:String, required:true},
         address:{type:String, required:true},
