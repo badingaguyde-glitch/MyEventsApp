@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> main
 const Ticket = require('../models/Ticket');
 const Event = require('../models/Event');
 const User = require('../models/User');
@@ -9,7 +12,11 @@ const User = require('../models/User');
 // @access  Private
 const buyTicket = async (req, res) => {
     try {
+<<<<<<< HEAD
         const { eventId, price } = req.body;
+=======
+        const { eventId } = req.body;
+>>>>>>> main
 
         if (!eventId) {
             return res.status(400).json({ message: 'Event ID required' });
@@ -53,7 +60,11 @@ const buyTicket = async (req, res) => {
         const ticket = await Ticket.create({
             event: eventId,
             user: req.user.id,
+<<<<<<< HEAD
             price: price || 0,
+=======
+            price: event.price,
+>>>>>>> main
             status: 'active'
         });
 
@@ -228,11 +239,19 @@ const verifyTicket = async (req, res) => {
 };
 
 // @desc    Cancel ticket (Bilet İptal Etme)
+<<<<<<< HEAD
 // @route   DELETE /api/tickets/:ticketid
 // @access  Private
 const cancelTicket = async (req, res) => {
     try {
         const ticket = await Ticket.findById(req.params.ticketid)
+=======
+// @route   DELETE /api/tickets/:id
+// @access  Private
+const cancelTicket = async (req, res) => {
+    try {
+        const ticket = await Ticket.findById(req.params.id)
+>>>>>>> main
             .populate('event');
 
         if (!ticket) {
@@ -458,5 +477,9 @@ module.exports = {
     getTicketByCode,
     checkAvailability,
     bulkVerifyTickets
+<<<<<<< HEAD
 };
 >>>>>>> Stashed changes
+=======
+};
+>>>>>>> main
