@@ -1,12 +1,11 @@
-<<<<<<< Updated upstream
+
 var express=require('express');
 var router=express.Router();
 var ctrlEvent=require('../controller/EventControllers');
 var ctrlTicket=require('../controller/TicketControllers');
 var ctrlUser=require('../controller/UserControllers');
-<<<<<<< HEAD
 
-=======
+
 var express = require('express');
 var router = express.Router();
 var ctrlEvent = require('../controller/EventControllers');
@@ -16,9 +15,7 @@ var ctrlUser = require('../controller/UserControllers');
 // ──────────────────────────────────────────────
 // USER ROUTES
 // ──────────────────────────────────────────────
->>>>>>> Stashed changes
-=======
->>>>>>> main
+
 router.route('/user')
     .post(ctrlUser.registerUser)
     .put(ctrlUser.requireAuth, ctrlUser.updateProfile);
@@ -36,15 +33,14 @@ router.route('/events')
     .get(ctrlEvent.getAllEvents)
     .post(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.createEvent);
 
-<<<<<<< HEAD
+
 router.route('/events/search')
     .get(ctrlEvent.searchEvents);
 
 router.route('/events/nearby')
     .get(ctrlEvent.getNearbyEvents);
 
-<<<<<<< Updated upstream
-=======
+
 router.route('/events/category')
     .get(ctrlEvent.filterByCategory);
 
@@ -88,8 +84,7 @@ router.route('/tickets/:ticketid')
     .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 module.exports = router;
->>>>>>> Stashed changes
-=======
+
 // Route with ID parameter - get event by ID (public)
 router.route('/events/:eventid')
     .get(ctrlEvent.getEventById);
@@ -130,4 +125,4 @@ router.route('/tickets/:ticketid')
 .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 module.exports = router;
->>>>>>> main
+
