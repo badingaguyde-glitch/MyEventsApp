@@ -3,9 +3,6 @@ var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
 
-<<<<<<< Updated upstream
-const getAllEvents = async (req,res)=>{
-=======
 
 
 // @desc    Create new event (Yeni Etkinlik Oluşturma)
@@ -84,7 +81,6 @@ const upload = multer({
 });
 
 const getAllEvents = async (req, res) => {
->>>>>>> Stashed changes
     try {
         const { category, search, city, date, priceMin, priceMax } = req.query;
 
@@ -279,8 +275,6 @@ const getNearbyEvents = async (req, res) => {
     }
 };
 
-<<<<<<< Updated upstream
-=======
 // @desc    Get event by ID
 // @route   GET /api/events/:id
 // @access  Public
@@ -508,15 +502,11 @@ const getEventParticipants = async (req, res) => {
         });
     }
 };
->>>>>>> Stashed changes
 
 module.exports = {
     getAllEvents,
     searchEvents,
     filterByCategory,
-<<<<<<< Updated upstream
-    getNearbyEvents
-=======
     getNearbyEvents,
     getEventById,
     updateEvent,
@@ -524,5 +514,4 @@ module.exports = {
     getMyEvents,
     getEventParticipants,
     upload
->>>>>>> Stashed changes
 };

@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 const Ticket = require('../models/Ticket');
 const Event = require('../models/Event');
 const User = require('../models/User');
@@ -459,4 +457,3 @@ module.exports = {
     checkAvailability,
     bulkVerifyTickets
 };
->>>>>>> Stashed changes

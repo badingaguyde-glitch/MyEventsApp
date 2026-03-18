@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-var express=require('express');
-var router=express.Router();
-var ctrlEvent=require('../controller/EventControllers');
-var ctrlTicket=require('../controller/TicketControllers');
-var ctrlUser=require('../controller/UserControllers');
-
-=======
 var express = require('express');
 var router = express.Router();
 var ctrlEvent = require('../controller/EventControllers');
@@ -15,7 +7,6 @@ var ctrlUser = require('../controller/UserControllers');
 // ──────────────────────────────────────────────
 // USER ROUTES
 // ──────────────────────────────────────────────
->>>>>>> Stashed changes
 router.route('/user')
     .post(ctrlUser.registerUser)
     .put(ctrlUser.requireAuth, ctrlUser.updateProfile);
@@ -39,8 +30,6 @@ router.route('/events/search')
 router.route('/events/nearby')
     .get(ctrlEvent.getNearbyEvents);
 
-<<<<<<< Updated upstream
-=======
 router.route('/events/category')
     .get(ctrlEvent.filterByCategory);
 
@@ -84,4 +73,3 @@ router.route('/tickets/:ticketid')
     .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 module.exports = router;
->>>>>>> Stashed changes
