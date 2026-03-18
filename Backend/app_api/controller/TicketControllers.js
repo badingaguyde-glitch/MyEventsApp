@@ -456,5 +456,4 @@ module.exports = {
     getTicketByCode,
     checkAvailability,
     bulkVerifyTickets
-<<<<<<< HEAD
 };
