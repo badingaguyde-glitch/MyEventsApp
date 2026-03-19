@@ -14,7 +14,7 @@ const EventCard = ({ event, index }) => {
         >
             <div className="relative h-40 sm:h-48 overflow-hidden rounded-xl m-4" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
                 <img
-                    src={event.image?.startsWith('http') ? event.image : `http://localhost:5000/uploads/${event.image || 'default.jpg'}`}
+                    src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'https://my-events-app-backend.vercel.app'}/uploads/${event.image || 'default.jpg'}`}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-all"
                     style={{ transition: 'transform 0.7s ease' }}
