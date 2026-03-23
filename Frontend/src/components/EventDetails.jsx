@@ -85,7 +85,7 @@ const EventDetails = () => {
                                 </span>
                             )}
                         </div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">{event.title}</h1>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight line-clamp-3">{event.title}</h1>
                     </div>
                 </div>
 
@@ -105,7 +105,7 @@ const EventDetails = () => {
                                         {new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                     </p>
                                     <p className="flex items-center gap-2 text-sm text-slate-400 font-bold">
-                                        <Clock size={16} /> {event.time}
+                                        <Clock size={16} /> {event.time || 'Heure non précisée'}
                                     </p>
                                 </div>
                             </div>
