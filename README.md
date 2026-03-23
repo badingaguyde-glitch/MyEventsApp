@@ -27,8 +27,8 @@ BANTU MY EVENT  olarak, sanat, kültür, eğlence ve iş dünyasından binlerce 
 
 ## Proje Linkleri
 
-- **REST API Adresi:** [api.yazmuh.com](https://api.yazmuh.com)
-- **Web Frontend Adresi:** [frontend.yazmuh.com](https://frontend.yazmuh.com)
+- **REST API Adresi:** [my-events-app-backend.vercel.app](https://my-events-app-backend.vercel.app)
+- **Web Frontend Adresi:** [my-events-app-xi.vercel.app](https://my-events-app-xi.vercel.app)
 
 ---
 
