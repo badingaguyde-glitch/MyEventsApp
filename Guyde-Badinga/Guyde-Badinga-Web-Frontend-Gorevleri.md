@@ -267,7 +267,7 @@
 | `/edit-event/:id` | `<EditEvent />` | ProtectedRoute (ownership) |
 | `/my-events` | `<MyEvents />` | Herkese açık |
 | `/events/:id/participants` | `<EventParticipants />` | ProtectedRoute (ownership) |
-| `/my-tickets` | `<MyTickets />` | Herkese açık |
+| `/my-tickets` | `<MyTickets />` | ProtectedRoute |
 | `/profile` | `<Profile />` | ProtectedRoute |
 | `/admin-dashboard` | `<AdminDashboard />` | ProtectedRoute (admin) |
 | `/organizer-dashboard` | `<OrganizerDashboard />` | ProtectedRoute (ownership) |
