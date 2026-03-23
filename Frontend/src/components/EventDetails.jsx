@@ -17,7 +17,7 @@ const EventDetails = () => {
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-     console.log("event details loaded:", event); // Debug log
+    console.log("event details loaded:", event); // Debug log
 
     useEffect(() => {
         fetchEvent();
@@ -85,13 +85,13 @@ const EventDetails = () => {
                                 </span>
                             )}
                         </div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight line-clamp-3">{event.title}</h1>
                     </div>
                 </div>
 
                 <div className="p-6 md:p-10 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
                     <div className="md:col-span-2 space-y-10">
                         <section className="space-y-4">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight line-clamp-3">{event.title}</h1>
                             <h2 className="text-2xl font-black border-l-4 border-primary pl-4">About This Event</h2>
                             <p className="text-slate-400 text-lg leading-relaxed font-medium">{event.description}</p>
                         </section>
