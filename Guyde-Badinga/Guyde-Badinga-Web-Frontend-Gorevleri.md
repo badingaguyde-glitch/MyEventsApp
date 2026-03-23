@@ -263,10 +263,10 @@
 | `/register` | `<Register />` | Herkese açık |
 | `/events` | `<EventList />` | Herkese açık |
 | `/events/:id` | `<EventDetails />` | Herkese açık |
-| `/create-event` | `<CreateEvent />` | Herkese açık |
-| `/edit-event/:id` | `<EditEvent />` | Herkese açık |
+| `/create-event` | `<CreateEvent />` | ProtectedRoute |
+| `/edit-event/:id` | `<EditEvent />` | ProtectedRoute (ownership) |
 | `/my-events` | `<MyEvents />` | Herkese açık |
-| `/events/:id/participants` | `<EventParticipants />` | Herkese açık |
+| `/events/:id/participants` | `<EventParticipants />` | ProtectedRoute (ownership) |
 | `/my-tickets` | `<MyTickets />` | Herkese açık |
 | `/profile` | `<Profile />` | ProtectedRoute |
 | `/admin-dashboard` | `<AdminDashboard />` | ProtectedRoute (admin) |
