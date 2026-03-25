@@ -13,7 +13,7 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'Event ID required' });
         }
 
-        
+
 
         const event = await Event.findById(eventId);
         if (!event) {
@@ -24,7 +24,7 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'This event is no longer active' });
         }
 
-        
+
         const soldTickets = await Ticket.countDocuments({
             event: eventId,
             status: { $ne: 'cancelled' }
@@ -34,7 +34,7 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'Event is sold out' });
         }
 
-        
+
         const existingTicket = await Ticket.findOne({
             event: eventId,
             user: req.user.id,
@@ -42,12 +42,12 @@ const buyTicket = async (req, res) => {
         });
 
         if (existingTicket) {
-            return res.status(400).json({ 
-                message: 'You already have an active ticket for this event' 
+            return res.status(400).json({
+                message: 'You already have an active ticket for this event'
             });
         }
 
-        
+
         const ticket = await Ticket.create({
             event: eventId,
             user: req.user.id,
@@ -55,7 +55,7 @@ const buyTicket = async (req, res) => {
             status: 'active'
         });
 
-        
+
         const populatedTicket = await Ticket.findById(ticket._id)
             .populate('event')
             .populate('user', 'firstName lastName email');
@@ -66,9 +66,9 @@ const buyTicket = async (req, res) => {
         });
     } catch (error) {
         console.error('Buy ticket error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error during ticket purchase',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -78,25 +78,25 @@ const buyTicket = async (req, res) => {
 
 const getUserTickets = async (req, res) => {
     try {
-        const tickets = await Ticket.find({ 
+        const tickets = await Ticket.find({
             user: req.user.id,
             status: { $ne: 'cancelled' }
         })
-        .populate({
-            path: 'event',
-            populate: {
-                path: 'organizer',
-                select: 'firstName lastName email'
-            }
-        })
-        .sort({ purchaseDate: -1 });
+            .populate({
+                path: 'event',
+                populate: {
+                    path: 'organizer',
+                    select: 'firstName lastName email'
+                }
+            })
+            .sort({ purchaseDate: -1 });
 
-        
+
         const ticketsWithInfo = tickets.map(ticket => {
             const event = ticket.event;
             const now = new Date();
             const eventDate = new Date(event.date);
-            
+
             let eventStatus = 'upcoming';
             if (eventDate < now) {
                 eventStatus = 'past';
@@ -113,9 +113,9 @@ const getUserTickets = async (req, res) => {
         res.json(ticketsWithInfo);
     } catch (error) {
         console.error('Get user tickets error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -128,40 +128,40 @@ const verifyTicket = async (req, res) => {
         const { eventId, ticketCode } = req.body;
 
         if (!eventId || !ticketCode) {
-            return res.status(400).json({ 
-                message: 'Event ID and ticket code required' 
+            return res.status(400).json({
+                message: 'Event ID and ticket code required'
             });
         }
 
-        
+
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        
+
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Not authorized to verify tickets for this event' 
+            return res.status(403).json({
+                message: 'Not authorized to verify tickets for this event'
             });
         }
 
-        
-        const ticket = await Ticket.findOne({ 
+
+        const ticket = await Ticket.findOne({
             ticketCode: ticketCode.toUpperCase(),
             event: eventId
         }).populate('user', 'firstName lastName email');
 
         if (!ticket) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 valid: false,
-                message: 'Invalid ticket code for this event' 
+                message: 'Invalid ticket code for this event'
             });
         }
 
-        
+
         if (ticket.status === 'used') {
-            return res.json({ 
+            return res.json({
                 valid: false,
                 message: 'Ticket has already been used',
                 ticket: {
@@ -173,7 +173,7 @@ const verifyTicket = async (req, res) => {
         }
 
         if (ticket.status === 'cancelled') {
-            return res.json({ 
+            return res.json({
                 valid: false,
                 message: 'Ticket has been cancelled',
                 ticket: {
@@ -183,13 +183,13 @@ const verifyTicket = async (req, res) => {
             });
         }
 
-        
+
         const eventDate = new Date(event.date);
         const now = new Date();
-        
-        
+
+
         if (eventDate > now) {
-            return res.json({ 
+            return res.json({
                 valid: true,
                 message: 'Valid ticket (Event not started yet)',
                 ticket: {
@@ -200,13 +200,13 @@ const verifyTicket = async (req, res) => {
             });
         }
 
-        
+
         ticket.status = 'used';
         ticket.checkInTime = now;
         ticket.checkedInBy = req.user.id;
         await ticket.save();
 
-        res.json({ 
+        res.json({
             valid: true,
             message: 'Ticket verified and checked in successfully',
             ticket: {
@@ -217,10 +217,10 @@ const verifyTicket = async (req, res) => {
         });
     } catch (error) {
         console.error('Verify ticket error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             valid: false,
             message: 'Server error during verification',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -237,54 +237,46 @@ const cancelTicket = async (req, res) => {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
-        
+
         if (ticket.user.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Not authorized to cancel this ticket' 
+            return res.status(403).json({
+                message: 'Not authorized to cancel this ticket'
             });
         }
 
-        
+
         if (ticket.status === 'used') {
-            return res.status(400).json({ 
-                message: 'Cannot cancel a ticket that has already been used' 
+            return res.status(400).json({
+                message: 'Cannot cancel a ticket that has already been used'
             });
         }
 
         if (ticket.status === 'cancelled') {
-            return res.status(400).json({ 
-                message: 'Ticket is already cancelled' 
+            return res.status(400).json({
+                message: 'Ticket is already cancelled'
             });
         }
 
-        
+
         const eventDate = new Date(ticket.event.date);
         const now = new Date();
-        
+
         if (eventDate < now) {
-            return res.status(400).json({ 
-                message: 'Cannot cancel ticket for past events' 
+            return res.status(400).json({
+                message: 'Cannot cancel ticket for past events'
             });
         }
 
-        
-        ticket.status = 'cancelled';
-        await ticket.save();
+        await ticket.deleteOne();
 
-        res.json({ 
-            message: 'Ticket cancelled successfully',
-            ticket: {
-                id: ticket._id,
-                ticketCode: ticket.ticketCode,
-                status: ticket.status,
-                event: ticket.event.title
-            }
+        res.json({
+            message: 'Ticket cancelled successfully'
         });
     } catch (error) {
         console.error('Cancel ticket error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error during ticket cancellation',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -307,9 +299,9 @@ const getTicketByCode = async (req, res) => {
         res.json(ticket);
     } catch (error) {
         console.error('Get ticket by code error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -343,9 +335,9 @@ const checkAvailability = async (req, res) => {
         });
     } catch (error) {
         console.error('Check availability error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error',
-            error: error.message 
+            error: error.message
         });
     }
 };
@@ -358,20 +350,20 @@ const bulkVerifyTickets = async (req, res) => {
         const { eventId, ticketCodes } = req.body;
 
         if (!eventId || !ticketCodes || !Array.isArray(ticketCodes)) {
-            return res.status(400).json({ 
-                message: 'Event ID and ticket codes array required' 
+            return res.status(400).json({
+                message: 'Event ID and ticket codes array required'
             });
         }
 
-        
+
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Not authorized to verify tickets for this event' 
+            return res.status(403).json({
+                message: 'Not authorized to verify tickets for this event'
             });
         }
 
@@ -379,7 +371,7 @@ const bulkVerifyTickets = async (req, res) => {
         const now = new Date();
 
         for (const code of ticketCodes) {
-            const ticket = await Ticket.findOne({ 
+            const ticket = await Ticket.findOne({
                 ticketCode: code.toUpperCase(),
                 event: eventId
             }).populate('user', 'firstName lastName email');
@@ -416,7 +408,7 @@ const bulkVerifyTickets = async (req, res) => {
                 continue;
             }
 
-            
+
             ticket.status = 'used';
             ticket.checkInTime = now;
             ticket.checkedInBy = req.user.id;
@@ -441,9 +433,9 @@ const bulkVerifyTickets = async (req, res) => {
         });
     } catch (error) {
         console.error('Bulk verify error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Server error during bulk verification',
-            error: error.message 
+            error: error.message
         });
     }
 };

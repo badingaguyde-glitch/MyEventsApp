@@ -74,7 +74,7 @@ cloudinary.config({
 
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, 
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowed.includes(file.mimetype)) cb(null, true);
@@ -110,7 +110,7 @@ const getAllEvents = async (req, res) => {
     try {
         const { category, search, city, date, priceMin, priceMax } = req.query;
 
-        
+
         let filter = { status: 'active' };
 
         if (category && category !== 'all') {
@@ -144,12 +144,12 @@ const getAllEvents = async (req, res) => {
             if (priceMax) filter.price.$lte = parseFloat(priceMax);
         }
 
-        
+
         const events = await Event.find(filter)
             .populate('organizer', 'firstName lastName email')
             .sort({ date: 1 });
 
-        
+
         const eventsWithAvailability = await Promise.all(
             events.map(async (event) => {
                 const soldTickets = await Ticket.countDocuments({
@@ -235,17 +235,17 @@ const getNearbyEvents = async (req, res) => {
     try {
         const { lat, lng, radius = 10, unit = 'km' } = req.query;
 
-        
+
         if (!lat || !lng) {
             return res.status(400).json({
                 message: 'Latitude and longitude are required'
             });
         }
 
-        
-        const radiusInMeters = unit === 'km' ? radius * 1000 : radius * 1609.34; 
 
-        
+        const radiusInMeters = unit === 'km' ? radius * 1000 : radius * 1609.34;
+
+
         const nearbyEvents = await Event.find({
             status: 'active',
             'coordinates': {
@@ -259,7 +259,7 @@ const getNearbyEvents = async (req, res) => {
             }
         }).populate('organizer', 'firstName lastName email');
 
-        
+
         const eventsWithDistance = nearbyEvents.map(event => {
             const eventCoords = event.coordinates;
             const distance = calculateDistance(
@@ -313,7 +313,7 @@ const getEventById = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        
+
         const soldTickets = await Ticket.countDocuments({
             event: event._id,
             status: { $ne: 'cancelled' }
@@ -326,7 +326,7 @@ const getEventById = async (req, res) => {
         };
 
         res.json(eventData);
-        console.log("capcaity:",eventData.capacity,"available:", eventData.availableSpots, "sold:", soldTickets);
+        console.log("capcaity:", eventData.capacity, "available:", eventData.availableSpots, "sold:", soldTickets);
     } catch (error) {
         console.error('Get event by ID error:', error);
         res.status(500).json({
@@ -347,14 +347,14 @@ const updateEvent = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        
+
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to update this event'
             });
         }
 
-        
+
         const {
             title,
             description,
@@ -410,27 +410,31 @@ const deleteEvent = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        
+
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to delete this event'
             });
         }
 
-        
-        await Ticket.updateMany(
-            { event: event._id, status: 'active' },
-            { status: 'cancelled' }
-        );
+        if (event.organizer.toString() == req.user.id) {
+            await Ticket.updateMany(
+                { event: event._id, status: 'active' },
+                { status: 'cancelled' }
+            );
 
-        
-        event.status = 'cancelled';
-        await event.save();
+            event.status = 'cancelled';
+            await event.save();
+            res.json({
+                message: 'Event cancelled successfully',
+                event
+            });
+        } else if (req.user.role === 'admin') {
+            await Ticket.deleteMany({ event: event._id });
+            await event.deleteOne();
+            res.json({ message: 'Event and associated tickets deleted successfully' });
+        }
 
-        res.json({
-            message: 'Event cancelled successfully',
-            event
-        });
     } catch (error) {
         console.error('Delete event error:', error);
         res.status(500).json({
@@ -448,7 +452,7 @@ const getMyEvents = async (req, res) => {
         const events = await Event.find({ organizer: req.user.id })
             .sort({ date: -1 });
 
-        
+
         const eventsWithStats = await Promise.all(
             events.map(async (event) => {
                 const soldTickets = await Ticket.countDocuments({
@@ -491,7 +495,7 @@ const getEventParticipants = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        
+
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to view participants'
@@ -524,7 +528,7 @@ const getEventParticipants = async (req, res) => {
             },
             participants
         });
-        
+
     } catch (error) {
         console.error('Get event participants error:', error);
         res.status(500).json({
