@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
+require('dotenv').config();
 
 
 
