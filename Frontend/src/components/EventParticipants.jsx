@@ -27,7 +27,7 @@ const EventParticipants = () => {
                 EventService.getEventParticipants(id, user.token)
             ]);
             setEvent(eventRes.data);
-            setParticipants(partRes.data);
+            setParticipants(partRes.data.participants || []);
         } catch (err) {
             console.error('Failed to load participants');
         } finally {
@@ -38,12 +38,13 @@ const EventParticipants = () => {
     if (loading) return <Loader message="Loading participants..." />;
 
     const exportCSV = () => {
-    const rows = participants.map(p => ({
-        name: p.name,
-        lastName: p.lastName,
-        email: p.email,
-        phone: p.phone,
-        date: p.registrationDate
+    const validParticipants = Array.isArray(participants) ? participants : [];
+    const rows = validParticipants.map(p => ({
+        name: p.user?.name || 'Unknown',
+        lastName: p.user?.lastName || '',
+        email: p.user?.email || 'N/A',
+        ticketCode: p.ticketCode,
+        date: p.purchaseDate
     }));
 
     const csv = [
@@ -94,12 +95,12 @@ const EventParticipants = () => {
                             <tr className="border-b text-slate-500 text-[10px] font-black uppercase tracking-widest" style={{ borderBottom: '1px solid var(--border-white)' }}>
                                 <th className="px-4 py-6">Attendee Profile</th>
                                 <th className="px-4 py-6">Contact Access</th>
-                                <th className="px-4 py-6">Phone Reference</th>
+                                <th className="px-4 py-6">Ticket Reference</th>
                                 <th className="px-4 py-6 text-right">Registered On</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm">
-                            {participants.map((p, index) => (
+                            {Array.isArray(participants) && participants.map((p, index) => (
                                 <motion.tr 
                                     key={p._id}
                                     initial={{ opacity: 0, y: 10 }}
@@ -111,21 +112,21 @@ const EventParticipants = () => {
                                     <td className="px-4 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-xl glass border border-primary/20 flex items-center justify-center font-black text-primary">
-                                                {p.name?.charAt(0) || "?"}
+                                                {p.user?.name?.charAt(0) || "?"}
                                             </div>
-                                            <span className="font-black text-white">{p.name} {p.lastName}</span>
+                                            <span className="font-black text-white">{p.user?.name} {p.user?.lastName}</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-6 text-slate-400 font-medium">{p.email}</td>
-                                    <td className="px-4 py-6 text-slate-400 font-medium">{p.phone || 'Private'}</td>
+                                    <td className="px-4 py-6 text-slate-400 font-medium">{p.user?.email}</td>
+                                    <td className="px-4 py-6 text-slate-400 font-medium">{p.ticketCode || 'N/A'}</td>
                                     <td className="px-4 py-6 text-right text-slate-500 font-black uppercase tracking-widest text-[10px]">
-                                        {new Date(p.registrationDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {p.purchaseDate ? new Date(p.purchaseDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                                     </td>
                                 </motion.tr>
                             ))}
                         </tbody>
                     </table>
-                    {participants.length === 0 && (
+                    {(!Array.isArray(participants) || participants.length === 0) && (
                         <div className="text-center py-20 card glass border-dashed" style={{ borderWidth: '2px', borderColor: 'var(--border-white)' }}>
                             <p className="text-slate-500 text-xl font-medium tracking-tight">No attendance records found for this secure event.</p>
                         </div>

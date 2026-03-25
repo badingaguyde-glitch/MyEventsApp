@@ -49,12 +49,11 @@ const MyTickets = () => {
     return (
         <div className="space-y-12">
             <h1 className="text-3xl md:text-4xl font-black">My Tickets</h1>
-            
+
             {message.text && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 text-sm ${
-                    message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                }`}>
-                    {message.type === 'success' ? <CheckCircle2 size={18}/> : <AlertCircle size={18}/>}
+                <div className={`p-4 rounded-xl flex items-center gap-3 text-sm ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                     {message.text}
                 </div>
             )}

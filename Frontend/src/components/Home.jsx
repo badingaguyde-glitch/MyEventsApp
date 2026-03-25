@@ -37,10 +37,10 @@ const Home = () => {
 
     return (
         <div className="space-y-8">
-            
+
             <section className="relative py-20 overflow-hidden rounded-3xl glass border-indigo-500/20">
                 <div className="container relative z-10 mx-auto text-center px-4">
-                    <motion.h1 
+                    <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl md:text-5xl font-black mb-4"
@@ -48,16 +48,16 @@ const Home = () => {
                         Experience Unforgettable <br />
                         <span className="text-indigo-400">Local Events</span>
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                         className="text-sm md:text-lg text-slate-400 mx-auto mb-8 px-2 max-w-2xl"
                     >
-                        Discover the best concerts, festivals, workshops, and sports events happening around you. 
+                        Discover the best concerts, festivals, workshops, and sports events happening around you.
                         Join the community and make every moment count.
                     </motion.p>
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
@@ -71,13 +71,13 @@ const Home = () => {
                         </Link>
                     </motion.div>
                 </div>
-                
-                
+
+
                 <div className="absolute top-0 right-0 h-full w-full pointer-events-none" style={{ background: 'radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)' }}></div>
                 <div className="absolute bottom-0 left-0 h-full w-full pointer-events-none" style={{ background: 'radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%)' }}></div>
             </section>
 
-            
+
             <section>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <h2 className="text-3xl font-bold">

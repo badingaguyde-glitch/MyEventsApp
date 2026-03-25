@@ -146,7 +146,7 @@ const getAllEvents = async (req, res) => {
 
 
         const events = await Event.find(filter)
-            .populate('organizer', 'firstName lastName email')
+            .populate('organizer', 'name lastName email')
             .sort({ date: 1 });
 
 
@@ -196,7 +196,7 @@ const searchEvents = async (req, res) => {
                     ]
                 }
             ]
-        }).populate('organizer', 'firstName lastName email');
+        }).populate('organizer', 'name lastName email');
 
         res.json(events);
     } catch (error) {
@@ -219,7 +219,7 @@ const filterByCategory = async (req, res) => {
         const events = await Event.find({
             category: category,
             status: 'active'
-        }).populate('organizer', 'firstName lastName email');
+        }).populate('organizer', 'name lastName email');
 
         res.json(events);
     } catch (error) {
@@ -257,7 +257,7 @@ const getNearbyEvents = async (req, res) => {
                     $maxDistance: radiusInMeters
                 }
             }
-        }).populate('organizer', 'firstName lastName email');
+        }).populate('organizer', 'name lastName email');
 
 
         const eventsWithDistance = nearbyEvents.map(event => {
@@ -307,7 +307,7 @@ const getNearbyEvents = async (req, res) => {
 const getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventid)
-            .populate('organizer', 'firstName lastName email');
+            .populate('organizer', 'name lastName email');
 
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });

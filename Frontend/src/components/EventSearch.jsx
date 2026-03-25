@@ -34,18 +34,18 @@ const EventSearch = () => {
                     <h1 className="text-3xl md:text-5xl font-black">Find Your Next <span className="text-gradient">Experience</span></h1>
                     <p className="text-slate-400 font-medium">Search for concerts, workshops, sports and more.</p>
                 </div>
-                
+
                 <form onSubmit={handleSearch} className="event-search-container px-4">
                     <div className="event-search-wrapper">
                         <Search className="event-search-icon" size={20} />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             className="event-search-input"
                             placeholder="Artist, event, or city..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
-                        <button 
+                        <button
                             type="submit"
                             className="event-search-btn"
                         >

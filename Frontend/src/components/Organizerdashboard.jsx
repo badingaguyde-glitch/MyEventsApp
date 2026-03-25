@@ -25,7 +25,7 @@ const Organizerdashboard = () => {
     const fetchStats = async () => {
         try {
             const res = await EventService.getMyEvents(user.token);
-            const events = res.data;
+            const events = Array.isArray(res.data) ? res.data : [];
             
             const sold = events.reduce((acc, ev) => acc + (ev.soldTickets || 0), 0);
             const revenue = events.reduce((acc, ev) => acc + ((ev.soldTickets || 0) * ev.price), 0);
