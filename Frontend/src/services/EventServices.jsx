@@ -8,16 +8,37 @@ const getEventById = (id) => {
     return http.get(`/events/${id}`);
 };
 
-const createEvent = (data, token) => {
-    return http.post("/events", data, {
-        headers: { Authorization: `Bearer ${token}` }
+const BASE_URL = "https://my-events-app-backend.vercel.app/api";
+
+const createEvent = async (data, token) => {
+    const response = await fetch(`${BASE_URL}/events`, {
+        method: 'POST',
+        headers: {
+            // Pas de Content-Type ici — très important ! fetch gérera le 'multipart/form-data; boundary=...' natif
+            "Authorization": `Bearer ${token}`
+        },
+        body: data
     });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw { response: { data: errorData } };
+    }
+    return response.json();
 };
 
-const updateEvent = (id, data, token) => {
-    return http.put(`/events/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` }
+const updateEvent = async (id, data, token) => {
+    const response = await fetch(`${BASE_URL}/events/${id}`, {
+        method: 'PUT',
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        body: data
     });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw { response: { data: errorData } };
+    }
+    return response.json();
 };
 
 const deleteEvent = (id, token) => {
