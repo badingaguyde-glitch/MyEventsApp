@@ -90,40 +90,20 @@ const Organizerdashboard = () => {
                 <div className="lg:col-span-2 space-y-8">
                     <h2 className="text-2xl font-black">Quick Operations</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Link to="/verify-ticket" className="card glass p-8 border hover:border-primary/40 transition-all group" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
+                        <Link to="/verify-ticket" className="card glass border p-8 flex flex-col justify-center items-center text-center space-y-3 h-full" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
                             <div className="p-3 bg-primary/10 rounded-xl w-fit mb-6 group-hover:bg-primary transition-all">
                                 <QrCode size={24} className="text-primary group-hover:text-white" />
                             </div>
                             <h3 className="text-xl font-bold mb-2">Verify Tickets</h3>
                             <p className="text-sm text-slate-400 font-medium leading-relaxed">Instantly validate attendee credentials via QR scan or reference code.</p>
                         </Link>
-                        <Link to="/my-events" className="card glass p-8 border hover:border-indigo-400/40 transition-all group" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
+                        <Link to="/my-events" className="card glass border p-8 flex flex-col justify-center items-center text-center space-y-3 h-full" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
                             <div className="p-3 bg-indigo-400/10 rounded-xl w-fit mb-6 group-hover:bg-indigo-400 transition-all">
                                 <ArrowUpRight size={24} className="text-indigo-400 group-hover:text-white" />
                             </div>
                             <h3 className="text-xl font-bold mb-2">Portfolio Management</h3>
                             <p className="text-sm text-slate-400 font-medium leading-relaxed">Refine your published events, monitor registrations, or adjust capacity.</p>
                         </Link>
-                    </div>
-                </div>
-
-                <div className="card glass border p-8 flex flex-col justify-center items-center text-center space-y-6 h-full" style={{ borderColor: 'var(--border-white)' }}>
-                    <div className="p-6 bg-slate-500/10 rounded-full">
-                        <TrendingUp size={40} className="text-slate-600" />
-                    </div>
-                    <div className="space-y-3">
-                        <h3 className="text-2xl font-black">Performance Analytics</h3>
-                        <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                            Deep-dive metrics and attendee conversion funnels will appear here as your events gain traction.
-                        </p>
-                    </div>
-                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div 
-                            initial={{ x: '-100%' }}
-                            animate={{ x: '100%' }}
-                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                            className="w-1/2 h-full bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-                        />
                     </div>
                 </div>
             </div>

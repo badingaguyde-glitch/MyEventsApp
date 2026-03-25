@@ -300,4 +300,7 @@ body {
   background: var(--primary-hover);
   transform: translateY(-1px);
 }
+div{
+  padding:5px;
+}
 
