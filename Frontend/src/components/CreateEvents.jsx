@@ -70,6 +70,7 @@ const CreateEvents = () => {
             navigate('/my-events');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to create event.');
+            console.log(err);
         } finally {
             setLoading(false);
         }
