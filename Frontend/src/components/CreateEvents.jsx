@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import EventService from '../services/EventServices';
 import { checkOrganizerStatus } from '../redux/reducer';
 import { motion } from 'framer-motion';
-import { AlertCircle,Save, X, Calendar, MapPin, Users, DollarSign, Image as ImageIcon, Tag, Clock } from 'lucide-react';
+import { AlertCircle, Save, X, Calendar, MapPin, Users, DollarSign, Image as ImageIcon, Tag, Clock } from 'lucide-react';
 import Loader from './Loader';
 
 const CreateEvents = () => {
@@ -54,11 +54,11 @@ const CreateEvents = () => {
             data.append("capacity", Number(formData.capacity));
             data.append("price", Number(formData.price));
 
-            data.append("location.city", formData.city);
-            data.append("location.address", formData.address);
-            data.append("location.venue", formData.venue);
-            data.append("coordinates[0]", formData.longitude);
-            data.append("coordinates[1]", formData.latitude);
+            data.append("location[city]", formData.city);
+            data.append("location[address]", formData.address);
+            data.append("location[venue]", formData.venue);
+            data.append("coordinates[0]", formData.longitude || 0);
+            data.append("coordinates[1]", formData.latitude || 0);
 
             if (formData.image) {
                 data.append("image", formData.image);

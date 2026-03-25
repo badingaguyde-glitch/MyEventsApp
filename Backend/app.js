@@ -1,3 +1,4 @@
+require('dotenv').config(); // ⚠️ DOIT être en première ligne, avant tout autre require()
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -9,7 +10,6 @@ require('./app_api/models/db');
 var apiRouter = require('./app_api/routes/index');
 
 var cors = require('cors');
-require('dotenv').config();
 
 var app = express();
 
