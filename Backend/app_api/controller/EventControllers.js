@@ -30,6 +30,18 @@ const createEvent = async (req, res) => {
             });
         }
 
+        // Upload image vers Cloudinary si fournie
+        let imageUrl = 'default-event.jpg';
+        if (req.file) {
+            try {
+                const uploadResult = await uploadToCloudinary(req.file.buffer);
+                imageUrl = uploadResult.secure_url;
+            } catch (uploadError) {
+                console.error('Image upload failed:', uploadError.message);
+                // On continue avec l'image par défaut plutôt que de bloquer la création
+            }
+        }
+
         // Create event
         const event = await Event.create({
             title,
@@ -40,7 +52,7 @@ const createEvent = async (req, res) => {
             location,
             capacity,
             price: price || 0,
-            image: req.file ? req.file.path : 'default-event.jpg',
+            image: imageUrl,
             coordinates: coordinates || [0, 0],
             organizer: req.user.id,
             status: 'active'
@@ -58,28 +70,49 @@ const createEvent = async (req, res) => {
 
 const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { Readable } = require('stream');
 
-// Configuration Cloudinary avec les variables d'environnement
+// Configuration Cloudinary
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME || 'test',
-    api_key: process.env.CLOUD_API_KEY || '12345',
-    api_secret: process.env.CLOUD_API_SECRET || 'abcdefg'
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'myevents',
-        allowedFormats: ['jpg', 'png', 'jpeg', 'webp'],
-        transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
+// multer stocke le fichier en mémoire (buffer) — pas de dépendance multer-storage-cloudinary
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (allowed.includes(file.mimetype)) cb(null, true);
+        else cb(new Error('Format non supporté. Utilisez jpg, png ou webp.'));
     }
 });
 
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }
-});
+// Upload manuel du buffer vers Cloudinary via upload_stream
+const uploadToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'myevents',
+                transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('Cloudinary upload error:', error);
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            }
+        );
+        const readable = new Readable();
+        readable.push(buffer);
+        readable.push(null);
+        readable.pipe(uploadStream);
+    });
+};
 
 const getAllEvents = async (req, res) => {
     try {
@@ -352,7 +385,12 @@ const updateEvent = async (req, res) => {
         event.capacity = Number(capacity) || Number(event.capacity);
         event.price = price !== undefined ? price : event.price;
         if (req.file) {
-            event.image = req.file.path;
+            try {
+                const uploadResult = await uploadToCloudinary(req.file.buffer);
+                event.image = uploadResult.secure_url;
+            } catch (uploadError) {
+                console.error('Image upload failed on update:', uploadError.message);
+            }
         }
         event.status = status || event.status;
         event.coordinates = coordinates || event.coordinates;
