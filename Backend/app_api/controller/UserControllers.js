@@ -13,7 +13,7 @@ const requireAuth = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Fetch full user from DB so req.user.role is always available
+        
         const user = await User.findById(decoded.id).select('-password');
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
@@ -115,13 +115,13 @@ const updateProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update fields
+        
         user.firstName = req.body.firstName || user.firstName;
         user.lastName = req.body.lastName || user.lastName;
         user.email = req.body.email || user.email;
         user.interests = req.body.interests || user.interests;
 
-        // Update password if provided
+        
         if (req.body.password) {
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(req.body.password, salt);

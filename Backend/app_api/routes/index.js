@@ -4,9 +4,9 @@ var ctrlEvent = require('../controller/EventControllers');
 var ctrlTicket = require('../controller/TicketControllers');
 var ctrlUser = require('../controller/UserControllers');
 
-// ──────────────────────────────────────────────
-// USER ROUTES
-// ──────────────────────────────────────────────
+
+
+
 
 router.route('/user')
     .post(ctrlUser.registerUser)
@@ -18,9 +18,9 @@ router.route('/user/login')
 router.route('/user/:userid')
     .delete(ctrlUser.requireAuth, ctrlUser.deleteUser);
 
-// ──────────────────────────────────────────────
-// EVENT ROUTES — Public
-// ──────────────────────────────────────────────
+
+
+
 router.route('/events')
     .get(ctrlEvent.getAllEvents)
     .post(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.createEvent);
@@ -36,14 +36,14 @@ router.route('/events/nearby')
 router.route('/events/category')
     .get(ctrlEvent.filterByCategory);
 
-// IMPORTANT: /events/mine must come BEFORE /events/:eventid 
-// or Express will match "mine" as an eventid value
+
+
 router.route('/events/mine')
     .get(ctrlUser.requireAuth, ctrlEvent.getMyEvents);
 
-// ──────────────────────────────────────────────
-// EVENT ROUTES — Per-ID (Protected)
-// ──────────────────────────────────────────────
+
+
+
 router.route('/events/:eventid')
     .get(ctrlEvent.getEventById)
     .put(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.updateEvent)
@@ -52,9 +52,9 @@ router.route('/events/:eventid')
 router.route('/events/:eventid/participants')
     .get(ctrlUser.requireAuth, ctrlEvent.getEventParticipants);
 
-// ──────────────────────────────────────────────
-// TICKET ROUTES
-// ──────────────────────────────────────────────
+
+
+
 router.route('/tickets')
     .post(ctrlUser.requireAuth, ctrlTicket.buyTicket)
     .get(ctrlUser.requireAuth, ctrlTicket.getUserTickets);
@@ -65,7 +65,7 @@ router.route('/tickets/verify')
 router.route('/tickets/bulk-verify')
     .post(ctrlUser.requireAuth, ctrlTicket.bulkVerifyTickets);
 
-// Static sub-paths BEFORE /:ticketid param
+
 router.route('/tickets/event/:eventId/availability')
     .get(ctrlTicket.checkAvailability);
 

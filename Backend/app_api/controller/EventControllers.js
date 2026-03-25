@@ -5,10 +5,6 @@ var User = mongoose.model('User');
 require('dotenv').config();
 
 
-
-// @desc    Create new event (Yeni Etkinlik Oluşturma)
-// @route   POST /api/events
-// @access  Private
 const createEvent = async (req, res) => {
     try {
         const {
@@ -23,14 +19,12 @@ const createEvent = async (req, res) => {
             coordinates
         } = req.body;
 
-        // Validate required fields
         if (!title || !description || !category || !date || !time || !location || !capacity) {
             return res.status(400).json({
                 message: 'Please provide all required fields'
             });
         }
 
-        // Upload image vers Cloudinary si fournie
         let imageUrl = 'default-event.jpg';
         if (req.file) {
             try {
@@ -38,11 +32,9 @@ const createEvent = async (req, res) => {
                 imageUrl = uploadResult.secure_url;
             } catch (uploadError) {
                 console.error('Image upload failed:', uploadError.message);
-                // On continue avec l'image par défaut plutôt que de bloquer la création
             }
         }
 
-        // Create event
         const event = await Event.create({
             title,
             description,
@@ -72,17 +64,17 @@ const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { Readable } = require('stream');
 
-// Configuration Cloudinary
+
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUD_API_KEY,
     api_secret: process.env.CLOUD_API_SECRET
 });
 
-// multer stocke le fichier en mémoire (buffer) — pas de dépendance multer-storage-cloudinary
+
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    limits: { fileSize: 5 * 1024 * 1024 }, 
     fileFilter: (req, file, cb) => {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowed.includes(file.mimetype)) cb(null, true);
@@ -90,7 +82,7 @@ const upload = multer({
     }
 });
 
-// Upload manuel du buffer vers Cloudinary via upload_stream
+
 const uploadToCloudinary = (buffer) => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -118,7 +110,7 @@ const getAllEvents = async (req, res) => {
     try {
         const { category, search, city, date, priceMin, priceMax } = req.query;
 
-        // Build filter object
+        
         let filter = { status: 'active' };
 
         if (category && category !== 'all') {
@@ -152,12 +144,12 @@ const getAllEvents = async (req, res) => {
             if (priceMax) filter.price.$lte = parseFloat(priceMax);
         }
 
-        // Get events with organizer info
+        
         const events = await Event.find(filter)
             .populate('organizer', 'firstName lastName email')
             .sort({ date: 1 });
 
-        // For each event, get available tickets count
+        
         const eventsWithAvailability = await Promise.all(
             events.map(async (event) => {
                 const soldTickets = await Ticket.countDocuments({
@@ -243,17 +235,17 @@ const getNearbyEvents = async (req, res) => {
     try {
         const { lat, lng, radius = 10, unit = 'km' } = req.query;
 
-        // Vérifier si les coordonnées sont fournies
+        
         if (!lat || !lng) {
             return res.status(400).json({
                 message: 'Latitude and longitude are required'
             });
         }
 
-        // Convertir le rayon en mètres (pour MongoDB geospatial)
-        const radiusInMeters = unit === 'km' ? radius * 1000 : radius * 1609.34; // km ou miles
+        
+        const radiusInMeters = unit === 'km' ? radius * 1000 : radius * 1609.34; 
 
-        // Rechercher les événements à proximité
+        
         const nearbyEvents = await Event.find({
             status: 'active',
             'coordinates': {
@@ -267,7 +259,7 @@ const getNearbyEvents = async (req, res) => {
             }
         }).populate('organizer', 'firstName lastName email');
 
-        // Calculer les distances pour chaque événement
+        
         const eventsWithDistance = nearbyEvents.map(event => {
             const eventCoords = event.coordinates;
             const distance = calculateDistance(
@@ -309,9 +301,9 @@ const getNearbyEvents = async (req, res) => {
     }
 };
 
-// @desc    Get event by ID
-// @route   GET /api/events/:id
-// @access  Public
+
+
+
 const getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventid)
@@ -321,7 +313,7 @@ const getEventById = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Get ticket count
+        
         const soldTickets = await Ticket.countDocuments({
             event: event._id,
             status: { $ne: 'cancelled' }
@@ -344,9 +336,9 @@ const getEventById = async (req, res) => {
     }
 };
 
-// @desc    Update event (Etkinlik Bilgilerini Güncelleme)
-// @route   PUT /api/events/:id
-// @access  Private
+
+
+
 const updateEvent = async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventid);
@@ -355,14 +347,14 @@ const updateEvent = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Check if user is the organizer
+        
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to update this event'
             });
         }
 
-        // Update fields
+        
         const {
             title,
             description,
@@ -407,9 +399,9 @@ const updateEvent = async (req, res) => {
 };
 
 
-// @desc    Delete event (Etkinlik İptal Etme)
-// @route   DELETE /api/events/:id
-// @access  Private
+
+
+
 const deleteEvent = async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventid);
@@ -418,20 +410,20 @@ const deleteEvent = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Check if user is the organizer
+        
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to delete this event'
             });
         }
 
-        // Cancel all tickets for this event
+        
         await Ticket.updateMany(
             { event: event._id, status: 'active' },
             { status: 'cancelled' }
         );
 
-        // Delete or mark event as cancelled
+        
         event.status = 'cancelled';
         await event.save();
 
@@ -448,15 +440,15 @@ const deleteEvent = async (req, res) => {
     }
 };
 
-// @desc    Get events by organizer
-// @route   GET /api/events/organizer/me
-// @access  Private
+
+
+
 const getMyEvents = async (req, res) => {
     try {
         const events = await Event.find({ organizer: req.user.id })
             .sort({ date: -1 });
 
-        // Get ticket counts for each event
+        
         const eventsWithStats = await Promise.all(
             events.map(async (event) => {
                 const soldTickets = await Ticket.countDocuments({
@@ -488,9 +480,9 @@ const getMyEvents = async (req, res) => {
     }
 };
 
-// @desc    Get event participants (Etkinlik Katılımcılarını Listeleme)
-// @route   GET /api/events/:id/participants
-// @access  Private
+
+
+
 const getEventParticipants = async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventid);
@@ -499,7 +491,7 @@ const getEventParticipants = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Check if user is organizer or admin
+        
         if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to view participants'
