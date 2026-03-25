@@ -35,7 +35,7 @@ const EditEvent = () => {
         try {
             const res = await EventService.getEventById(id);
             const data = res.data;
-            // Format date for input[type="date"]
+            
             const formattedDate = data.date ? new Date(data.date).toISOString().split('T')[0] : '';
             setFormData({
                 ...data,

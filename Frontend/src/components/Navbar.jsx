@@ -45,9 +45,9 @@ const Navbar = () => {
                     </span>
                 </Link>
 
-                {/* Top Bar Actions & Menu Trigger */}
+                
                 <div className="flex items-center gap-4">
-                    {/* Auth Controls - Unconditionally visible */}
+                    
                     <div className="flex items-center gap-2 md:gap-4 border-r pr-2 md:pr-4" style={{ borderColor: 'var(--border-white)' }}>
                         {isLoggedIn ? (
                             <>
@@ -67,7 +67,7 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Universal Menu Toggle */}
+                    
                     <button
                         className="p-2 text-white glass rounded-xl flex items-center justify-center transition-all hover:bg-white/10 shrink-0"
                         onClick={() => setIsOpen(true)}
@@ -78,11 +78,11 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Sidebar Drawer */}
+            
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {/* Backdrop */}
+                        
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -90,7 +90,7 @@ const Navbar = () => {
                             onClick={() => setIsOpen(false)}
                             className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100]"
                         />
-                        {/* Drawer */}
+                        
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}

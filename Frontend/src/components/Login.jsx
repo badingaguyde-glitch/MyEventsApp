@@ -22,7 +22,7 @@ const Login = () => {
         try {
             const resultAction = await dispatch(login({ email, password }));
             if (resultAction.meta.requestStatus === 'fulfilled') {
-                // Initial check for organizer status
+                
                 if (resultAction.payload.token) {
                     dispatch(checkOrganizerStatus(resultAction.payload.token));
                 }

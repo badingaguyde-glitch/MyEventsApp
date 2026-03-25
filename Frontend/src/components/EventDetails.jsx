@@ -17,7 +17,7 @@ const EventDetails = () => {
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-    console.log("event details loaded:", event); // Debug log
+    console.log("event details loaded:", event); 
 
     useEffect(() => {
         fetchEvent();
@@ -44,10 +44,10 @@ const EventDetails = () => {
         setMessage({ text: '', type: '' });
 
         try {
-            // Using direct token passing as requested
+            
             await TicketService.buyTicket({ eventId: id, price: event.price }, user.token);
             setMessage({ text: 'Ticket booked successfully!', type: 'success' });
-            fetchEvent(); // Refresh availability
+            fetchEvent(); 
         } catch (err) {
             setMessage({ text: err.response?.data?.message || 'Booking failed.', type: 'error' });
         } finally {

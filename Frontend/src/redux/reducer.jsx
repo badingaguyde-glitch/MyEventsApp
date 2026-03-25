@@ -2,7 +2,7 @@ import UserDataService from "../services/UserDataServices";
 import EventService from "../services/EventServices";
 import TicketService from "../services/TicketServices";
 
-// Action Types
+
 const LOGIN_INIT = "LOGIN_INIT";
 const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 const LOGIN_FAILURE = "LOGIN_FAILURE";
@@ -19,7 +19,7 @@ const DELETE_KAYIT_FAILURE = "DELETE_KAYIT_FAILURE";
 const FETCH_MY_EVENTS_SUCCESS = "FETCH_MY_EVENTS_SUCCESS";
 const LOGOUT = "LOGOUT";
 
-// Async Actions (Thunks)
+
 export const login = ({ email, password }) => async (dispatch) => {
     dispatch({ type: LOGIN_INIT });
     try {
@@ -80,7 +80,7 @@ export const checkOrganizerStatus = (token) => async (dispatch) => {
     }
 };
 
-// Initial State
+
 const user = JSON.parse(localStorage.getItem("user"));
 const initialState = {
     isLoggedIn: user ? true : false,
@@ -95,7 +95,7 @@ const initialState = {
     myEvents: []
 };
 
-// Reducer
+
 const kayitReducer = (state = initialState, action) => {
     switch (action.type) {
         case LOGIN_INIT:

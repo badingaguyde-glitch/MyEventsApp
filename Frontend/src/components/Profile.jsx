@@ -124,7 +124,7 @@ const Profile = () => {
                     </button>
                 </form>
 
-                {/* Delete Account */}
+                
                 <div className="pt-6 border-t" style={{ borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
                     <button
                         onClick={() => setShowConfirm(true)}
@@ -135,7 +135,7 @@ const Profile = () => {
                 </div>
             </motion.div>
 
-            {/* Confirmation Modal */}
+            
             <AnimatePresence>
                 {showConfirm && (
                     <motion.div

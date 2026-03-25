@@ -32,7 +32,7 @@ const CreateEvents = () => {
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === 'image') {
-            setFormData({ ...formData, image: files[0] }); // stocker le fichier
+            setFormData({ ...formData, image: files[0] }); 
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -64,7 +64,7 @@ const CreateEvents = () => {
                 data.append("image", formData.image);
             }
 
-            // envoyer `data` au lieu de `formData`
+            
             await EventService.createEvent(data, user.token);
             dispatch(checkOrganizerStatus(user.token));
             navigate('/my-events');
@@ -291,7 +291,7 @@ const CreateEvents = () => {
                                 type="file"
                                 name="image"
                                 accept="image/*"
-                                onChange={handleChange} // réutilise ton handleChange
+                                onChange={handleChange} 
                                 className="input"
                             />
                             {formData.image && (
