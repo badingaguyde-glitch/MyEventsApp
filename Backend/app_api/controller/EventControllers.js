@@ -3,6 +3,7 @@ var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
 require('dotenv').config();
+import { calculateDistance } from './utils/calculate.js';
 
 
 const createEvent = async (req, res) => {
