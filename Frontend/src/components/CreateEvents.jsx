@@ -157,11 +157,11 @@ const CreateEvents = () => {
                   <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                   <select
                     name="category"
-                    className="input pl-12 appearance-none cursor-pointer"
+                    className="input pl-12 appearance-none cursor-pointer bg-transparent text-white"
                     value={formData.category}
                     onChange={handleChange}
                   >
-                    <option value="conference">Confce</option>
+                    <option value="conference">Conference</option>
                     <option value="workshop">Workshop</option>
                     <option value="concert">Concert</option>
                     <option value="sports">Sports</option>

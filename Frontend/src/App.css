@@ -117,11 +117,8 @@ select {
 }
 
 select option {
-  background-color: var(--bg-dark);
-  border: 1px solid var(--border-white);
-  border-radius: 1rem;
+  background-color: #0f172a;
   color: white;
-  font-family: inherit;
 }
 
 .card:hover {
