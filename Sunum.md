@@ -2,7 +2,7 @@
 
 ## Sunum Videosu
 
-> **Video Linki:** [Sunum videosu linki buraya eklenecek](https://example.com)
+> **Video Linki:** [Sunum videosu linki buraya eklenecek](https://youtu.be/BP1at9YU1GU)
 
 ---
 
