@@ -9,15 +9,13 @@ const EventCard = ({ event, index }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="card group overflow-hidden border transition-all flex flex-col h-full"
-            style={{ borderColor: 'var(--border-white)' }}
+            className="card group overflow-hidden border border-light transition-all flex flex-col h-full"
         >
-            <div className="relative h-40 sm:h-48 overflow-hidden rounded-xl m-4" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+            <div className="event-card-img-wrapper">
                 <img
                     src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'https://my-events-app-backend.vercel.app'}/uploads/${event.image || 'default.jpg'}`}
                     alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-all"
-                    style={{ transition: 'transform 0.7s ease' }}
+                    className="event-card-img"
                     onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=800' }}
                 />
                 <div className="absolute top-3 left-3 px-3 py-1 glass rounded-full text-[10px] font-bold text-white uppercase tracking-widest">
@@ -48,14 +46,13 @@ const EventCard = ({ event, index }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap lg:flex-nowrap justify-between items-center pt-4 border-b gap-4" style={{ borderTop: '1px solid var(--border-white)', borderBottom: 'none' }}>
+                <div className="event-card-footer">
                     <span className="text-2xl font-black text-white truncate min-w-0">
                         {event.price === 0 ? 'FREE' : `$${event.price}`}
                     </span>
                     <Link
                         to={`/events/${event._id}`}
-                        className="btn-primary py-2 px-4 shadow-none shrink-0"
-                        style={{ fontSize: '0.75rem' }}
+                        className="btn-primary py-2 px-4 shadow-none shrink-0 text-xs"
                     >
                         DETAILS <ArrowRight size={14} className="gap-2 shrink-0" />
                     </Link>

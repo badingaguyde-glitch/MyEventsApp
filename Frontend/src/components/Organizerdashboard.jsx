@@ -72,8 +72,7 @@ const Organizerdashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="card glass p-4 md:p-6 flex items-center gap-4 md:gap-6 border"
-                        style={{ borderColor: 'var(--border-white)' }}
+                        className="card glass p-4 md:p-6 flex items-center gap-4 md:gap-6 border border-light"
                     >
                         <div className={`p-3 md:p-4 rounded-2xl ${card.bg} shadow-lg shadow-black/20 shrink-0`}>
                             <card.icon size={24} className={card.color} />
@@ -90,14 +89,14 @@ const Organizerdashboard = () => {
                 <div className="lg:col-span-2 space-y-8">
                     <h2 className="text-2xl font-black">Quick Operations</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Link to="/verify-ticket" className="card glass border p-8 flex flex-col justify-center items-center text-center space-y-3 h-full" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
+                        <Link to="/verify-ticket" className="card glass border border-light p-8 flex flex-col justify-center items-center text-center space-y-3 h-full no-underline">
                             <div className="p-3 bg-primary/10 rounded-xl w-fit mb-6 group-hover:bg-primary transition-all">
                                 <QrCode size={24} className="text-primary group-hover:text-white" />
                             </div>
                             <h3 className="text-xl font-bold mb-2">Verify Tickets</h3>
                             <p className="text-sm text-slate-400 font-medium leading-relaxed">Instantly validate attendee credentials via QR scan or reference code.</p>
                         </Link>
-                        <Link to="/my-events" className="card glass border p-8 flex flex-col justify-center items-center text-center space-y-3 h-full" style={{ borderColor: 'var(--border-white)', textDecoration: 'none' }}>
+                        <Link to="/my-events" className="card glass border border-light p-8 flex flex-col justify-center items-center text-center space-y-3 h-full no-underline">
                             <div className="p-3 bg-indigo-400/10 rounded-xl w-fit mb-6 group-hover:bg-indigo-400 transition-all">
                                 <ArrowUpRight size={24} className="text-indigo-400 group-hover:text-white" />
                             </div>

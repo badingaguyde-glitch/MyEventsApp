@@ -37,7 +37,7 @@ const AdminDashboard = () => {
                     <p className="text-sm md:text-base text-slate-400 font-medium break-words">Platform-wide governance and global analytics.</p>
                 </div>
                 <div className="flex flex-wrap md:flex-nowrap gap-4 w-full md:w-auto">
-                    <button className="p-3 glass rounded-xl text-slate-400 hover:text-white transition-all shrink-0" style={{ border: '1px solid var(--border-white)', background: 'none' }}>
+                    <button className="p-3 glass rounded-xl text-slate-400 hover:text-white transition-all border border-light bg-none shrink-0">
                         <Settings size={20} />
                     </button>
                     <button className="btn-primary py-3 px-6 shadow-none flex-1 md:flex-none text-sm md:text-base">
@@ -58,8 +58,7 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.1 }}
-                        className="card glass p-4 md:p-6 flex flex-col justify-between h-32 border"
-                        style={{ borderColor: 'var(--border-white)' }}
+                        className="card glass p-4 md:p-6 flex flex-col justify-between h-32 border border-light"
                     >
                         <div className="flex justify-between items-start gap-2">
                             <stat.icon size={20} className={`${stat.color} shrink-0`} />
@@ -74,7 +73,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
-                <div className="card glass p-8 border space-y-8" style={{ borderColor: 'var(--border-white)' }}>
+                <div className="card glass p-8 border border-light space-y-8">
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl font-black">Platform Activity</h2>
                         <Activity size={20} className="text-primary" />
@@ -85,7 +84,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="card glass p-8 border space-y-8" style={{ borderColor: 'var(--border-white)' }}>
+                <div className="card glass p-8 border border-light space-y-8">
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl font-black">Visual Analytics</h2>
                         <BarChart3 size={20} className="text-primary" />
@@ -97,7 +96,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            <div className="card glass p-8 border" style={{ borderColor: 'var(--border-white)' }}>
+            <div className="card glass p-8 border border-light">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                     <h2 className="text-2xl font-black">Identity Management</h2>
                     <div className="relative w-full md:w-72">

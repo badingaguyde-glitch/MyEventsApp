@@ -67,8 +67,7 @@ const MyEvents = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
-                        className="card glass border transition-all"
-                        style={{ borderColor: 'var(--border-white)' }}
+                        className="card glass border border-light transition-all"
                     >
                         <div className="p-6 space-y-6">
                             <div className="flex justify-between items-start gap-3">
@@ -88,7 +87,7 @@ const MyEvents = () => {
                                 <p className="flex items-center gap-2"><Users size={14} className="text-primary" /> {event.soldTickets || 0} / {event.capacity} Spots Filled</p>
                             </div>
 
-                            <div className="pt-6 flex flex-wrap sm:flex-nowrap items-center justify-between border-b gap-3" style={{ borderTop: '1px solid var(--border-white)', borderBottom: 'none' }}>
+                            <div className="pt-6 flex flex-wrap sm:flex-nowrap items-center justify-between border-b-none border-light border-t gap-3">
                                 <div className="flex gap-2 w-full sm:w-auto overflow-x-auto">
                                     <Link to={`/events/${event._id}/participants`} className="p-2 glass text-slate-400 hover:text-white rounded-lg transition-all shrink-0" title="View Participants">
                                         <Users size={18} />
@@ -99,8 +98,7 @@ const MyEvents = () => {
                                 </div>
                                 <button
                                     onClick={() => handleDelete(event._id)}
-                                    className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all shrink-0 sm:w-auto"
-                                    style={{ background: 'rgba(244, 63, 94, 0.1)', border: 'none', cursor: 'pointer' }}
+                                    className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all shrink-0 sm:w-auto bg-rose-500/10 border-none cursor-pointer"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -111,9 +109,9 @@ const MyEvents = () => {
             </div>
 
             {events.length === 0 && (
-                <div className="text-center py-20 card glass border-dashed" style={{ borderWidth: '2px' }}>
+                <div className="text-center py-20 card glass border-dashed border-2 border-light">
                     <p className="text-slate-400 mb-6 text-xl">You haven't created any events yet.</p>
-                    <Link to="/create-event" className="text-primary font-black uppercase tracking-widest" style={{ textDecoration: 'none' }}>
+                    <Link to="/create-event" className="text-primary font-black uppercase tracking-widest no-underline">
                         Create your first event
                     </Link>
                 </div>

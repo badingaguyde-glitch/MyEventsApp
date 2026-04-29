@@ -84,13 +84,11 @@ const CreateEvents = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="card glass p-10 space-y-10 border"
-          style={{ borderColor: 'var(--border-white)' }}
+          className="card glass p-10 space-y-10 border border-light"
         >
 
           {/* Header */}
-          <div className="flex justify-between items-center pb-6 border-b"
-            style={{ borderBottom: '1px solid var(--border-white)' }}>
+          <div className="flex justify-between items-center pb-6 border-b border-light">
             <div>
               <h1 className="text-3xl font-black">Launch Experience</h1>
               <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">

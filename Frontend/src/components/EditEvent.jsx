@@ -74,10 +74,9 @@ const EditEvent = () => {
             <motion.div 
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="card glass p-10 space-y-10 border"
-                style={{ borderColor: 'var(--border-white)' }}
+                className="card glass p-10 space-y-10 border border-light"
             >
-                <div className="flex justify-between items-center pb-6 border-b" style={{ borderBottom: '1px solid var(--border-white)' }}>
+                <div className="flex justify-between items-center pb-6 border-b border-light">
                     <div>
                         <h1 className="text-3xl font-black text-white">Refine Experience</h1>
                         <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] mt-2">Adjust parameters for your published event</p>

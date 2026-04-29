@@ -73,8 +73,8 @@ const Home = () => {
                 </div>
 
 
-                <div className="absolute top-0 right-0 h-full w-full pointer-events-none" style={{ background: 'radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)' }}></div>
-                <div className="absolute bottom-0 left-0 h-full w-full pointer-events-none" style={{ background: 'radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%)' }}></div>
+                <div className="hero-gradient-top"></div>
+                <div className="hero-gradient-bottom"></div>
             </section>
 
 
@@ -93,7 +93,7 @@ const Home = () => {
                                 <MapPin size={16} /> Near Me
                             </button>
                         )}
-                        <Link to="/events" className="text-indigo-400 font-bold flex items-center gap-1" style={{ textDecoration: 'none' }}>
+                        <Link to="/events" className="text-indigo-400 font-bold flex items-center gap-1 no-underline">
                             View all <ArrowRight size={16} />
                         </Link>
                     </div>

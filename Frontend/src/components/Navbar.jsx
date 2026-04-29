@@ -38,7 +38,7 @@ const Navbar = () => {
     return (
         <nav className="glass sticky top-0 z-50 w-full border-b py-3">
             <div className="container mx-auto flex items-center justify-between px-4">
-                <Link to="/" className="flex items-center gap-2 text-xl md:text-2xl font-bold text-white shrink-0" style={{ textDecoration: 'none' }}>
+                <Link to="/" className="nav-logo">
                     <Calendar className="text-primary shrink-0" size={32} />
                     <span className="text-gradient">
                         MyEvents
@@ -48,14 +48,14 @@ const Navbar = () => {
                 
                 <div className="flex items-center gap-4">
                     
-                    <div className="flex items-center gap-2 md:gap-4 border-r pr-2 md:pr-4" style={{ borderColor: 'var(--border-white)' }}>
+                    <div className="nav-user-divider">
                         {isLoggedIn ? (
                             <>
                                 <Link to="/profile" className="nav-link text-xs font-bold uppercase tracking-widest whitespace-nowrap">
                                     <User size={14} className="opacity-60 shrink-0" />
                                     <span className="hidden sm:inline truncate max-w-[80px] md:max-w-none">{user.name.split(' ')[0]}</span>
                                 </Link>
-                                <button onClick={handleLogout} className="text-rose-400 hover:text-rose-300 transition-colors p-2 shrink-0" title="Log Out" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                <button onClick={handleLogout} className="text-rose-400 hover:text-rose-300 transition-colors p-2 shrink-0 bg-none border-none cursor-pointer" title="Log Out">
                                     <LogOut size={18} />
                                 </button>
                             </>
@@ -69,9 +69,8 @@ const Navbar = () => {
 
                     
                     <button
-                        className="p-2 text-white glass rounded-xl flex items-center justify-center transition-all hover:bg-white/10 shrink-0"
+                        className="nav-menu-btn"
                         onClick={() => setIsOpen(true)}
-                        style={{ background: 'none', cursor: 'pointer', border: '1px solid var(--border-white)', width: '44px', height: '44px' }}
                     >
                         <Menu size={24} />
                     </button>
@@ -96,8 +95,7 @@ const Navbar = () => {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-full w-[280px] bg-bg-dark border-l z-[110] shadow-2xl"
-                            style={{ borderColor: 'var(--border-white)' }}
+                            className="nav-sidebar"
                         >
                             <div className="p-6 flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-10">
@@ -113,8 +111,7 @@ const Navbar = () => {
                                             key={link.path}
                                             to={link.path}
                                             onClick={() => setIsOpen(false)}
-                                            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white"
-                                            style={{ textDecoration: 'none' }}
+                                            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white no-underline"
                                         >
                                             <div className="p-2 bg-white/5 rounded-lg">
                                                 <link.icon size={18} className="text-primary" />
@@ -124,14 +121,13 @@ const Navbar = () => {
                                     ))}
                                 </div>
 
-                                <div className="mt-auto pt-8 border-t" style={{ borderColor: 'var(--border-white)' }}>
+                                <div className="mt-auto pt-8 border-t border-light">
                                     {isLoggedIn ? (
                                         <div className="space-y-4">
                                             <Link
                                                 to="/profile"
                                                 onClick={() => setIsOpen(false)}
-                                                className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white"
-                                                style={{ textDecoration: 'none' }}
+                                                className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white no-underline"
                                             >
                                                 <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
                                                     <User size={18} className="text-primary" />
@@ -143,8 +139,7 @@ const Navbar = () => {
                                             </Link>
                                             <button
                                                 onClick={() => { handleLogout(); setIsOpen(false); }}
-                                                className="w-full flex items-center gap-4 p-4 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-all text-sm font-bold uppercase tracking-widest"
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                                                className="w-full flex items-center gap-4 p-4 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-all text-sm font-bold uppercase tracking-widest bg-none border-none cursor-pointer"
                                             >
                                                 <LogOut size={18} />
                                                 Sign Out
@@ -152,8 +147,8 @@ const Navbar = () => {
                                         </div>
                                     ) : (
                                         <div className="flex flex-col gap-4">
-                                            <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl" style={{ textDecoration: 'none' }}>Login</Link>
-                                            <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary rounded-2xl" style={{ textDecoration: 'none' }}>Sign Up</Link>
+                                            <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl no-underline">Login</Link>
+                                            <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary rounded-2xl no-underline">Sign Up</Link>
                                         </div>
                                     )}
                                 </div>

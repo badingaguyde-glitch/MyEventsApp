@@ -22,9 +22,9 @@ const Loader = ({ message = "Loading..." }) => {
             <div className="text-center space-y-2">
                 <p className="text-white font-black uppercase tracking-[0.4em] text-[10px] opacity-50">{message}</p>
                 <div className="flex gap-1 justify-center">
-                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
+                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce delay-100"></div>
+                    <div className="w-1 h-1 bg-primary rounded-full animate-bounce delay-200"></div>
                 </div>
             </div>
         </div>

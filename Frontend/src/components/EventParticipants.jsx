@@ -66,19 +66,18 @@ const EventParticipants = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <button
                     onClick={() => navigate(-1)}
-                    className="btn-flex items-center gap-2 text-slate-400 hover:text-white transition-all font-black uppercase tracking-widest text-[10px]"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    className="btn-flex items-center gap-2 text-slate-400 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] bg-none border-none cursor-pointer"
                 >
                     <ArrowLeft size={20} className="text-primary" /> Back to Dashboard
                 </button>
                 <div className="">
-                    <button className="btn-primary flex items-center gap-2 px-6 py-3 glass rounded-xl text-xs font-black tracking-widest transition-all hover:bg-white/10 " style={{ border: '1px solid var(--border-white)' }}>
+                    <button className="btn-primary flex items-center gap-2 px-6 py-3 glass rounded-xl text-xs font-black tracking-widest transition-all hover:bg-white/10 border border-light">
                         <Download size={18} className="text-primary" onClick={exportCSV} /> Export Manifest
                     </button>
                 </div>
             </div>
 
-            <div className="card glass p-10 border" style={{ borderColor: 'var(--border-white)' }}>
+            <div className="card glass p-10 border border-light">
                 <div className="flex items-center gap-6 mb-12">
                     <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 shadow-lg shadow-primary/10">
                         <Users size={32} className="text-primary gap-6" />
@@ -94,7 +93,7 @@ const EventParticipants = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b text-slate-500 text-[10px] font-black uppercase tracking-widest" style={{ borderBottom: '1px solid var(--border-white)' }}>
+                            <tr className="border-b border-light text-slate-500 text-[10px] font-black uppercase tracking-widest">
                                 <th className="px-4 py-6">Attendee Profile</th>
                                 <th className="px-4 py-6">Contact Access</th>
                                 <th className="px-4 py-6">Ticket Reference</th>
@@ -108,8 +107,7 @@ const EventParticipants = () => {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="hover:bg-white/[0.02] transition-colors border-b"
-                                    style={{ borderBottom: '1px solid var(--border-white)' }}
+                                    className="hover:bg-white/[0.02] transition-colors border-b border-light"
                                 >
                                     <td className="px-4 py-6">
                                         <div className="flex items-center gap-4">
@@ -129,7 +127,7 @@ const EventParticipants = () => {
                         </tbody>
                     </table>
                     {(!Array.isArray(participants) || participants.length === 0) && (
-                        <div className="text-center py-20 card glass border-dashed" style={{ borderWidth: '2px', borderColor: 'var(--border-white)' }}>
+                        <div className="text-center py-20 card glass border-dashed border-light border-2">
                             <p className="text-slate-500 text-xl font-medium tracking-tight">No attendance records found for this secure event.</p>
                         </div>
                     )}

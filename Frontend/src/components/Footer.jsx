@@ -3,7 +3,7 @@ import { Calendar, Github, Twitter, Instagram } from 'lucide-react';
 
 const Footer = () => {
     return (
-        <footer className="mt-32 border-t py-20 text-center" style={{ borderTop: '1px solid var(--border-white)' }}>
+        <footer className="mt-32 border-t border-light py-20 text-center">
             <div className="flex flex-col items-center gap-12">
                 <div className="space-y-6 max-w-lg mx-auto">
                     <div className="flex items-center justify-center gap-3 text-2xl font-black tracking-tighter text-white">
@@ -43,7 +43,7 @@ const Footer = () => {
                 </div>
             </div>
             
-            <div className="mt-20 pt-8 border-t flex flex-col items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600" style={{ borderTop: '1px solid var(--border-white)' }}>
+            <div className="mt-20 pt-8 border-t border-light flex flex-col items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                 <p>© 2026 MyEvents Orchestration Systems. All rights secured.</p>
                 <div className="flex gap-8">
                     <span className="hover:text-white transition-colors cursor-pointer">Privacy Protocol</span>

@@ -65,7 +65,7 @@ const MyTickets = () => {
             </div>
 
             {tickets.length === 0 && (
-                <div className="text-center py-20 card glass border-dashed" style={{ borderWidth: '2px' }}>
+                <div className="text-center py-20 card glass border-dashed border-2 border-light">
                     <p className="text-slate-400 text-xl font-medium">You haven't booked any tickets yet.</p>
                 </div>
             )}

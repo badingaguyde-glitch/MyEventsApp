@@ -46,8 +46,7 @@ const VerifyTicket = () => {
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="card glass p-10 border shadow-2xl"
-                style={{ borderColor: 'var(--border-white)' }}
+                className="card glass p-10 border shadow-2xl border-light"
             >
                 <form onSubmit={handleVerify} className="space-y-10">
                     <div>

@@ -98,7 +98,7 @@ const Register = () => {
                     </button>
                 </form>
                 <p className="mt-6 text-center text-sm text-slate-400">
-                    Already have an account? <Link to="/login" className="text-indigo-400 font-bold" style={{ textDecoration: 'none' }}>Sign In</Link>
+                    Already have an account? <Link to="/login" className="text-indigo-400 font-bold no-underline">Sign In</Link>
                 </p>
             </motion.div>
         </div>

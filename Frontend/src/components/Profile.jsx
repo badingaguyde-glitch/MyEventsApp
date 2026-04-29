@@ -69,7 +69,7 @@ const Profile = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="card p-6 md:p-8 glass space-y-8"
             >
-                <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b text-center sm:text-left" style={{ borderBottom: '1px solid var(--border-white)' }}>
+                <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-light text-center sm:text-left">
                     <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/30 shadow-lg shadow-primary/20">
                         <User size={40} className="text-primary" />
                     </div>
@@ -125,7 +125,7 @@ const Profile = () => {
                 </form>
 
                 
-                <div className="pt-6 border-t" style={{ borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                <div className="pt-6 border-t border-danger-light">
                     <button
                         onClick={() => setShowConfirm(true)}
                         className="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold text-rose-400 border border-rose-500/20 rounded-xl hover:bg-rose-500/10 transition-all"
@@ -142,18 +142,16 @@ const Profile = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+                        className="modal-overlay"
                         onClick={() => setShowConfirm(false)}
                     >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="card glass p-8 max-w-sm w-full space-y-6"
-                            style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="card glass p-8 max-w-sm w-full space-y-6 border-danger"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                             <div className="flex flex-col items-center text-center gap-4">
                                 <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center">
                                     <Trash2 size={32} className="text-rose-400" />

@@ -88,7 +88,7 @@ const Login = () => {
                     </button>
                 </form>
                 <p className="mt-6 text-center text-sm text-slate-400">
-                    Don't have an account? <Link to="/register" className="text-indigo-400 font-bold" style={{ textDecoration: 'none' }}>Create Account</Link>
+                    Don't have an account? <Link to="/register" className="text-indigo-400 font-bold no-underline">Create Account</Link>
                 </p>
             </motion.div>
         </div>

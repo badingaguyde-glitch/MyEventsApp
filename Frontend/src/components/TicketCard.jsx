@@ -8,8 +8,7 @@ const TicketCard = ({ ticket, index, onCancel }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="card relative group border transition-all overflow-hidden"
-            style={{ borderColor: 'var(--border-white)' }}
+            className="card relative group border border-light transition-all overflow-hidden"
         >
             <div className="p-4 md:p-6 space-y-6">
                 <div className="flex justify-between items-start gap-4">
@@ -22,8 +21,7 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                     </div>
                     <button 
                         onClick={() => onCancel(ticket._id)}
-                        className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all"
-                        style={{ background: 'rgba(244, 63, 94, 0.1)' }}
+                        className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all bg-rose-500/10"
                         title="Cancel Booking"
                     >
                         <Trash2 size={18} />
@@ -47,7 +45,7 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                     </div>
                 </div>
 
-                <div className="pt-6 border-b flex flex-wrap sm:flex-nowrap justify-between items-end gap-4" style={{ borderTop: '1px dashed var(--border-white)', borderBottom: 'none' }}>
+                <div className="pt-6 border-b border-t-dashed flex flex-wrap sm:flex-nowrap justify-between items-end gap-4 border-b-none">
                     <div className="min-w-0">
                         <p className="text-[10px] font-bold text-slate-500 uppercase mb-1 truncate">Receipt Number</p>
                         <p className="text-xs font-mono text-slate-400 truncate">{ticket._id.toUpperCase()}</p>
@@ -60,8 +58,8 @@ const TicketCard = ({ ticket, index, onCancel }) => {
             </div>
             
             {/* Ticket Cutout Effect */}
-            <div className="absolute top-1/2 -left-3 w-6 h-6 bg-bg-dark rounded-full -translate-y-1/2" style={{ backgroundColor: 'var(--bg-dark)', border: '1px solid var(--border-white)' }}></div>
-            <div className="absolute top-1/2 -right-3 w-6 h-6 bg-bg-dark rounded-full -translate-y-1/2" style={{ backgroundColor: 'var(--bg-dark)', border: '1px solid var(--border-white)' }}></div>
+            <div className="ticket-cutout-left"></div>
+            <div className="ticket-cutout-right"></div>
         </motion.div>
     );
 };

@@ -63,8 +63,7 @@ const EventDetails = () => {
             <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="card glass border transition-all overflow-hidden"
-                style={{ borderColor: 'var(--border-white)' }}
+                className="card glass border border-light transition-all overflow-hidden"
             >
                 <div className="h-64 sm:h-80 md:h-[450px] relative">
                     <img
@@ -73,7 +72,7 @@ const EventDetails = () => {
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200' }}
                     />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10, 11, 14, 1), rgba(10, 11, 14, 0.4), transparent)' }}></div>
+                    <div className="event-details-hero-overlay"></div>
                     <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="px-4 py-1.5 bg-primary rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20">
@@ -97,7 +96,7 @@ const EventDetails = () => {
                         </section>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="p-6 glass border rounded-2xl space-y-3" style={{ borderColor: 'var(--border-white)' }}>
+                            <div className="p-6 glass border border-light rounded-2xl space-y-3">
                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Date & Time</p>
                                 <div className="space-y-2">
                                     <p className="flex items-center gap-2 font-bold text-white">
@@ -109,7 +108,7 @@ const EventDetails = () => {
                                     </p>
                                 </div>
                             </div>
-                            <div className="p-6 glass border rounded-2xl space-y-3" style={{ borderColor: 'var(--border-white)' }}>
+                            <div className="p-6 glass border border-light rounded-2xl space-y-3">
                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Venue Location</p>
                                 <div className="space-y-2">
                                     <p className="flex items-center gap-2 font-bold text-white">
@@ -125,8 +124,8 @@ const EventDetails = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="p-8 glass border rounded-3xl sticky top-24" style={{ borderColor: 'var(--border-white)', background: 'rgba(255,255,255,0.02)' }}>
-                            <div className="flex justify-between items-center mb-8 pb-6 border-b" style={{ borderBottom: '1px solid var(--border-white)' }}>
+                        <div className="event-details-booking-card">
+                            <div className="flex justify-between items-center mb-8 pb-6 border-b border-light">
                                 <span className="text-slate-400 font-bold uppercase tracking-widest text-xs">Standard Pass</span>
                                 <span className="text-4xl font-black text-primary">${event.price}</span>
                             </div>
@@ -155,8 +154,7 @@ const EventDetails = () => {
                             <button
                                 onClick={handleBooking}
                                 disabled={booking || event.availableSpots <= 0}
-                                className="btn-primary w-full py-5 text-sm uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed"
-                                style={{ boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)' }}
+                                className="btn-primary btn-purchase disabled:opacity-30 disabled:cursor-not-allowed"
                             >
                                 {booking ? 'Processing...' : <><Ticket size={20} className="gap-2" /> Purchase Secret Ticket</>}
                             </button>
