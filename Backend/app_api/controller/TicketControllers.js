@@ -1,6 +1,8 @@
 const Ticket = require('../models/Ticket');
 const Event = require('../models/Event');
 const User = require('../models/User');
+const client = require('../config/redis');
+
 
 
 
@@ -54,6 +56,11 @@ const buyTicket = async (req, res) => {
             price: price || 0,
             status: 'active'
         });
+        await client.del('tickets'); // Clear the tickets cache
+        await client.del('user_tickets'); // Clear the user's tickets cache
+        await client.del('ticket_availability'); // Clear the ticket availability cache
+        await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
+
 
 
         const populatedTicket = await Ticket.findById(ticket._id)
@@ -268,6 +275,10 @@ const cancelTicket = async (req, res) => {
         }
 
         await ticket.deleteOne();
+        await client.del('tickets'); // Clear the tickets cache
+        await client.del('user_tickets'); // Clear the user's tickets cache
+        await client.del('ticket_availability'); // Clear the ticket availability cache
+        await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
 
         res.json({
             message: 'Ticket cancelled successfully'

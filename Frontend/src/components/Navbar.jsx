@@ -5,6 +5,7 @@ import { logout, checkOrganizerStatus } from '../redux/reducer';
 import { Calendar, Ticket, User, LogOut, Search, Home as HomeIcon, QrCode, Shield, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {createPortal} from 'react-dom';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,17 @@ const Navbar = () => {
             dispatch(checkOrganizerStatus(user.token));
         }
     }, [isLoggedIn, user]);
+    React.useEffect(() => {
+    if (isOpen) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+
+    return () => {
+        document.body.style.overflow = '';
+    };
+}, [isOpen]);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -36,68 +48,24 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="glass sticky top-0 z-50 w-full border-b py-3">
-            <div className="container mx-auto flex items-center justify-between px-4">
-                <Link to="/" className="nav-logo">
-                    <Calendar className="text-primary shrink-0" size={32} />
-                    <span className="text-gradient">
-                        MyEvents
-                    </span>
-                </Link>
+        <>
+            {createPortal(
+                <AnimatePresence>
+                    {isOpen && (
+                        <>
+                            <motion.div
+                                className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100]"
+                                onClick={() => setIsOpen(false)}
+                            />
 
-                
-                <div className="flex items-center gap-4">
-                    
-                    <div className="nav-user-divider">
-                        {isLoggedIn ? (
-                            <>
-                                <Link to="/profile" className="nav-link text-xs font-bold uppercase tracking-widest whitespace-nowrap">
-                                    <User size={14} className="opacity-60 shrink-0" />
-                                    <span className="hidden sm:inline truncate max-w-[80px] md:max-w-none">{user.name.split(' ')[0]}</span>
-                                </Link>
-                                <button onClick={handleLogout} className="text-rose-400 hover:text-rose-300 transition-colors p-2 shrink-0 bg-none border-none cursor-pointer" title="Log Out">
-                                    <LogOut size={18} />
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link to="/login" className="nav-link text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap">Login</Link>
-                                <Link to="/register" className="btn-primary py-2 px-3 md:px-4 text-[10px] tracking-widest shadow-none hidden sm:inline-flex whitespace-nowrap shrink-0">SIGN UP</Link>
-                            </>
-                        )}
-                    </div>
-
-                    
-                    <button
-                        className="nav-menu-btn"
-                        onClick={() => setIsOpen(true)}
-                    >
-                        <Menu size={24} />
-                    </button>
-                </div>
-            </div>
-
-            
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsOpen(false)}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100]"
-                        />
-                        
-                        <motion.div
-                            initial={{ x: '100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="nav-sidebar"
-                        >
-                            <div className="p-6 flex flex-col h-full">
+                            <motion.div
+                                initial={{ x: '100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="nav-sidebar z-[1001]"
+                            >
+                                <div className="p-6 flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-10">
                                     <span className="text-sm font-black uppercase tracking-[0.2em] text-primary">Menu</span>
                                     <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-white transition-all bg-white/5 rounded-lg border border-white/10">
@@ -153,11 +121,57 @@ const Navbar = () => {
                                     )}
                                 </div>
                             </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-        </nav>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
+            <nav className="glass sticky top-0 z-50 w-full border-b py-3">
+                <div className="container mx-auto flex items-center justify-between px-4">
+                    <Link to="/" className="nav-logo">
+                        <Calendar className="text-primary shrink-0" size={32} />
+                        <span className="text-gradient">
+                            MyEvents
+                        </span>
+                    </Link>
+
+
+                    <div className="flex items-center gap-4">
+
+                        <div className="nav-user-divider">
+                            {isLoggedIn ? (
+                                <>
+                                    <Link to="/profile" className="nav-link text-xs font-bold uppercase tracking-widest whitespace-nowrap">
+                                        <User size={14} className="opacity-60 shrink-0" />
+                                        <span className="hidden sm:inline truncate max-w-[80px] md:max-w-none">{user.name.split(' ')[0]}</span>
+                                    </Link>
+                                    <button onClick={handleLogout} className="text-rose-400 hover:text-rose-300 transition-colors p-2 shrink-0 bg-none border-none cursor-pointer" title="Log Out">
+                                        <LogOut size={18} />
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="nav-link text-[10px] md:text-xs font-bold uppercase tracking-widest whitespace-nowrap">Login</Link>
+                                    <Link to="/register" className="btn-primary py-2 px-3 md:px-4 text-[10px] tracking-widest shadow-none hidden sm:inline-flex whitespace-nowrap shrink-0">SIGN UP</Link>
+                                </>
+                            )}
+                        </div>
+
+
+                        <button
+                            className="nav-menu-btn"
+                            onClick={() => setIsOpen(true)}
+                        >
+                            <Menu size={24} />
+                        </button>
+                    </div>
+                </div>
+
+
+
+            </nav>
+        </>
     );
 };
 

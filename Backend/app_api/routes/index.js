@@ -3,6 +3,7 @@ var router = express.Router();
 var ctrlEvent = require('../controller/EventControllers');
 var ctrlTicket = require('../controller/TicketControllers');
 var ctrlUser = require('../controller/UserControllers');
+var cache = require('../middleware/cache');
 
 
 
@@ -22,7 +23,7 @@ router.route('/user/:userid')
 
 
 router.route('/events')
-    .get(ctrlEvent.getAllEvents)
+    .get(cache('events', 60), ctrlEvent.getAllEvents)
     .post(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.createEvent);
 
 
@@ -30,34 +31,34 @@ router.route('/events/search')
     .get(ctrlEvent.searchEvents);
 
 router.route('/events/nearby')
-    .get(ctrlEvent.getNearbyEvents);
+    .get(cache('nearby_events', 60), ctrlEvent.getNearbyEvents);
 
 
 router.route('/events/category')
-    .get(ctrlEvent.filterByCategory);
+    .get(cache('category_events', 60), ctrlEvent.filterByCategory);
 
 
 
 router.route('/events/mine')
-    .get(ctrlUser.requireAuth, ctrlEvent.getMyEvents);
+    .get(ctrlUser.requireAuth, cache((req) => `my_events_${req.user._id}`, 60), ctrlEvent.getMyEvents);
 
 
 
 
 router.route('/events/:eventid')
-    .get(ctrlEvent.getEventById)
+    .get(cache('event_details', 60), ctrlEvent.getEventById)
     .put(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.updateEvent)
     .delete(ctrlUser.requireAuth, ctrlEvent.deleteEvent);
 
 router.route('/events/:eventid/participants')
-    .get(ctrlUser.requireAuth, ctrlEvent.getEventParticipants);
+    .get(ctrlUser.requireAuth, cache('event_participants', 60), ctrlEvent.getEventParticipants);
 
 
 
 
 router.route('/tickets')
     .post(ctrlUser.requireAuth, ctrlTicket.buyTicket)
-    .get(ctrlUser.requireAuth, ctrlTicket.getUserTickets);
+    .get(ctrlUser.requireAuth, cache('user_tickets', 60), ctrlTicket.getUserTickets);
 
 router.route('/tickets/verify')
     .post(ctrlUser.requireAuth, ctrlTicket.verifyTicket);
@@ -67,12 +68,12 @@ router.route('/tickets/bulk-verify')
 
 
 router.route('/tickets/event/:eventId/availability')
-    .get(ctrlTicket.checkAvailability);
+    .get(cache('ticket_availability', 60), ctrlTicket.checkAvailability);
 
 router.route('/tickets/code/:code')
-    .get(ctrlUser.requireAuth, ctrlTicket.getTicketByCode);
+    .get(cache('ticket_by_code', 60), ctrlUser.requireAuth, ctrlTicket.getTicketByCode);
 
 router.route('/tickets/:ticketid')
-    .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
+    .delete(cache('ticket_details', 60), ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 module.exports = router;

@@ -318,12 +318,13 @@ select option {
   position: fixed;
   top: 0;
   right: 0;
-  height: 100%;
-  width: 280px;
+  height: 100vh;
+  width: min(90vw, 360px);
   background-color: var(--bg-dark);
   border-left: 1px solid var(--border-white);
-  z-index: 110;
+  z-index: 9999;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
 }
 
 /* Event Card */
@@ -379,8 +380,8 @@ select option {
   position: sticky;
   top: 6rem;
   border: 1px solid var(--border-white);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .btn-purchase {
@@ -404,9 +405,9 @@ select option {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .ticket-cutout-left {

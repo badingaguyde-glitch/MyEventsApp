@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
+var client = require('../config/redis');
 require('dotenv').config();
 var calculateDistance = require('./utils/calculate');
 
@@ -49,6 +50,25 @@ const createEvent = async (req, res) => {
             coordinates: coordinates || [0, 0],
             organizer: req.user.id,
             status: 'active'
+        });
+        await client.del('events'); // Clear the events cache
+        await client.del('category_events'); // Clear the category events cache
+        await client.del('nearby_events'); // Clear the nearby events cache
+        await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
+
+        publishToQueue('email_queue', {
+            type: 'event_created_email',
+            user: {
+                name: req.user.name,
+                lastName: req.user.lastName,
+                email: req.user.email
+            },
+            event: {
+                id: event._id,
+                title: event.title,
+                date: event.date,
+                location: event.location
+            }
         });
 
         res.status(201).json(event);
@@ -389,6 +409,26 @@ const updateEvent = async (req, res) => {
         event.coordinates = coordinates || event.coordinates;
 
         const updatedEvent = await event.save();
+        await client.del('events'); // Clear the events cache
+        await client.del('category_events'); // Clear the category events cache
+        await client.del('nearby_events');
+        await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
+
+        publishToQueue('email_queue', {
+            type: 'event_updated_email',
+            user: {
+                name: event.organizer.name,
+                lastName: event.organizer.lastName,
+                email: event.organizer.email
+            },
+            event: {
+                id: event._id,
+                title: event.title,
+                date: event.date,
+                location: event.location
+            }
+        });
+
         res.json(updatedEvent);
     } catch (error) {
         console.error('Update event error:', error);
@@ -423,6 +463,14 @@ const deleteEvent = async (req, res) => {
                 { event: event._id, status: 'active' },
                 { status: 'cancelled' }
             );
+            await client.del('tickets'); // Clear the tickets cache
+            await client.del('user_tickets'); // Clear the user's tickets cache
+            await client.del('ticket_availability'); // Clear the ticket availability cache
+            await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
+            await client.del('events'); // Clear the events cache
+            await client.del('category_events'); // Clear the category events cache
+            await client.del('nearby_events'); // Clear the nearby events cache
+            await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
 
             event.status = 'cancelled';
             await event.save();
@@ -433,8 +481,31 @@ const deleteEvent = async (req, res) => {
         } else if (req.user.role === 'admin') {
             await Ticket.deleteMany({ event: event._id });
             await event.deleteOne();
+            await client.del('tickets'); // Clear the tickets cache
+            await client.del('user_tickets'); // Clear the user's tickets cache
+            await client.del('ticket_availability'); // Clear the ticket availability cache
+            await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
+            await client.del('events'); // Clear the events cache
+            await client.del('category_events'); // Clear the category events cache
+            await client.del('nearby_events'); // Clear the nearby events cache
+            await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
             res.json({ message: 'Event and associated tickets deleted successfully' });
         }
+
+        publishToQueue('email_queue', {
+            type: 'event_deleted_email',
+            user: {
+                name: event.organizer.name,
+                lastName: event.organizer.lastName,
+                email: event.organizer.email
+            },
+            event: {
+                id: event._id,
+                title: event.title,
+                date: event.date,
+                location: event.location
+            }
+        });
 
     } catch (error) {
         console.error('Delete event error:', error);
