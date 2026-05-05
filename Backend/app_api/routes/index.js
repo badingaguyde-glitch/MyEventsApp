@@ -13,6 +13,12 @@ router.route('/user')
     .post(ctrlUser.registerUser)
     .put(ctrlUser.requireAuth, ctrlUser.updateProfile);
 
+router.route('/user/generate-code')
+    .post(ctrlUser.generateRegistrationCode);
+
+router.route('/user/verify-code')
+    .post(ctrlUser.checkEmail);
+
 router.route('/user/login')
     .post(ctrlUser.login);
 

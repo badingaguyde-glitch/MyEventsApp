@@ -5,6 +5,67 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { publishToQueue } = require('../config/rabbitmq');
 
+const verificationCodes = new Map();
+
+const generateRegistrationCode = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+        
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        verificationCodes.set(email, {
+            code,
+            expiresAt: Date.now() + 10 * 60 * 1000
+        });
+        
+        publishToQueue('email_queue', {
+            type: 'registration_code_email',
+            email,
+            code
+        });
+        
+        res.status(200).json({ message: 'Verification code sent' });
+    } catch (error) {
+        console.error('generateRegistrationCode error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const checkEmail = async (req, res) => {
+    try {
+        const { email, code } = req.body;
+        if (!email || !code) {
+            return res.status(400).json({ message: 'Email and code are required' });
+        }
+        
+        const record = verificationCodes.get(email);
+        if (!record) {
+            return res.status(400).json({ message: 'No verification code found for this email' });
+        }
+        
+        if (Date.now() > record.expiresAt) {
+            verificationCodes.delete(email);
+            return res.status(400).json({ message: 'Verification code expired' });
+        }
+        
+        if (record.code !== code.toString()) {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+        
+        verificationCodes.delete(email);
+        res.status(200).json({ message: 'Code verified successfully' });
+    } catch (error) {
+        console.error('checkEmail error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 
 const requireAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -125,7 +186,7 @@ const updateProfile = async (req, res) => {
         }
 
 
-        user.firstName = req.body.firstName || user.firstName;
+        user.name = req.body.name || user.name;
         user.lastName = req.body.lastName || user.lastName;
         user.email = req.body.email || user.email;
         user.interests = req.body.interests || user.interests;
@@ -140,7 +201,7 @@ const updateProfile = async (req, res) => {
 
         res.json({
             _id: updatedUser._id,
-            firstName: updatedUser.firstName,
+            name: updatedUser.name,
             lastName: updatedUser.lastName,
             email: updatedUser.email,
             interests: updatedUser.interests,
@@ -164,8 +225,21 @@ const deleteUser = async (req, res) => {
         }
 
         await Ticket.deleteMany({ user: user._id });
+        events = await Event.find({ organizer: user._id });
+        if (events.length > 0) {
+            await Event.deleteMany({ organizer: user._id });
+        }
+        publishToQueue('email_queue', {
+            type: 'user_deletion_email',
+            user: {
+                name: user.name,
+                lastName: user.lastName,
+                email: user.email
+            }
+        });
         await user.deleteOne();
-        res.json({ message: 'User and associated tickets deleted successfully' });
+        res.json({ message: 'User and associated tickets and events deleted successfully' });
+
     } catch (error) {
         console.error('Delete user error:', error);
         res.status(500).json({
@@ -176,6 +250,8 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
+    generateRegistrationCode,
+    checkEmail,
     registerUser,
     login,
     updateProfile,

@@ -45,7 +45,7 @@ const EventDetails = () => {
 
         try {
             
-            await TicketService.buyTicket({ eventId: id, price: event.price }, user.token);
+            await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id }, user.token);
             setMessage({ text: 'Ticket booked successfully!', type: 'success' });
             fetchEvent(); 
         } catch (err) {

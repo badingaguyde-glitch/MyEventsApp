@@ -2,6 +2,7 @@ const Ticket = require('../models/Ticket');
 const Event = require('../models/Event');
 const User = require('../models/User');
 const client = require('../config/redis');
+const { publishToQueue } = require('../config/rabbitmq');
 
 
 
@@ -9,7 +10,8 @@ const client = require('../config/redis');
 
 const buyTicket = async (req, res) => {
     try {
-        const { eventId, price } = req.body;
+        const { eventId, price, userId, user: bodyUserId } = req.body;
+        const targetUserId = userId || bodyUserId;
 
         if (!eventId) {
             return res.status(400).json({ message: 'Event ID required' });
@@ -21,6 +23,7 @@ const buyTicket = async (req, res) => {
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
+        
 
         if (event.status !== 'active') {
             return res.status(400).json({ message: 'This event is no longer active' });
@@ -39,7 +42,7 @@ const buyTicket = async (req, res) => {
 
         const existingTicket = await Ticket.findOne({
             event: eventId,
-            user: req.user.id,
+            user: targetUserId,
             status: 'active'
         });
 
@@ -52,7 +55,7 @@ const buyTicket = async (req, res) => {
 
         const ticket = await Ticket.create({
             event: eventId,
-            user: req.user.id,
+            user: targetUserId,
             price: price || 0,
             status: 'active'
         });
@@ -60,12 +63,32 @@ const buyTicket = async (req, res) => {
         await client.del('user_tickets'); // Clear the user's tickets cache
         await client.del('ticket_availability'); // Clear the ticket availability cache
         await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
+        
+        const user = await User.findById(targetUserId);
+
+        publishToQueue('email_queue', {
+            type:'ticket_purchase_email',
+            user: {
+                name: user.name,
+                lastName: user.lastName,
+                email: user.email
+            },
+            event: {
+                title: event.title,
+                date: event.date,
+                location: event.location
+            },
+            ticket: {
+                id: ticket._id,
+                code: ticket.ticketCode
+            }
+        });
 
 
 
         const populatedTicket = await Ticket.findById(ticket._id)
             .populate('event')
-            .populate('user', 'firstName lastName email');
+            .populate('user', 'name lastName email');
 
         res.status(201).json({
             message: 'Ticket purchased successfully',
@@ -278,7 +301,7 @@ const cancelTicket = async (req, res) => {
         await client.del('tickets'); // Clear the tickets cache
         await client.del('user_tickets'); // Clear the user's tickets cache
         await client.del('ticket_availability'); // Clear the ticket availability cache
-        await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
+        await client.del(`ticket_by_code_${ticket.event._id}`); // Clear the ticket by code cache for this event
 
         res.json({
             message: 'Ticket cancelled successfully'

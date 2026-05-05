@@ -5,6 +5,7 @@ var User = mongoose.model('User');
 var client = require('../config/redis');
 require('dotenv').config();
 var calculateDistance = require('./utils/calculate');
+const {publishToQueue} = require('../config/rabbitmq');
 
 
 const createEvent = async (req, res) => {
@@ -362,7 +363,7 @@ const getEventById = async (req, res) => {
 
 const updateEvent = async (req, res) => {
     try {
-        const event = await Event.findById(req.params.eventid);
+        const event = await Event.findById(req.params.eventid).populate('organizer', 'name lastName email');
 
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
@@ -408,7 +409,8 @@ const updateEvent = async (req, res) => {
         event.status = status || event.status;
         event.coordinates = coordinates || event.coordinates;
 
-        const updatedEvent = await event.save();
+        const updatedEvent = await event.populate('organizer', 'name lastName email');
+        await event.save();
         await client.del('events'); // Clear the events cache
         await client.del('category_events'); // Clear the category events cache
         await client.del('nearby_events');
@@ -578,7 +580,7 @@ const getEventParticipants = async (req, res) => {
             event: event._id,
             status: { $ne: 'cancelled' }
         })
-            .populate('user', 'firstName lastName email')
+            .populate('user', 'name lastName email')
             .sort({ purchaseDate: -1 });
 
         const participants = tickets.map(ticket => ({

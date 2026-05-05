@@ -4,6 +4,14 @@ const register = (data) => {
     return http.post("/user", data);
 };
 
+const generateCode = (data) => {
+    return http.post("/user/generate-code", data);
+};
+
+const verifyCode = (data) => {
+    return http.post("/user/verify-code", data);
+};
+
 const login = (data) => {
     return http.post("/user/login", data);
 };
@@ -21,6 +29,8 @@ const deleteUser = (id, token) => {
 };
 
 const UserDataService = {
+    generateCode,
+    verifyCode,
     register,
     login,
     updateProfile,
