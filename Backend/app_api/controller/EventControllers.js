@@ -5,27 +5,18 @@ var User = mongoose.model('User');
 var client = require('../config/redis');
 require('dotenv').config();
 var calculateDistance = require('./utils/calculate');
-const {publishToQueue} = require('../config/rabbitmq');
+const { publishToQueue } = require('../config/rabbitmq');
 
 
 const createEvent = async (req, res) => {
     try {
         const {
-            title,
-            description,
-            category,
-            date,
-            time,
-            location,
-            capacity,
-            price,
-            coordinates
+            title, description, category, date, time,
+            location, capacity, price, coordinates
         } = req.body;
 
         if (!title || !description || !category || !date || !time || !location || !capacity) {
-            return res.status(400).json({
-                message: 'Please provide all required fields'
-            });
+            return res.status(400).json({ message: 'Please provide all required fields' });
         }
 
         let imageUrl = 'default-event.jpg';
@@ -38,49 +29,60 @@ const createEvent = async (req, res) => {
             }
         }
 
+        // On crée l'événement avec le statut 'pending_payment'
         const event = await Event.create({
-            title,
-            description,
-            category,
-            date,
-            time,
-            location,
-            capacity,
+            title, description, category, date, time, location, capacity,
             price: price || 0,
             image: imageUrl,
             coordinates: coordinates || [0, 0],
             organizer: req.user.id,
-            status: 'active'
+            status: 'pending_payment'
         });
-        await client.del('events'); // Clear the events cache
-        await client.del('category_events'); // Clear the category events cache
-        await client.del('nearby_events'); // Clear the nearby events cache
-        await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
 
-        publishToQueue('email_queue', {
-            type: 'event_created_email',
-            user: {
-                name: req.user.name,
-                lastName: req.user.lastName,
-                email: req.user.email
-            },
-            event: {
-                id: event._id,
-                title: event.title,
-                date: event.date,
-                location: event.location
+        // Montant de la commission depuis les variables d'environnement (par défaut 500 centimes = 5€)
+        const feeAmount = process.env.EVENT_CREATION_FEE ? parseInt(process.env.EVENT_CREATION_FEE) : 500;
+
+        // On appelle le contrôleur Stripe pour créer la session
+        const { createCheckoutSession } = require('./PaymentControllers');
+
+        // On simule un objet req/res pour réutiliser notre fonction createCheckoutSession
+        const stripeReq = {
+            body: {
+                amount: feeAmount,
+                currency: 'eur',
+                name: `Commission de création: ${title}`,
+                description: 'Frais de mise en ligne de votre événement sur BANTU MyEvents',
+                metadata: {
+                    type: 'event_commission',
+                    eventId: event._id.toString(),
+                    userId: req.user.id.toString(),
+                    userEmail: req.user.email,
+                    userName: req.user.name,
+                    userLastName: req.user.lastName
+                },
+                successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/events/success`,
+                cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/events/cancel`
             }
-        });
+        };
 
-        res.status(201).json(event);
+        const stripeRes = {
+            status: (code) => ({
+                json: (data) => res.status(201).json({
+                    message: "Événement en attente de paiement",
+                    event: event,
+                    stripeUrl: data.url // On renvoie l'URL de paiement au front
+                })
+            })
+        };
+
+        await createCheckoutSession(stripeReq, stripeRes);
+
     } catch (error) {
         console.error('Create event error:', error);
-        res.status(500).json({
-            message: 'Server error during event creation',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Server error during event creation', error: error.message });
     }
 };
+
 
 const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');

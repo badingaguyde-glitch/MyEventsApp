@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
 
 const ticketSchema = new mongoose.Schema({
-    ticketCode:{type:String,  unique: true},
-    event:{type:mongoose.Schema.Types.ObjectId, ref:'Event', required:true},
-    user:{type:mongoose.Schema.Types.ObjectId, ref:'User', required:true},
-    status:{type:String, required:true, enum:['active', 'used', 'cancelled'], default:'active'},
-    checkInTime:{type:Date},
-    checkInBy:{type:mongoose.Schema.Types.ObjectId, ref:'User'},
-    price:{type:Number, required:true, min:0}
+    ticketCode: { type: String, unique: true },
+    event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, required: true, enum: ['active', 'used', 'cancelled', 'pending_payment'], default: 'pending_payment' },
+    checkInTime: { type: Date },
+    checkInBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    price: { type: Number, required: true, min: 0 }
 });
 
-ticketSchema.pre('save', async function() {
+ticketSchema.pre('save', async function () {
     if (!this.ticketCode) {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code;
         let isUnique = false;
-        
+
         while (!isUnique) {
             code = 'TKT-';
             for (let i = 0; i < 8; i++) {
@@ -24,7 +24,7 @@ ticketSchema.pre('save', async function() {
             const existingTicket = await mongoose.model('Ticket').findOne({ ticketCode: code });
             isUnique = !existingTicket;
         }
-        
+
         this.ticketCode = code;
     }
 });

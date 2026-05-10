@@ -17,18 +17,14 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'Event ID required' });
         }
 
-
-
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
-        
 
         if (event.status !== 'active') {
             return res.status(400).json({ message: 'This event is no longer active' });
         }
-
 
         const soldTickets = await Ticket.countDocuments({
             event: eventId,
@@ -39,69 +35,95 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'Event is sold out' });
         }
 
-
         const existingTicket = await Ticket.findOne({
             event: eventId,
             user: targetUserId,
-            status: 'active'
+            status: { $in: ['active', 'pending_payment'] }
         });
 
         if (existingTicket) {
             return res.status(400).json({
-                message: 'You already have an active ticket for this event'
+                message: 'You already have an active or pending ticket for this event'
             });
         }
 
-
+        // On crée le ticket en attente de paiement
         const ticket = await Ticket.create({
             event: eventId,
             user: targetUserId,
             price: price || 0,
-            status: 'active'
+            status: 'pending_payment'
         });
-        await client.del('tickets'); // Clear the tickets cache
-        await client.del('user_tickets'); // Clear the user's tickets cache
-        await client.del('ticket_availability'); // Clear the ticket availability cache
-        await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
-        
+
         const user = await User.findById(targetUserId);
 
-        publishToQueue('email_queue', {
-            type:'ticket_purchase_email',
-            user: {
-                name: user.name,
-                lastName: user.lastName,
-                email: user.email
-            },
-            event: {
-                title: event.title,
-                date: event.date,
-                location: event.location
-            },
-            ticket: {
-                id: ticket._id,
-                code: ticket.ticketCode
+        // Si le ticket est gratuit (prix = 0), on valide directement sans Stripe
+        if (ticket.price === 0) {
+            ticket.status = 'active';
+            await ticket.save();
+
+            await client.del('tickets');
+            await client.del('user_tickets');
+            await client.del('ticket_availability');
+            await client.del(`ticket_by_code_${event._id}`);
+
+            publishToQueue('email_queue', {
+                type: 'ticket_purchase_email',
+                user: { name: user.name, lastName: user.lastName, email: user.email },
+                event: { title: event.title, date: event.date, location: event.location },
+                ticket: { id: ticket._id, code: ticket.ticketCode }
+            });
+
+            const populatedTicket = await Ticket.findById(ticket._id).populate('event').populate('user', 'name lastName email');
+            return res.status(201).json({ message: 'Free ticket acquired successfully', ticket: populatedTicket });
+        }
+
+        // Si payant, on redirige vers Stripe
+        const { createCheckoutSession } = require('./PaymentControllers');
+
+        const stripeReq = {
+            body: {
+                // Stripe demande le montant en centimes
+                amount: Math.round(ticket.price * 100),
+                currency: 'eur',
+                name: `Ticket pour : ${event.title}`,
+                description: `Entrée pour l'événement du ${new Date(event.date).toLocaleDateString()}`,
+                metadata: {
+                    type: 'ticket',
+                    ticketId: ticket._id.toString(),
+                    eventId: event._id.toString(),
+                    userId: user._id.toString(),
+                    userEmail: user.email,
+                    userName: user.name,
+                    userLastName: user.lastName,
+                    eventTitle: event.title,
+                    eventDate: event.date.toString(),
+                    eventLocation: JSON.stringify(event.location),
+                    ticketCode: ticket.ticketCode
+                },
+                successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/tickets/success`,
+                cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/tickets/cancel`
             }
-        });
+        };
 
+        const stripeRes = {
+            status: (code) => ({
+                json: (data) => res.status(201).json({
+                    message: "Ticket en attente de paiement",
+                    ticket: ticket,
+                    stripeUrl: data.url
+                })
+            })
+        };
 
+        await createCheckoutSession(stripeReq, stripeRes);
 
-        const populatedTicket = await Ticket.findById(ticket._id)
-            .populate('event')
-            .populate('user', 'name lastName email');
-
-        res.status(201).json({
-            message: 'Ticket purchased successfully',
-            ticket: populatedTicket
-        });
     } catch (error) {
         console.error('Buy ticket error:', error);
-        res.status(500).json({
-            message: 'Server error during ticket purchase',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Server error during ticket purchase', error: error.message });
     }
 };
+
 
 
 

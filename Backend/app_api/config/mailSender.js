@@ -64,7 +64,7 @@ const transporter = nodeMailer.createTransport({
 
 const Queue = 'email_queue';
 
-async function sendEmail({to, subject, html, attachments}) {
+async function sendEmail({ to, subject, html, attachments }) {
     await transporter.sendMail({
         from: `"${process.env.FROM_NAME}" <${process.env.SMTP_USER}>`,
         to,
@@ -74,10 +74,10 @@ async function sendEmail({to, subject, html, attachments}) {
     });
 }
 
-async function handleMessage(msg){
-    const {type, user, event, ticket, email, code} = JSON.parse(msg.content.toString());
+async function handleMessage(msg) {
+    const { type, user, event, ticket, email, code, receiptUrl } = JSON.parse(msg.content.toString());
 
-    if(type==='welcome_email'){
+    if (type === 'welcome_email') {
         await sendEmail({
             to: user.email,
             subject: 'Welcome to MyEvents App!',
@@ -89,7 +89,7 @@ async function handleMessage(msg){
             `),
             attachments: [LOGO_ATTACHMENT]
         });
-    }else if (type === 'ticket_purchase_email'){
+    } else if (type === 'ticket_purchase_email') {
         const qrData = ticket.code.toString();
         const qrImage = await qrCode.toDataURL(qrData);
 
@@ -107,7 +107,10 @@ async function handleMessage(msg){
                         <li><strong>Location:</strong> ${event.location.address}</li>
                     </ul>
                 </div>
-                
+                ${receiptUrl ? `<div style="text-align: center; margin: 20px 0;">
+                    <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">Voir mon reçu de paiement</a>
+                </div>` : ''}
+
                 <p>Please present this QR Code at the entrance of the event:</p>
                 <div class="qr-section">
                     <img src="cid:qrcode" alt="Access QR Code" />
@@ -125,7 +128,7 @@ async function handleMessage(msg){
                 }
             ]
         });
-    }else if (type === 'event_created_email'){
+    } else if (type === 'event_created_email') {
         await sendEmail({
             to: user.email,
             subject: `Your event "${event.title}" has been created!`,
@@ -140,13 +143,16 @@ async function handleMessage(msg){
                         <li><strong>Location:</strong> ${event.location.address}</li>
                     </ul>
                 </div>
-                
+                ${receiptUrl ? `<div style="text-align: center; margin: 20px 0;">
+                    <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">Voir mon reçu de commission</a>
+                </div>` : ''}
+
                 <p>It's time to share your event and invite your attendees!</p>
                 <a href="${process.env.FRONTEND_URL || '#'}/events/${event.id}" class="button">Manage My Event</a>
             `),
             attachments: [LOGO_ATTACHMENT]
         });
-    }else if (type === 'event_deleted_email'){
+    } else if (type === 'event_deleted_email') {
         await sendEmail({
             to: user.email,
             subject: `Your event "${event.title}" has been cancelled`,
@@ -156,7 +162,7 @@ async function handleMessage(msg){
             `),
             attachments: [LOGO_ATTACHMENT]
         });
-    } else if (type === 'event_updated_email'){
+    } else if (type === 'event_updated_email') {
         await sendEmail({
             to: user.email,
             subject: `Update for your event "${event.title}"`,
@@ -174,7 +180,7 @@ async function handleMessage(msg){
             `),
             attachments: [LOGO_ATTACHMENT]
         });
-    } else if (type === 'user_deletion_email'){
+    } else if (type === 'user_deletion_email') {
         await sendEmail({
             to: user.email,
             subject: `Your account has been deleted`,
@@ -207,7 +213,7 @@ async function handleMessage(msg){
     }
 }
 
-async function startConsumer(retries = 5){
+async function startConsumer(retries = 5) {
     try {
         const connection = await amqplib.connect(process.env.RABBITMQ_URL || 'amqp://rabbitmq');
         const channel = await connection.createChannel();
