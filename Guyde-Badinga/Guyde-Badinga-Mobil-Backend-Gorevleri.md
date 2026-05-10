@@ -1,61 +1,72 @@
-# Ali Tutar'ın Mobil Backend Görevleri
+# Guyde Badinga'nın Mobil Backend Görevleri
 
 ## 1. Üye Olma (Kayıt) Servisi
-- **API Endpoint:** `POST /auth/register`
+- **API Endpoint:** `POST /user`
 - **Görev:** Mobil uygulamada kullanıcı kayıt işlemini gerçekleştiren servis entegrasyonu
 - **İşlevler:**
-  - Kullanıcı bilgilerini (email, password, firstName, lastName) toplama
+  - Kullanıcı bilgilerini (name, lastName, email, password, interests) toplama
   - Form validasyonu (email formatı, şifre güvenliği kontrolü)
   - API'ye POST isteği gönderme
   - Başarılı kayıt durumunda kullanıcıyı giriş ekranına yönlendirme
-  - Hata durumlarını yakalama ve kullanıcıya gösterilmesi (409 Conflict, 400 Bad Request)
 - **Teknik Detaylar:**
   - HTTP Client kullanımı (Retrofit/OkHttp - Android, URLSession/Alamofire - iOS)
-  - Request/Response model sınıfları oluşturma
-  - Error handling ve retry mekanizması
   - Loading state yönetimi
 
-## 2. Kullanıcı Bilgilerini Görüntüleme Servisi
-- **API Endpoint:** `GET /users/{userId}`
-- **Görev:** Kullanıcı profil bilgilerini API'den çekip mobil uygulamada gösterme
+## 2. Kullanıcı Girişi (Login) Servisi
+- **API Endpoint:** `POST /user/login`
+- **Görev:** Mobil uygulamada kullanıcı giriş işlemini gerçekleştirme ve oturumu yönetme
 - **İşlevler:**
-  - JWT token ile kimlik doğrulama
-  - Kullanıcı ID'sini kullanarak profil bilgilerini getirme
-  - Gelen veriyi parse edip UI'da gösterme
-  - Token süresi dolmuşsa refresh token ile yenileme
-  - Offline durumda cache'den veri gösterme
+  - Email ve şifre ile giriş yapma
+  - Gelen JWT Token'ı güvenli bir şekilde saklama
 - **Teknik Detaylar:**
-  - Authentication header ekleme (Bearer Token)
-  - Response caching stratejisi
-  - Token refresh mekanizması
-  - Error handling (401 Unauthorized, 403 Forbidden, 404 Not Found)
+  - Güvenli depolama (Secure SharedPreferences / iOS Keychain)
+  - Tüm yetki gerektiren API isteklerine otomatik Authentication (Bearer) header eklemek için HTTP Interceptor yapılandırması
 
 ## 3. Kullanıcı Bilgilerini Güncelleme Servisi
-- **API Endpoint:** `PUT /users/{userId}`
-- **Görev:** Kullanıcı profil bilgilerini güncelleme işlemini gerçekleştirme
+- **API Endpoint:** `PUT /user`
+- **Görev:** Kullanıcı profil bilgilerini API'den güncelleyip mobil arayüze yansıtma
 - **İşlevler:**
-  - Profil düzenleme ekranından gelen verileri toplama
-  - Form validasyonu (email formatı, telefon formatı vb.)
-  - API'ye PUT isteği gönderme
-  - Başarılı güncelleme sonrası cache'i güncelleme
-  - Optimistic UI update (kullanıcı deneyimini iyileştirme)
+  - Profil bilgilerini düzenleme ekranından alıp API'ye iletme
 - **Teknik Detaylar:**
-  - Request body oluşturma (firstName, lastName, email, phone)
-  - Partial update desteği (yalnızca değişen alanları gönderme)
-  - Conflict resolution (eşzamanlı güncelleme durumları)
-  - Error handling ve kullanıcı bildirimleri
+  - Partial update desteği ve Optimistic UI update
 
-## 4. Kullanıcı Silme Servisi
-- **API Endpoint:** `DELETE /users/{userId}`
-- **Görev:** Kullanıcı hesabını silme işlemini gerçekleştirme
+## 4. Kullanıcı Hesabını Silme Servisi
+- **API Endpoint:** `DELETE /user/{userId}`
+- **Görev:** Kullanıcının kendi hesabını mobil uygulamadan kalıcı olarak silmesi
 - **İşlevler:**
-  - Kullanıcıya silme işlemi için onay dialog'u gösterme
-  - API'ye DELETE isteği gönderme
-  - Başarılı silme sonrası local storage ve cache'i temizleme
-  - Kullanıcıyı login ekranına yönlendirme
-  - Token'ı geçersiz kılma
+  - Hesabı kalıcı olarak silme (DELETE) için kullanıcı onayı alma
+  - Çıkış (Logout) ve local cache temizliği
 - **Teknik Detaylar:**
-  - Destructive action için confirmation dialog
-  - Local data cleanup (SharedPreferences/UserDefaults, cache, database)
-  - Logout işlemi entegrasyonu
-  - Error handling (401, 403, 404)
+  - Silme sonrası Login ekranına yönlendirme
+
+## 5. Tüm Etkinlikleri Listeleme Servisi (Redis Optimizasyonu)
+- **API Endpoint:** `GET /events`
+- **Görev:** Sistemdeki tüm etkinlikleri listeleyerek mobil ana ekranda gösterme
+- **İşlevler:**
+  - Backend'in sağladığı Redis önbellekleme (caching) mimarisinden faydalanarak listeleri anında yükleme
+- **Teknik Detaylar:**
+  - Infinity scroll (sonsuz kaydırma) ve hızlı yükleme (skeleton UI)
+
+## 6. Etkinlik Arama Servisi (Redis Optimizasyonu)
+- **API Endpoint:** `GET /events/search`
+- **Görev:** Arama kutusundan girilen kelimelere göre etkinlikleri arama
+- **İşlevler:**
+  - Query (q) parametresini API'ye gönderip sonuçları anlık listeleme
+- **Teknik Detaylar:**
+  - Arama yaparken performansı artırmak için Redis üzerinden gelen verilerin gecikmesiz gösterilmesi
+
+## 7. Kategoriye Göre Filtreleme Servisi (Redis Optimizasyonu)
+- **API Endpoint:** `GET /events/category`
+- **Görev:** Etkinlikleri belirli kategorilere göre filtreleyip listeleme
+- **İşlevler:**
+  - Kategori seçimine göre anlık API isteği oluşturma
+- **Teknik Detaylar:**
+  - Redis cache entegrasyonu sayesinde filtrelenmiş sonuçların beklemesiz (sıfır gecikme) yüklenmesi
+
+## 8. Yakınımdaki Etkinlikleri Listeleme Servisi (Redis Optimizasyonu)
+- **API Endpoint:** `GET /events/nearby`
+- **Görev:** Kullanıcının mevcut konumuna göre yakınındaki etkinlikleri listeleme
+- **İşlevler:**
+  - Konum servisleri (GPS) entegrasyonu ile kullanıcının enlem (lat) ve boylam (lng) bilgisini kullanarak API çağırma
+- **Teknik Detaylar:**
+  - Redis destekli coğrafi sorguların mobil tarafta hızlı render edilmesi

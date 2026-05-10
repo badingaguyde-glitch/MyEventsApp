@@ -66,9 +66,13 @@ const CreateEvents = () => {
       }
 
 
-      await EventService.createEvent(data, user.token);
+      const response = await EventService.createEvent(data, user.token);
       dispatch(checkOrganizerStatus(user.token));
-      navigate('/my-events');
+      if (response.stripeUrl) {
+          window.location.href = response.stripeUrl;
+      } else {
+          navigate('/my-events');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create event.');
       console.log(err);

@@ -7,6 +7,9 @@ services:
       - "5000:5000"
     env_file:
       - ./Backend/.env
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+      - REDIS_URL=redis://redis:6379
     restart: always
     depends_on:
       - redis

@@ -14,6 +14,8 @@ import EventSearch from './components/EventSearch';
 import EditEvent from './components/EditEvent';
 import VerifyTicket from './components/VerifyTicket';
 import PageError from './components/PageError';
+import TicketSuccess from './components/TicketSuccess';
+import TicketCancel from './components/TicketCancel';
 import Template from './components/Template';
 import ProtectedRoute from './components/ProtectedRoute';
 import store from './redux/store';
@@ -49,6 +51,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="admin-dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
             <Route path="organizer-dashboard" element={<ProtectedRoute requireOwnership={true}><OrganizerDashboard /></ProtectedRoute>} />
             <Route path="verify-ticket" element={<ProtectedRoute><VerifyTicket /></ProtectedRoute>} />
+            <Route path="tickets/success" element={<TicketSuccess />} />
+            <Route path="tickets/cancel" element={<TicketCancel />} />
             <Route path="*" element={<PageError />} />
           </Route>
         </Routes>

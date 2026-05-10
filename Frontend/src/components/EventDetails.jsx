@@ -45,9 +45,13 @@ const EventDetails = () => {
 
         try {
             
-            await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id }, user.token);
-            setMessage({ text: 'Ticket booked successfully!', type: 'success' });
-            fetchEvent(); 
+            const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id }, user.token);
+            if (response.data && response.data.stripeUrl) {
+                window.location.href = response.data.stripeUrl;
+            } else {
+                setMessage({ text: 'Ticket booked successfully!', type: 'success' });
+                fetchEvent(); 
+            }
         } catch (err) {
             setMessage({ text: err.response?.data?.message || 'Booking failed.', type: 'error' });
         } finally {

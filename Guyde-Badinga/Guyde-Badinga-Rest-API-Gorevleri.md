@@ -62,6 +62,7 @@
   - `priceMin` (number, optional) - Minimum fiyat
   - `priceMax` (number, optional) - Maksimum fiyat
 - **Response:** `200 OK` - Etkinlik listesi başarıyla getirildi
+- **Performans:** Redis kullanılarak önbellekleme (caching) uygulanmıştır. Veriler hızlıca servis edilir.
 
 ## 6. Etkinlik Arama
 - **Endpoint:** `GET /events/search`
@@ -69,6 +70,7 @@
 - **Query Parameters:**
   - `q` (string, required) - Arama terimi
 - **Response:** `200 OK` - Arama sonuçları başarıyla getirildi
+- **Performans:** Redis kullanılarak arama sonuçları önbelleğe alınır.
 
 ## 7. Kategoriye Göre Etkinlik Filtreleme
 - **Endpoint:** `GET /events/category`
@@ -76,6 +78,7 @@
 - **Query Parameters:**
   - `category` (string, required) - Filtrelenecek kategori adı
 - **Response:** `200 OK` - Kategoriye göre filtrelenmiş etkinlikler getirildi
+- **Performans:** Redis kullanılarak kategori filtreleme sonuçları önbelleğe alınır.
 
 ## 8. Yakınımdaki Etkinlikleri Listele
 - **Endpoint:** `GET /events/nearby`
@@ -86,3 +89,4 @@
   - `radius` (number, optional) - Arama yarıçapı (varsayılan: 10)
   - `unit` (string, optional) - Birim: `km` veya `miles` (varsayılan: `km`)
 - **Response:** `200 OK` - Yakındaki etkinlikler başarıyla getirildi
+- **Performans:** Redis kullanılarak lokasyon tabanlı sorgular optimize edilmiş ve önbelleğe alınmıştır.
