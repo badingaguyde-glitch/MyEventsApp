@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, Modal } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, Modal, Alert } from 'react-native'
 import React, { useState, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Header from '@/Components/Header'
@@ -145,7 +145,7 @@ export default function MyTickets() {
           </View>
           <Text className='text-2xl font-bold text-black text-center mb-2'>No Tickets Yet</Text>
           <Text className='text-gray-500 text-center mb-8'>
-            You haven't purchased any tickets yet. Browse events and get your tickets now!
+            {"You haven't purchased any tickets yet. Browse events and get your tickets now!"}
           </Text>
           <TouchableOpacity 
             className='bg-black w-full py-4 rounded-xl'

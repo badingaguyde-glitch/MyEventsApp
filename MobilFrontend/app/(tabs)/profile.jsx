@@ -220,7 +220,7 @@ export default function Profile() {
                 <View className='bg-gray-50 rounded-xl p-8 items-center'>
                   <Ionicons name="calendar-outline" size={50} color={COLORS.secondary} />
                   <Text className='text-gray-500 text-center mt-3'>
-                    You haven't created any events yet
+                    {"You haven't created any events yet"}
                   </Text>
                   <TouchableOpacity 
                     className='mt-4'

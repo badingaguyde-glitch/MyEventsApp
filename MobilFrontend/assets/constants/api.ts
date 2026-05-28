@@ -2,10 +2,10 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-const API_BASE_URL = Platform.select({
-    android: "https://my-events-app-backend.vercel.app/api",
-    ios: "https://my-events-app-backend.vercel.app/api",
-    default: "https://my-events-app-backend.vercel.app/api"
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || Platform.select({
+    android: "http://10.0.2.2:5000/api",
+    ios: "http://localhost:5000/api",
+    default: "http://localhost:5000/api"
 });
 
 const api = axios.create({
