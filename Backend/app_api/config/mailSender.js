@@ -66,7 +66,7 @@ const Queue = 'email_queue';
 
 async function sendEmail({ to, subject, html, attachments }) {
     await transporter.sendMail({
-        from: `"${process.env.FROM_NAME}" <${process.env.SMTP_USER}>`,
+        from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
         to,
         subject,
         html,

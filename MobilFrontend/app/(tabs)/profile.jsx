@@ -17,18 +17,6 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
    const [myEvents, setMyEvents] = useState([])   // This should work now
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [isLogin, setIsLogin] = useState(true)
-  const [authForm, setAuthForm] = useState({
-    email: '',
-    password: '',
-    name: '',
-    lastName: '',
-    interests: '',
-  })
-  const [authLoading2, setAuthLoading2] = useState(false)
-
-  const { login, register } = useAuth()
 
   const fetchMyEvents = async () => {
     if (!user) return
@@ -68,39 +56,7 @@ export default function Profile() {
     }
   }
 
-  const handleAuth = async () => {
-    if (!authForm.email || !authForm.password) {
-      Alert.alert('Error', 'Please fill in all required fields')
-      return
-    }
 
-    if (!isLogin && (!authForm.name || !authForm.lastName)) {
-      Alert.alert('Error', 'Please fill in all required fields')
-      return
-    }
-
-    setAuthLoading2(true)
-    try {
-      if (isLogin) {
-        await login(authForm.email, authForm.password)
-      } else {
-        await register({
-          name: authForm.name,
-          lastName: authForm.lastName,
-          email: authForm.email,
-          password: authForm.password,
-          interests: authForm.interests.split(',').map(i => i.trim()).filter(i => i),
-        })
-      }
-      setShowAuthModal(false)
-      setAuthForm({ email: '', password: '', name: '', lastName: '', interests: '' })
-      fetchMyEvents()
-    } catch (error) {
-      Alert.alert('Error', error.response?.data?.message || 'Authentication failed')
-    } finally {
-      setAuthLoading2(false)
-    }
-  }
 
   const handleLogout = () => {
     Alert.alert(
@@ -156,19 +112,13 @@ export default function Profile() {
             </Text>
             <TouchableOpacity 
               className='bg-primary w-full py-4 rounded-xl mb-3'
-              onPress={() => {
-                setIsLogin(true)
-                setShowAuthModal(true)
-              }}
+              onPress={() => router.push('/login')}
             >
               <Text className='text-white text-center font-bold text-lg'>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               className='border-2 border-primary w-full py-4 rounded-xl'
-              onPress={() => {
-                setIsLogin(false)
-                setShowAuthModal(true)
-              }}
+              onPress={() => router.push('/login?mode=signup')}
             >
               <Text className='text-primary text-center font-bold text-lg'>Sign Up</Text>
             </TouchableOpacity>
@@ -350,101 +300,7 @@ export default function Profile() {
         )}
       </ScrollView>
 
-      {/* Auth Modal */}
-      <Modal
-        visible={showAuthModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowAuthModal(false)}
-      >
-        <TouchableOpacity 
-          className='flex-1 bg-black/50 justify-center items-center'
-          activeOpacity={1}
-          onPress={() => setShowAuthModal(false)}
-        >
-          <TouchableOpacity 
-            className='bg-white rounded-2xl mx-6 p-6 w-[350px]'
-            activeOpacity={1}
-            onPress={() => {}}
-          >
-            <View className='items-center mb-4'>
-              <View className='w-16 h-16 bg-primary rounded-full justify-center items-center'>
-                <Ionicons name="ticket" size={30} color="white" />
-              </View>
-              <Text className='text-2xl font-bold text-black mt-2'>
-                {isLogin ? 'Welcome Back' : 'Create Account'}
-              </Text>
-            </View>
 
-            {!isLogin && (
-              <>
-                <TextInput
-                  className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3'
-                  placeholder="First Name"
-                  value={authForm.name}
-                  onChangeText={(text) => setAuthForm({ ...authForm, name: text })}
-                />
-                <TextInput
-                  className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3'
-                  placeholder="Last Name"
-                  value={authForm.lastName}
-                  onChangeText={(text) => setAuthForm({ ...authForm, lastName: text })}
-                />
-              </>
-            )}
-
-            <TextInput
-              className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3'
-              placeholder="Email"
-              value={authForm.email}
-              onChangeText={(text) => setAuthForm({ ...authForm, email: text })}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <TextInput
-              className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3'
-              placeholder="Password"
-              value={authForm.password}
-              onChangeText={(text) => setAuthForm({ ...authForm, password: text })}
-              secureTextEntry
-            />
-
-            {!isLogin && (
-              <TextInput
-                className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-4'
-                placeholder="Interests (Music, Sports, etc.)"
-                value={authForm.interests}
-                onChangeText={(text) => setAuthForm({ ...authForm, interests: text })}
-              />
-            )}
-
-            <TouchableOpacity 
-              className={`py-3 rounded-xl mb-3 ${authLoading2 ? 'bg-gray-400' : 'bg-primary'}`}
-              onPress={handleAuth}
-              disabled={authLoading2}
-            >
-              <Text className='text-white text-center font-bold'>
-                {authLoading2 ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text className='text-center text-gray-600'>
-                {isLogin ? "Don't have an account? " : "Already have an account? "}
-                <Text className='text-primary font-bold'>{isLogin ? 'Sign Up' : 'Login'}</Text>
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              className='mt-3'
-              onPress={() => setShowAuthModal(false)}
-            >
-              <Text className='text-center text-gray-500'>Cancel</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
     </SafeAreaView>
   )
 }

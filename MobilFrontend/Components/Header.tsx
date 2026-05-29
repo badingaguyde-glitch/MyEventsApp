@@ -4,11 +4,11 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { COLORS } from '@/assets/constants'
 import { useRouter } from 'expo-router'
 
-export default function Header({showBack, showSearch, showMenu, showLogo}:
-    {showBack?: boolean, showSearch?: boolean, showMenu?: boolean, showLogo?: boolean }) {
-  
+export default function Header({ showBack, showSearch, showMenu, showLogo }:
+    { showBack?: boolean, showSearch?: boolean, showMenu?: boolean, showLogo?: boolean }) {
+
     const router = useRouter();
-    
+
     return (
         <View className='flex-row items-center justify-between px-4 py-3 bg-white'>
             {/* Left side */}
@@ -24,13 +24,13 @@ export default function Header({showBack, showSearch, showMenu, showLogo}:
                         <Ionicons name="menu-outline" size={28} color={COLORS.primary} />
                     </TouchableOpacity>
                 )}
-                
+
                 {showLogo ? (
                     <View className='flex-1'>
-                        <Image 
+                        <Image
                             source={require("@/assets/logo.png")}
-                            style={{ width: "100%", height: 30 }} 
-                            resizeMode='contain' 
+                            style={{ width: "100%", height: 30 }}
+                            resizeMode='contain'
                         />
                     </View>
                 ) : (
