@@ -71,7 +71,7 @@ const EventDetails = () => {
             >
                 <div className="h-64 sm:h-80 md:h-[450px] relative">
                     <img
-                        src={event.image?.startsWith('http') ? event.image : `http://localhost:5000/uploads/${event.image || 'default.jpg'}`}
+                        src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'https://my-events-app-backend.vercel.app'}/uploads/${event.image || 'default.jpg'}`}
                         alt={event.title}
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200' }}
