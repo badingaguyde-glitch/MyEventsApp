@@ -5,7 +5,7 @@ const cache = (keyFn, ttl = 60) => {
 
         const key = typeof keyFn === "function"
             ? keyFn(req)
-            : keyFn;
+            : `${keyFn}_${req.originalUrl}`;
 
         const data = await client.get(key);
 
@@ -25,6 +25,18 @@ const cache = (keyFn, ttl = 60) => {
 
         next();
     };
+};
+
+cache.clearPattern = async (pattern) => {
+    try {
+        const keys = await client.keys(pattern);
+        if (keys && keys.length > 0) {
+            await client.del(keys);
+            console.log(`Cleared cache keys matching: ${pattern} (${keys.length} keys)`);
+        }
+    } catch (err) {
+        console.error(`Error clearing cache pattern ${pattern}:`, err);
+    }
 };
 
 module.exports = cache;

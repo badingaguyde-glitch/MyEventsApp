@@ -7,7 +7,8 @@ const ticketSchema = new mongoose.Schema({
     status: { type: String, required: true, enum: ['active', 'used', 'cancelled', 'pending_payment'], default: 'pending_payment' },
     checkInTime: { type: Date },
     checkInBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    price: { type: Number, required: true, min: 0 }
+    price: { type: Number, required: true, min: 0 },
+    createdAt: { type: Date, default: Date.now }
 });
 
 ticketSchema.pre('save', async function () {

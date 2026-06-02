@@ -34,64 +34,51 @@ services:
       - backend
     restart: always
 
-  init-shared:
-    image: alpine:latest
-    volumes:
-      - shared-data:/shared
-    command: rm -f /shared/api-url.txt /shared/ssh.log
-
   mobilfrontend:
     build:
       context: ./MobilFrontend
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
-    volumes:
-      - shared-data:/shared
-    command:
-      - sh
-      - -c
-      - |
-        if [ -z "$$EXPO_PUBLIC_API_URL" ]; then
-          echo "Waiting for API URL..."
-          while [ ! -f /shared/api-url.txt ]; do sleep 1; done
-          export EXPO_PUBLIC_API_URL=$$(cat /shared/api-url.txt)/api
-        fi
-        echo "Using API URL: $$EXPO_PUBLIC_API_URL"
-        npx expo start --tunnel
+    environment:
+      - EXPO_PUBLIC_API_URL=https://guydebadinga-events.serveousercontent.com/api
+      - EXPO_PACKAGER_PROXY_URL=https://natural-stylized-marbles.ngrok-free.dev
+    command: npx expo start --lan --clear
     depends_on:
-      backend:
-        condition: service_started
-      init-shared:
-        condition: service_completed_successfully
+      - backend
+      - backend-tunnel
     restart: always
     tty: true
     stdin_open: true
 
   backend-tunnel:
     image: alpine:latest
+    restart: always
     volumes:
-      - shared-data:/shared
+      - ssh-data:/root/.ssh
     command:
       - sh
       - -c
       - |
         apk add --no-cache openssh-client
         mkdir -p /root/.ssh
-        [ ! -f /root/.ssh/id_ed25519 ] && ssh-keygen -t ed25519 -N "" -f /root/.ssh/id_ed25519 || true
-        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -R 80:backend:5000 nokey@localhost.run > /shared/ssh.log 2>&1 &
-        echo "Waiting for tunnel URL..."
-        while ! grep -qE "https://[a-zA-Z0-9.-]+\.lhr\.life" /shared/ssh.log; do sleep 1; done
-        grep -oE "https://[a-zA-Z0-9.-]+\.lhr\.life" /shared/ssh.log | head -n 1 > /shared/api-url.txt
-        echo "Tunnel URL saved: $$(cat /shared/api-url.txt)"
-        wait
-    depends_on:
-      backend:
-        condition: service_started
-      init-shared:
-        condition: service_completed_successfully
+        chmod 700 /root/.ssh
+        if [ ! -f /root/.ssh/id_rsa ]; then
+          ssh-keygen -t rsa -b 2048 -N "" -f /root/.ssh/id_rsa
+        fi
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -R guydebadinga-events:80:backend:5000 serveo.net
+
+  expo-tunnel:
+    image: ngrok/ngrok:latest
     restart: always
+    environment:
+      - NGROK_AUTHTOKEN=3EX2Df6HVUHmhzA7vt4OoEPqZ6F_2CQCUH2ibByyKMKWGydwj
+    command:
+      - http
+      - mobilfrontend:8081
+      - --url=natural-stylized-marbles.ngrok-free.dev
+      - --log=stdout
 
 volumes:
-  shared-data:
+  ssh-data:
 

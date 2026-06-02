@@ -2,6 +2,7 @@ const Ticket = require('../models/Ticket');
 const Event = require('../models/Event');
 const User = require('../models/User');
 const client = require('../config/redis');
+const cache = require('../middleware/cache');
 const { publishToQueue } = require('../config/rabbitmq');
 
 
@@ -10,8 +11,8 @@ const { publishToQueue } = require('../config/rabbitmq');
 
 const buyTicket = async (req, res) => {
     try {
-        const { eventId, price, userId, user: bodyUserId } = req.body;
-        const targetUserId = userId || bodyUserId;
+        const { eventId, price, userId, user: bodyUserId, clientType } = req.body;
+        const targetUserId = userId || bodyUserId || (req.user && req.user.id);
 
         if (!eventId) {
             return res.status(400).json({ message: 'Event ID required' });
@@ -62,10 +63,14 @@ const buyTicket = async (req, res) => {
             ticket.status = 'active';
             await ticket.save();
 
-            await client.del('tickets');
-            await client.del('user_tickets');
-            await client.del('ticket_availability');
-            await client.del(`ticket_by_code_${event._id}`);
+            await cache.clearPattern('tickets_*');
+            await cache.clearPattern(`user_tickets_${targetUserId}`);
+            await cache.clearPattern('ticket_availability_*');
+            await cache.clearPattern(`ticket_by_code_*${event._id}*`);
+            await cache.clearPattern('events_*');
+            await cache.clearPattern('category_events_*');
+            await cache.clearPattern('nearby_events_*');
+            await cache.clearPattern(`event_details_*${event._id}*`);
 
             publishToQueue('email_queue', {
                 type: 'ticket_purchase_email',
@@ -99,20 +104,35 @@ const buyTicket = async (req, res) => {
                     eventTitle: event.title,
                     eventDate: event.date.toString(),
                     eventLocation: JSON.stringify(event.location),
-                    ticketCode: ticket.ticketCode
+                    ticketCode: ticket.ticketCode,
+                    clientType: clientType || 'mobile'
                 },
-                successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/tickets/success`,
-                cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/tickets/cancel`
+                successUrl: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'mobile'}`,
+                cancelUrl: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'mobile'}`
             }
         };
 
         const stripeRes = {
             status: (code) => ({
-                json: (data) => res.status(201).json({
-                    message: "Ticket en attente de paiement",
-                    ticket: ticket,
-                    stripeUrl: data.url
-                })
+                json: (data) => {
+                    if (code !== 200) {
+                        return res.status(code).json({
+                            message: "Stripe error during ticket purchase",
+                            error: data.error || data.message
+                        });
+                    }
+                    publishToQueue('email_queue', {
+                        type: 'ticket_pending_email',
+                        user: { name: user.name, lastName: user.lastName, email: user.email },
+                        event: { title: event.title },
+                        receiptUrl: data.url
+                    });
+                    return res.status(201).json({
+                        message: "Ticket en attente de paiement",
+                        ticket: ticket,
+                        stripeUrl: data.url
+                    });
+                }
             })
         };
 
@@ -258,6 +278,11 @@ const verifyTicket = async (req, res) => {
         ticket.checkedInBy = req.user.id;
         await ticket.save();
 
+        await cache.clearPattern('tickets_*');
+        await cache.clearPattern(`user_tickets_${ticket.user._id || ticket.user}`);
+        await cache.clearPattern(`ticket_by_code_*${ticket.ticketCode}*`);
+        await cache.clearPattern('event_participants_*');
+
         res.json({
             valid: true,
             message: 'Ticket verified and checked in successfully',
@@ -320,10 +345,14 @@ const cancelTicket = async (req, res) => {
         }
 
         await ticket.deleteOne();
-        await client.del('tickets'); // Clear the tickets cache
-        await client.del('user_tickets'); // Clear the user's tickets cache
-        await client.del('ticket_availability'); // Clear the ticket availability cache
-        await client.del(`ticket_by_code_${ticket.event._id}`); // Clear the ticket by code cache for this event
+        await cache.clearPattern('tickets_*');
+        await cache.clearPattern(`user_tickets_${req.user.id}`);
+        await cache.clearPattern('ticket_availability_*');
+        await cache.clearPattern(`ticket_by_code_*${ticket.event._id}*`);
+        await cache.clearPattern('events_*');
+        await cache.clearPattern('category_events_*');
+        await cache.clearPattern('nearby_events_*');
+        await cache.clearPattern(`event_details_*${ticket.event._id}*`);
 
         res.json({
             message: 'Ticket cancelled successfully'
@@ -480,6 +509,11 @@ const bulkVerifyTickets = async (req, res) => {
                 }
             });
         }
+
+        await cache.clearPattern('tickets_*');
+        await cache.clearPattern('user_tickets_*');
+        await cache.clearPattern('ticket_by_code_*');
+        await cache.clearPattern('event_participants_*');
 
         res.json({
             totalProcessed: results.length,

@@ -208,6 +208,62 @@ async function handleMessage(msg) {
             `),
             attachments: [LOGO_ATTACHMENT]
         });
+    } else if (type === 'ticket_pending_email') {
+        const timeoutHours = process.env.PAYMENT_TIMEOUT_HOURS || 2;
+        await sendEmail({
+            to: user.email,
+            subject: `Action Required: Pay for your ticket for ${event.title}`,
+            html: emailWrapper(`
+                <h1>Ticket Reservation Pending Payment</h1>
+                <p>Hi ${user.name}, you have reserved a ticket for <span class="highlight">${event.title}</span>.</p>
+                <p>To secure your spot, please complete the payment within the next <strong style="color: #ef4444;">${timeoutHours} hours</strong>.</p>
+                <p>If the payment is not completed in time, your reservation will be automatically cancelled and deleted.</p>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="${receiptUrl || '#'}" class="button" style="background-color: #f59e0b;">💳 Complete Payment Now</a>
+                </div>
+            `),
+            attachments: [LOGO_ATTACHMENT]
+        });
+    } else if (type === 'event_pending_email') {
+        const timeoutHours = process.env.PAYMENT_TIMEOUT_HOURS || 2;
+        await sendEmail({
+            to: user.email,
+            subject: `Action Required: Activate your event "${event.title}"`,
+            html: emailWrapper(`
+                <h1>Event Commission Payment Pending</h1>
+                <p>Hi ${user.name}, your event <span class="highlight">${event.title}</span> has been created.</p>
+                <p>To publish it and make it visible to the public, please pay the creation fee within the next <strong style="color: #ef4444;">${timeoutHours} hours</strong>.</p>
+                <p>If the payment is not completed in time, your event request will be automatically deleted.</p>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="${receiptUrl || '#'}" class="button" style="background-color: #f59e0b;">💳 Pay Event Fee Now</a>
+                </div>
+            `),
+            attachments: [LOGO_ATTACHMENT]
+        });
+    } else if (type === 'ticket_expired_email') {
+        await sendEmail({
+            to: user.email,
+            subject: `Ticket Reservation Expired: ${event.title}`,
+            html: emailWrapper(`
+                <h1 style="color: #ef4444;">Reservation Cancelled</h1>
+                <p>Hi ${user.name}, the time limit to pay for your ticket for <span class="highlight">${event.title}</span> has exceeded.</p>
+                <p>Since the payment was not received within the required timeframe, your ticket reservation (Code: <strong>${ticket.code}</strong>) has expired and has been deleted.</p>
+                <p>If you still wish to attend, please visit the event page and reserve a new ticket.</p>
+            `),
+            attachments: [LOGO_ATTACHMENT]
+        });
+    } else if (type === 'event_expired_email') {
+        await sendEmail({
+            to: user.email,
+            subject: `Event Registration Expired: "${event.title}"`,
+            html: emailWrapper(`
+                <h1 style="color: #ef4444;">Event Registration Cancelled</h1>
+                <p>Hi ${user.name}, the time limit to pay the activation fee for your event <span class="highlight">${event.title}</span> has exceeded.</p>
+                <p>Since the activation fee was not paid within the required timeframe, your event creation request has expired and was deleted from our database.</p>
+                <p>If you still wish to publish this event, please create a new event request and complete the payment.</p>
+            `),
+            attachments: [LOGO_ATTACHMENT]
+        });
     } else {
         console.log('Unknown message type:', type);
     }
