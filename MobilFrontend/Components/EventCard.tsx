@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
-import { Event } from '@/assets/constants'
+import { Event, resolveEventImage } from '@/assets/constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { COLORS } from '@/assets/constants'
 
@@ -24,7 +24,7 @@ export default function EventCard({ event, horizontal = false, onPress }: EventC
         onPress={onPress}
       >
         <Image 
-          source={{ uri: event.image }}
+          source={{ uri: resolveEventImage(event.image) }}
           className='w-full h-32'
           style={{ resizeMode: 'cover' }}
         />
@@ -56,7 +56,7 @@ export default function EventCard({ event, horizontal = false, onPress }: EventC
     >
       <View className='flex-row'>
         <Image 
-          source={{ uri: event.image }}
+          source={{ uri: resolveEventImage(event.image) }}
           className='w-28 h-28'
           style={{ resizeMode: 'cover' }}
         />

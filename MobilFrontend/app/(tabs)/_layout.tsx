@@ -1,0 +1,65 @@
+import { View, Text, Platform } from 'react-native'
+import React from 'react'
+import { Tabs, router } from 'expo-router'
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { COLORS} from '@/assets/constants'; 
+
+export default function TabLayout() {
+  return (
+   <Tabs
+   screenOptions={{
+    headerShown: false,
+    tabBarActiveTintColor: COLORS.primary,
+    tabBarInactiveTintColor: COLORS.inactive,
+    tabBarStyle:{
+        borderTopWidth:1,
+        borderTopColor: '#F0F0F0',
+        paddingTop:8,
+        paddingBottom: Platform.OS === 'ios' ? 28 : 12,
+        height: Platform.OS === 'ios' ? 88 : 68,
+    }
+    
+
+   }}
+   
+   
+   
+   >
+    <Tabs.Screen name="Home" options={{ 
+        tabBarIcon: ({color, focused}) =>  <Ionicons name={focused?"home":"home-outline"} size={26} color={color}/>
+     }} />
+
+    <Tabs.Screen name="events" options={{ 
+        tabBarIcon: ({color, focused}) =>  <Ionicons name={focused?"calendar":"calendar-outline"} size={26} color={color}/>
+     }} />
+
+    <Tabs.Screen 
+        name="create-event-placeholder" 
+        options={{ 
+          title: "Create",
+          tabBarIcon: ({color, focused}) => <Ionicons name={focused ? "add-circle" : "add-circle-outline"} size={28} color={color}/>
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push('/create-event');
+          }
+        }}
+      />
+
+     <Tabs.Screen name="search" options={{ 
+        tabBarIcon: ({color, focused}) =>  <Ionicons name={focused?"search":"search-outline"} size={26} color={color}/>
+     }} />
+
+     <Tabs.Screen name="mytickets" options={{ 
+        tabBarIcon: ({color, focused}) =>  <Ionicons name={focused?"ticket":"ticket-outline"} size={26} color={color}/>
+     }} />
+
+     <Tabs.Screen name="profile" options={{ 
+        tabBarIcon: ({color, focused}) =>  <Ionicons name={focused?"person":"person-outline"} size={26} color={color}/>
+     }} />
+
+
+   </Tabs>
+  )
+}

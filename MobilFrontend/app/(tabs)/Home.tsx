@@ -148,7 +148,11 @@ export default function Home() {
         <Text className='text-xl font-bold text-black  p-2'>Categories</Text>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} >
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 16 }}
+      >
         
        {categories.map((cat:any)=>(
          <CategoryItem key={cat.id} item={cat} isSelected={false}

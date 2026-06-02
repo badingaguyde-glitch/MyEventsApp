@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Switch } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Switch, Linking } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Header from '@/Components/Header'
@@ -135,21 +135,40 @@ export default function CreateEvent() {
       if (formData.image) {
         const imageFormData = new FormData()
         const uriParts = formData.image.split('.')
-        const fileType = uriParts[uriParts.length - 1]
+        let fileExtension = uriParts[uriParts.length - 1]?.toLowerCase()
+        if (!['jpeg', 'png', 'webp', 'jpg'].includes(fileExtension)) {
+          fileExtension = 'jpeg'
+        }
         imageFormData.append('image', {
           uri: formData.image,
-          name: `event.${fileType}`,
-          type: `image/${fileType}`,
+          name: `event.${fileExtension}`,
+          type: `image/${fileExtension === 'jpg' ? 'jpeg' : fileExtension}`,
         } as any)
 
-        await api.put(`/events/${response.data._id}`, imageFormData, {
+        await api.put(`/events/${response.data.event._id}`, imageFormData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       }
       
       console.log('Event created:', response.data)
-      Alert.alert('Success', 'Event created successfully!')
-      router.back()
+      if (response.data.stripeUrl) {
+        Alert.alert(
+          'Payment Required',
+          'Your event is created but pending payment. We will open Stripe to complete the activation payment. Please check your email inbox (including spam folder) for the activation link to complete this if you need to pay later.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                Linking.openURL(response.data.stripeUrl)
+                router.back()
+              }
+            }
+          ]
+        )
+      } else {
+        Alert.alert('Success', 'Event created successfully!')
+        router.back()
+      }
     } catch (error: any) {
       console.error('Create event error:', error.response?.data || error)
       Alert.alert('Error', error.response?.data?.message || 'Failed to create event')

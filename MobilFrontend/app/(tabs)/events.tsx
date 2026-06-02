@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '@/Components/Header';
 import api from '@/assets/constants/api';
-import { Event, COLORS } from '@/assets/constants';
+import { Event, COLORS, resolveEventImage } from '@/assets/constants';
 import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -53,7 +53,7 @@ export default function Events() {
             onPress={() => router.push({ pathname: '/event/[id]', params: { id: item._id } } as any)}
         >
             <Image
-                source={{ uri: item.image }}
+                source={{ uri: resolveEventImage(item.image) }}
                 className="w-full h-48"
                 style={{ resizeMode: 'cover' }}
             />

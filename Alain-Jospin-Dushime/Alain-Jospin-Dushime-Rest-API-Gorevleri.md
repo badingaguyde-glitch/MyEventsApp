@@ -48,7 +48,8 @@
   }
   
 - *Authentication:* Bearer Token gerekli
-- *Response:* 201 Created - "Ticket purchased successfully" ve oluşturulan Ticket nesnesi döner
+- *Response:* 201 Created - "Ticket en attente de paiement" mesajı ve Stripe Checkout URL'si (stripeUrl) döner.
+- *Not:* Kullanıcı Stripe üzerinden ödemeyi tamamladığında webhook tetiklenir, bilet aktif hale gelir ve RabbitMQ kullanılarak asenkron olarak email gönderimi sağlanır.
 
 ## 5. Kullanıcının Biletlerini Listeleme
 - *Endpoint:* GET /tickets
@@ -84,3 +85,11 @@
   - ticketid (string, required) - İptal edilecek biletin ID'si
 - *Authentication:* Bearer Token gerekli (Bilet sahibi veya admin yetkilidir)
 - *Response:* 200 OK - "Ticket cancelled successfully"
+
+## 9. Stripe Payment Webhook (Ödeme Doğrulama)
+- *Endpoint:* POST /api/payment/webhook
+- *Açıklama:* Stripe tarafından asenkron olarak çağrılan webhook endpoint'idir. Ödeme başarılı olduğunda (`checkout.session.completed`) tetiklenir.
+- *Request Body:* Stripe raw payload (Express raw body)
+- *Authentication:* Stripe Signature kontrolü (Stripe Webhook Secret kullanılarak doğrulanır).
+- *Response:* 200 OK - Event received successfully.
+- *Arka Plan İşlemleri:* Başarılı ödeme alındığında, RabbitMQ `payment_queue` kullanılarak asenkron bir worker tetiklenir. Worker biletin durumunu `paid` veya `active` yapar ve e-posta gönderimi için `email_queue`'ya mesaj bırakır.
