@@ -87,6 +87,8 @@ export default function MyTickets() {
         return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Used' }
       case 'cancelled':
         return { bg: 'bg-red-100', text: 'text-red-700', label: 'Cancelled' }
+      case 'pending_payment':
+        return { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Pending Payment' }
       default:
         return { bg: 'bg-gray-100', text: 'text-gray-600', label: status }
     }
@@ -213,6 +215,15 @@ export default function MyTickets() {
                   <Text className='text-primary font-bold text-lg'>${item.price}</Text>
                 </View>
 
+                {item.status === 'pending_payment' && (
+                  <View className='mt-3 p-3 bg-amber-50 border border-amber-100 rounded-lg flex-row items-start'>
+                    <Ionicons name="warning-outline" size={16} color="#d97706" style={{ marginTop: 2, marginRight: 6 }} />
+                    <Text className='text-amber-800 text-xs font-semibold flex-1'>
+                      Payment pending. Please check your email (including spam) to complete the payment for this ticket.
+                    </Text>
+                  </View>
+                )}
+
                 {item.status === 'active' && item.eventStatus !== 'past' && (
                   <TouchableOpacity 
                     className='mt-3 bg-red-50 py-2 rounded-lg'
@@ -233,7 +244,18 @@ export default function MyTickets() {
         ListHeaderComponent={
           <View className='px-4 pb-2'>
             <Text className='text-2xl font-bold text-black'>My Tickets</Text>
-            <Text className='text-gray-500 text-sm mt-1'>You have {tickets.length} ticket(s)</Text>
+            <Text className='text-gray-500 text-sm mt-1 mb-3'>You have {tickets.length} ticket(s)</Text>
+            {tickets.some(t => t.status === 'pending_payment') && (
+              <View className='mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex-row items-start shadow-sm'>
+                <Ionicons name="mail-unread-outline" size={20} color="#d97706" style={{ marginTop: 2, marginRight: 8 }} />
+                <View className='flex-1'>
+                  <Text className='text-amber-800 font-bold text-sm'>Pending Ticket Payments</Text>
+                  <Text className='text-amber-700 text-xs mt-1 leading-4'>
+                    You have tickets in pending payment status. Please check your email inbox (including spam folder) for the payment links to complete your bookings.
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         }
       />
@@ -252,12 +274,24 @@ export default function MyTickets() {
             onPress={() => setSelectedTicket(null)}
           >
             <View className='bg-white rounded-2xl mx-6 p-6 w-[320px]'>
-              <View className='items-center mb-4'>
-                <QRCode 
-                  value={selectedTicket.ticketCode} 
-                  size={180}
-                />
-              </View>
+              {selectedTicket.status === 'pending_payment' ? (
+                <View className='items-center mb-4 p-4 bg-amber-50 rounded-xl border border-amber-200'>
+                  <Ionicons name="mail-unread-outline" size={48} color="#d97706" style={{ marginBottom: 8 }} />
+                  <Text className="text-amber-800 text-sm font-bold text-center">
+                    Payment Required
+                  </Text>
+                  <Text className="text-gray-500 text-xs text-center mt-2 leading-4">
+                    Check your email inbox (including spam) to complete the payment for this ticket.
+                  </Text>
+                </View>
+              ) : (
+                <View className='items-center mb-4'>
+                  <QRCode 
+                    value={selectedTicket.ticketCode} 
+                    size={180}
+                  />
+                </View>
+              )}
               <Text className='text-center text-black font-bold text-lg mb-2'>
                 {selectedTicket.event.title}
               </Text>

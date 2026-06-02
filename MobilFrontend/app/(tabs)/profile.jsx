@@ -166,6 +166,18 @@ export default function Profile() {
                 </TouchableOpacity>
               </View>
 
+              {myEvents.some(e => e.status === 'pending_payment') && (
+                <View className='mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex-row items-start shadow-sm'>
+                  <Ionicons name="mail-unread-outline" size={20} color="#d97706" style={{ marginTop: 2, marginRight: 8 }} />
+                  <View className='flex-1'>
+                    <Text className='text-amber-800 font-bold text-sm'>Unpaid Activation Fees</Text>
+                    <Text className='text-amber-700 text-xs mt-1 leading-4'>
+                      Some of your events are pending activation. Check your emails (including spam) for the activation payment links to publish them.
+                    </Text>
+                  </View>
+                </View>
+              )}
+
               {myEvents.length === 0 ? (
                 <View className='bg-gray-50 rounded-xl p-8 items-center'>
                   <Ionicons name="calendar-outline" size={50} color={COLORS.secondary} />
@@ -199,9 +211,21 @@ export default function Profile() {
                           <Text className='text-primary font-semibold'>
                             {event.availableSpots ?? event.capacity - (event.soldTickets || 0)} spots left
                           </Text>
-                          <View className={`px-2 py-1 rounded-full ${event.status === 'active' ? 'bg-green-100' : 'bg-red-100'}`}>
-                            <Text className={`text-xs ${event.status === 'active' ? 'text-green-700' : 'text-red-700'}`}>
-                              {event.status}
+                          <View className={`px-2 py-1 rounded-full ${
+                            event.status === 'active' 
+                              ? 'bg-green-100' 
+                              : event.status === 'pending_payment'
+                              ? 'bg-amber-100'
+                              : 'bg-red-100'
+                          }`}>
+                            <Text className={`text-xs font-bold ${
+                              event.status === 'active' 
+                                ? 'text-green-700' 
+                                : event.status === 'pending_payment'
+                                ? 'text-amber-700'
+                                : 'text-red-700'
+                            }`}>
+                              {event.status === 'pending_payment' ? 'pending payment' : event.status}
                             </Text>
                           </View>
                         </View>
@@ -272,10 +296,18 @@ export default function Profile() {
             ) : (
               <View className='p-4 border-t border-gray-100'>
                 <TouchableOpacity 
-                  className='flex-row justify-between items-center py-4'
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
                   onPress={() => setIsEditing(true)}
                 >
                   <Text className='text-black font-semibold'>Edit Profile</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
+                  onPress={() => router.push('/create-event')}
+                >
+                  <Text className='text-black font-semibold'>Create Event</Text>
                   <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
                 </TouchableOpacity>
                 

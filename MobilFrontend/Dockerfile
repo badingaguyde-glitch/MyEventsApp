@@ -1,6 +1,9 @@
 # Use an official Node.js runtime as a parent image
 FROM node:20-alpine
 
+# Install glibc compatibility package for ngrok binary used by expo tunnel
+RUN apk add --no-cache libc6-compat
+
 # Set the working directory in the container
 WORKDIR /app
 

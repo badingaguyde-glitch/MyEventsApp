@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput, RefreshControl } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, TextInput, RefreshControl, Linking, Switch } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
@@ -8,6 +8,7 @@ import { COLORS } from '@/assets/constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAuth } from '@/context/AuthContext'
 import { CameraView, useCameraPermissions } from 'expo-camera'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 interface Participant {
   ticketId: string
@@ -57,25 +58,143 @@ export default function ManageEvent() {
   const [activeTab, setActiveTab] = useState<'overview' | 'participants'>('overview')
   const [permission, requestPermission] = useCameraPermissions()
   const [scanned, setScanned] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
+  const [offlineQueue, setOfflineQueue] = useState<string[]>([])
+  const [syncingOffline, setSyncingOffline] = useState(false)
+
+  const handlePayEvent = async () => {
+    setPaymentLoading(true)
+    try {
+      const response = await api.post(`/events/${id}/pay`)
+      if (response.data.stripeUrl) {
+        Linking.openURL(response.data.stripeUrl)
+      } else if (response.data.event?.status === 'active') {
+        Alert.alert('Success', 'Event activated successfully!')
+        fetchEventDetails()
+      } else {
+        Alert.alert('Success', 'Event activated!')
+        fetchEventDetails()
+      }
+    } catch (error: any) {
+      console.error('Payment generation error:', error)
+      Alert.alert('Error', error.response?.data?.message || 'Failed to generate payment session')
+    } finally {
+      setPaymentLoading(false)
+    }
+  }
 
   const fetchEventDetails = async () => {
     try {
       const eventRes = await api.get(`/events/${id}`)
       setEvent(eventRes.data)
+      await AsyncStorage.setItem(`offline_event_${id}`, JSON.stringify(eventRes.data))
       
       const participantsRes = await api.get(`/events/${id}/participants`)
-      setParticipants(participantsRes.data.participants || [])
+      const participantsList = participantsRes.data.participants || []
+      setParticipants(participantsList)
+      await AsyncStorage.setItem(`offline_participants_${id}`, JSON.stringify(participantsList))
     } catch (error: any) {
       console.error('Error fetching event details:', error)
-      if (error.response?.status === 403) {
-        Alert.alert('Access Denied', 'You are not authorized to manage this event')
-        router.back()
-      } else {
+      try {
+        const cachedEvent = await AsyncStorage.getItem(`offline_event_${id}`)
+        const cachedParticipants = await AsyncStorage.getItem(`offline_participants_${id}`)
+        if (cachedEvent && cachedParticipants) {
+          setEvent(JSON.parse(cachedEvent))
+          setParticipants(JSON.parse(cachedParticipants))
+          setIsOfflineMode(true)
+          Alert.alert('Offline Mode Active', 'Failed to reach the server. Loaded cached event and participant data instead.')
+        } else {
+          if (error.response?.status === 403) {
+            Alert.alert('Access Denied', 'You are not authorized to manage this event')
+            router.back()
+          } else {
+            Alert.alert('Error', 'Failed to load event details. No cached data available.')
+          }
+        }
+      } catch (cacheError) {
+        console.error('Cache read error:', cacheError)
         Alert.alert('Error', 'Failed to load event details')
       }
     } finally {
       setLoading(false)
       setRefreshing(false)
+    }
+  }
+
+  const loadOfflineData = async () => {
+    try {
+      const cachedQueue = await AsyncStorage.getItem(`offline_queue_${id}`)
+      if (cachedQueue) {
+        setOfflineQueue(JSON.parse(cachedQueue))
+      }
+    } catch (err) {
+      console.error('Error loading offline queue:', err)
+    }
+  }
+
+  const handleSyncOfflineCheckins = async () => {
+    if (offlineQueue.length === 0) return
+
+    setSyncingOffline(true)
+    try {
+      const response = await api.post('/tickets/bulk-verify', {
+        eventId: id,
+        ticketCodes: offlineQueue
+      })
+      
+      const successCount = response.data.successful
+      const failedCount = response.data.failed
+      
+      Alert.alert(
+        'Synchronization Complete',
+        `Successfully synced ${successCount} tickets.\nFailed tickets: ${failedCount}.`
+      )
+      
+      setOfflineQueue([])
+      await AsyncStorage.removeItem(`offline_queue_${id}`)
+      fetchEventDetails()
+    } catch (error: any) {
+      console.error('Error syncing check-ins:', error)
+      Alert.alert(
+        'Sync Failed',
+        error.response?.data?.message || 'Could not connect to the server to sync offline check-ins. Please try again when you have internet access.'
+      )
+    } finally {
+      setSyncingOffline(false)
+    }
+  }
+
+  const handleToggleOfflineMode = async (value: boolean) => {
+    if (value) {
+      try {
+        const cachedParticipants = await AsyncStorage.getItem(`offline_participants_${id}`)
+        if (!cachedParticipants || JSON.parse(cachedParticipants).length === 0) {
+          Alert.alert(
+            'Cache Unavailable',
+            'No cached participants found. Please connect to the internet and load the details page once to cache event data before enabling offline mode.',
+            [{ text: 'OK' }]
+          )
+          return
+        }
+        setIsOfflineMode(true)
+        Alert.alert('Offline Mode Active', 'You are now verifying tickets locally. Offline changes will need to be synced.')
+      } catch (err) {
+        console.error('Error enabling offline mode:', err)
+      }
+    } else {
+      setIsOfflineMode(false)
+      if (offlineQueue.length > 0) {
+        Alert.alert(
+          'Sync Required',
+          `You have ${offlineQueue.length} unsynced check-ins. Would you like to synchronize them now?`,
+          [
+            { text: 'Sync Now', onPress: () => handleSyncOfflineCheckins() },
+            { text: 'Cancel', style: 'cancel' }
+          ]
+        )
+      }
     }
   }
 
@@ -85,29 +204,74 @@ export default function ManageEvent() {
   }
 
   const handleVerifyTicket = async (code: string) => {
-    if (!code.trim()) {
+    const formattedCode = code.trim().toUpperCase()
+    if (!formattedCode) {
       Alert.alert('Error', 'Please enter a ticket code')
       return false
     }
 
     setVerifying(true)
     try {
-      const response = await api.post('/tickets/verify', {
-        eventId: id,
-        ticketCode: code.trim().toUpperCase()
-      })
-      
-      if (response.data.valid) {
-        Alert.alert('Success', response.data.message)
-        fetchEventDetails() // Refresh participants list
+      if (isOfflineMode) {
+        const participantIdx = participants.findIndex(p => p.ticketCode === formattedCode)
+        if (participantIdx === -1) {
+          Alert.alert('Invalid Ticket', 'Ticket code not found for this event.')
+          setVerifying(false)
+          return false
+        }
+
+        const participant = participants[participantIdx]
+        if (participant.status === 'used') {
+          Alert.alert('Invalid Ticket', 'Ticket has already been used.')
+          setVerifying(false)
+          return false
+        }
+
+        if (participant.status === 'cancelled') {
+          Alert.alert('Invalid Ticket', 'Ticket has been cancelled.')
+          setVerifying(false)
+          return false
+        }
+
+        const updatedParticipants = [...participants]
+        updatedParticipants[participantIdx] = {
+          ...participant,
+          status: 'used',
+          checkInTime: new Date().toISOString()
+        }
+        setParticipants(updatedParticipants)
+        await AsyncStorage.setItem(`offline_participants_${id}`, JSON.stringify(updatedParticipants))
+
+        const newQueue = [...offlineQueue, formattedCode]
+        setOfflineQueue(newQueue)
+        await AsyncStorage.setItem(`offline_queue_${id}`, JSON.stringify(newQueue))
+
+        Alert.alert('Success (Offline)', `Checked in ${participant.user?.firstName} ${participant.user?.lastName} offline.`)
+        
         setTicketCode('')
         setShowVerifyModal(false)
         setShowScanner(false)
         setScanned(false)
+        setVerifying(false)
         return true
       } else {
-        Alert.alert('Invalid Ticket', response.data.message)
-        return false
+        const response = await api.post('/tickets/verify', {
+          eventId: id,
+          ticketCode: formattedCode
+        })
+        
+        if (response.data.valid) {
+          Alert.alert('Success', response.data.message)
+          fetchEventDetails() // Refresh participants list
+          setTicketCode('')
+          setShowVerifyModal(false)
+          setShowScanner(false)
+          setScanned(false)
+          return true
+        } else {
+          Alert.alert('Invalid Ticket', response.data.message)
+          return false
+        }
       }
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to verify ticket')
@@ -159,6 +323,7 @@ export default function ManageEvent() {
 
   useEffect(() => {
     fetchEventDetails()
+    loadOfflineData()
   }, [id])
 
   if (loading) {
@@ -197,13 +362,48 @@ export default function ManageEvent() {
             <Ionicons name="calendar" size={60} color={COLORS.primary} />
           </View>
           <View className='absolute top-4 right-4'>
-            <View className={`px-3 py-1 rounded-full ${event.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}>
-              <Text className='text-white text-xs font-bold uppercase'>{event.status}</Text>
+            <View className={`px-3 py-1 rounded-full ${
+              event.status === 'active' 
+                ? 'bg-green-500' 
+                : event.status === 'pending_payment'
+                ? 'bg-amber-500'
+                : 'bg-red-500'
+            }`}>
+              <Text className='text-white text-xs font-bold uppercase'>
+                {event.status === 'pending_payment' ? 'pending payment' : event.status}
+              </Text>
             </View>
           </View>
         </View>
 
         <View className='p-4'>
+          {event.status === 'pending_payment' && (
+            <View className='bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 shadow-sm'>
+              <View className='flex-row items-center mb-2'>
+                <Ionicons name="warning" size={24} color="#d97706" />
+                <Text className='text-amber-800 font-bold text-lg ml-2'>Payment Required</Text>
+              </View>
+              <Text className='text-amber-700 mb-3 leading-5 font-semibold'>
+                This event is currently in pending payment status. You must pay the activation fee to publish this event and make it visible.
+                Please check your email inbox (including spam folder) for the payment link to complete this, or pay directly below.
+              </Text>
+              <TouchableOpacity 
+                className={`py-3 rounded-lg flex-row items-center justify-center ${paymentLoading ? 'bg-amber-300' : 'bg-amber-600'}`}
+                onPress={handlePayEvent}
+                disabled={paymentLoading}
+              >
+                {paymentLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Ionicons name="card" size={20} color="white" />
+                    <Text className='text-white font-bold ml-2'>Pay Creation Fee</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+
           <Text className='text-2xl font-bold text-black mb-2'>{event.title}</Text>
           
           <View className='flex-row items-center mb-2'>
@@ -221,6 +421,56 @@ export default function ManageEvent() {
           <View className='flex-row items-center mb-4'>
             <Ionicons name="location-outline" size={18} color={COLORS.secondary} />
             <Text className='text-gray-600 ml-2'>{event.location.venue}, {event.location.city}</Text>
+          </View>
+
+          {/* Offline Mode & Sync Banner */}
+          <View className='bg-gray-50 border border-gray-100 rounded-xl p-4 mb-4 shadow-sm'>
+            <View className='flex-row justify-between items-center'>
+              <View className='flex-row items-center'>
+                <Ionicons 
+                  name={isOfflineMode ? "cloud-offline" : "cloud-done"} 
+                  size={24} 
+                  color={isOfflineMode ? COLORS.secondary : "#10B981"} 
+                />
+                <View className='ml-3'>
+                  <Text className='font-bold text-black text-base'>Offline Verification</Text>
+                  <Text className='text-gray-500 text-xs'>
+                    {isOfflineMode ? 'Verifying locally using cache' : 'Verifying with server in real-time'}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={isOfflineMode}
+                onValueChange={handleToggleOfflineMode}
+                trackColor={{ false: '#D1D5DB', true: COLORS.primary }}
+                thumbColor={isOfflineMode ? '#FFFFFF' : '#F3F4F6'}
+              />
+            </View>
+
+            {offlineQueue.length > 0 && (
+              <View className='mt-3 pt-3 border-t border-gray-200/80 flex-row justify-between items-center'>
+                <View className='flex-row items-center'>
+                  <Ionicons name="sync" size={20} color="#F59E0B" />
+                  <Text className='text-orange-700 font-semibold text-sm ml-2'>
+                    {offlineQueue.length} check-in{offlineQueue.length > 1 ? 's' : ''} pending sync
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className={`px-4 py-2 rounded-lg flex-row items-center ${syncingOffline ? 'bg-orange-200' : 'bg-orange-500'}`}
+                  onPress={handleSyncOfflineCheckins}
+                  disabled={syncingOffline}
+                >
+                  {syncingOffline ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Ionicons name="cloud-upload-outline" size={16} color="white" />
+                      <Text className='text-white font-bold text-xs ml-1.5'>Sync Now</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
           {/* Stats Cards */}

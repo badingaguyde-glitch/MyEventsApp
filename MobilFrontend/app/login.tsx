@@ -91,7 +91,7 @@ export default function Login() {
         interests: formData.interests.split(',').map(i => i.trim()).filter(i => i),
       })
       
-      router.replace('/(tabs)' as any)
+      router.replace('/(tabs)/Home' as any)
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Registration failed')
     } finally {
@@ -109,7 +109,7 @@ export default function Login() {
     setLoading(true)
     try {
       await login(formData.email, formData.password)
-      router.replace('/(tabs)' as any)
+      router.replace('/(tabs)/Home' as any)
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Authentication failed')
     } finally {

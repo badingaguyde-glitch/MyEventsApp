@@ -190,3 +190,20 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   return R * c;
 };
 
+import { Platform } from 'react-native';
+
+export const resolveEventImage = (imagePath: string): string => {
+  if (!imagePath || imagePath === 'default-event.jpg') {
+    return "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=600";
+  }
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  const baseUploadsUrl = Platform.select({
+    android: "http://10.0.2.2:5000/uploads",
+    ios: "http://localhost:5000/uploads",
+    default: "http://localhost:5000/uploads"
+  });
+  return `${baseUploadsUrl}/${imagePath}`;
+};
+

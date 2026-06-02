@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
 import Header from '@/Components/Header'
 import api from '@/assets/constants/api'
-import { Event, COLORS } from '@/assets/constants'
+import { Event, COLORS, resolveEventImage } from '@/assets/constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAuth } from '@/context/AuthContext'
 
@@ -46,8 +46,27 @@ export default function EventDetails() {
 
     setBuying(true)
     try {
-      await api.post('/tickets', { eventId: id, price: event?.price })
-      Alert.alert('Success', 'Ticket purchased successfully!')
+      const response = await api.post('/tickets', { 
+        eventId: id, 
+        price: event?.price,
+        userId: user.id || user._id
+      })
+      if (response.data.stripeUrl) {
+        Alert.alert(
+          'Payment Required',
+          'We will open Stripe to complete your ticket purchase. Please check your email inbox (including spam folder) for the payment link to complete this if you need to pay later.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                Linking.openURL(response.data.stripeUrl)
+              }
+            }
+          ]
+        )
+      } else {
+        Alert.alert('Success', 'Ticket purchased successfully!')
+      }
       fetchEventDetails() // Refresh to update available spots
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to purchase ticket')
@@ -94,7 +113,7 @@ export default function EventDetails() {
       <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
         {/* Event Image */}
         <Image 
-          source={{ uri: event.image }}
+          source={{ uri: resolveEventImage(event.image) }}
           className='w-full h-64'
           style={{ resizeMode: 'cover' }}
         />
