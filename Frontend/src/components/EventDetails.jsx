@@ -45,7 +45,7 @@ const EventDetails = () => {
 
         try {
             
-            const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id }, user.token);
+            const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id || user.id, clientType: 'web' }, user.token);
             if (response.data && response.data.stripeUrl) {
                 window.location.href = response.data.stripeUrl;
             } else {
@@ -71,7 +71,7 @@ const EventDetails = () => {
             >
                 <div className="h-64 sm:h-80 md:h-[450px] relative">
                     <img
-                        src={event.image?.startsWith('http') ? event.image : `http://localhost:5000/uploads/${event.image || 'default.jpg'}`}
+                        src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/uploads/${event.image || 'default.jpg'}`}
                         alt={event.title}
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200' }}

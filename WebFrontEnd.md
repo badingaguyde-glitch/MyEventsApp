@@ -1,6 +1,6 @@
 # Web Frontend Görev Dağılımı
 
-**Web Frontend Adresi:** [frontend.yazmuh.com](https://frontend.yazmuh.com)
+**Web Frontend Adresi (Vercel):** [my-events-app-xi.vercel.app](https://my-events-app-xi.vercel.app)
 
 Bu dokümanda, web uygulamasının kullanıcı arayüzü (UI) ve kullanıcı deneyimi (UX) görevleri listelenmektedir. Her grup üyesi, kendisine atanan sayfaların tasarımı, implementasyonu ve kullanıcı etkileşimlerinden sorumludur.
 
@@ -97,3 +97,14 @@ Bu dokümanda, web uygulamasının kullanıcı arayüzü (UI) ve kullanıcı den
 - **Environment Variables:** .env files
 - **CI/CD:** GitHub Actions, GitLab CI, Jenkins
 - **Hosting:** Vercel, Netlify, AWS, Azure
+
+---
+
+## Eklemeler (Canlı Ortamda Bulunmayan Değişiklikler)
+
+> [!WARNING]
+> Bu bölümdeki değişiklikler yerel geliştirme ve test ortamı (Docker/tünel bağlantıları) için yapılmış olup, henüz Vercel üzerindeki canlı web sunucusunda (`https://my-events-app-xi.vercel.app`) aktif değildir.
+
+### 1. Yerel API Bağlantısı ve CORS Düzeltmeleri
+- **Dinamik API Base URL:** [EventServices.jsx](file:///c:/Users/HP-PC/OneDrive/Bureau/projects/MyEventsApp/Frontend/src/services/EventServices.jsx) dosyasında API bağlantı adresi dinamik hale getirilmiştir. `import.meta.env.VITE_API_BASE_URL` ortam değişkeni boş olduğunda sistem otomatik olarak yerel API adresine (`http://localhost:5000/api`) yönlenir, böylece yerel geliştirmedeki CORS hataları önlenir.
+- **Yerel Görsel Yüklemeleri Fallback'i:** [EventCard.jsx](file:///c:/Users/HP-PC/OneDrive/Bureau/projects/MyEventsApp/Frontend/src/components/EventCard.jsx) ve [EventDetails.jsx](file:///c:/Users/HP-PC/OneDrive/Bureau/projects/MyEventsApp/Frontend/src/components/EventDetails.jsx) bileşenlerinde, yerel olarak yüklenen etkinlik görsellerinin doğru görüntülenebilmesi için `http://localhost:5000` adresine fallback bağlantısı eklenmiştir.

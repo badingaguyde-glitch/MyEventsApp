@@ -60,6 +60,7 @@ const CreateEvents = () => {
       data.append("location[venue]", formData.venue);
       data.append("coordinates[0]", formData.longitude || 0);
       data.append("coordinates[1]", formData.latitude || 0);
+      data.append("clientType", "web");
 
       if (formData.image) {
         data.append("image", formData.image);

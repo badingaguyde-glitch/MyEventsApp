@@ -58,6 +58,18 @@ const MyTickets = () => {
                 </div>
             )}
 
+            {tickets.some(t => t.status === 'pending_payment') && (
+                <div className="p-4 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-start gap-3 text-sm">
+                    <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                    <div>
+                        <h4 className="font-bold text-amber-300">Action Required: Pending Payments</h4>
+                        <p className="mt-1 text-xs">
+                            You have one or more tickets in pending payment status. Please check your emails (including spam) to complete the payment for these tickets to activate them.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {tickets.map((ticket, index) => (
                     <TicketCard key={ticket._id} ticket={ticket} index={index} onCancel={handleCancel} />
