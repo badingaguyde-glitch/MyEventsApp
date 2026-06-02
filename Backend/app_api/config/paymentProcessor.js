@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Event = require('../models/Event');
 const Ticket = require('../models/Ticket');
 const client = require('./redis');
+const cache = require('../middleware/cache');
 const { publishToQueue } = require('./rabbitmq');
 
 const Queue = 'payment_queue';
@@ -32,10 +33,14 @@ async function processPaymentEvent(msg) {
 
             if (ticket) {
                 // 2. Vider les caches Redis
-                await client.del('tickets');
-                await client.del('user_tickets');
-                await client.del('ticket_availability');
-                await client.del(`ticket_by_code_${ticket.event}`);
+                await cache.clearPattern('tickets_*');
+                await cache.clearPattern(`user_tickets_${metadata.userId}`);
+                await cache.clearPattern('ticket_availability_*');
+                await cache.clearPattern(`ticket_by_code_*${ticket.event}*`);
+                await cache.clearPattern('events_*');
+                await cache.clearPattern('category_events_*');
+                await cache.clearPattern('nearby_events_*');
+                await cache.clearPattern(`event_details_*${ticket.event}*`);
 
                 // 3. Envoyer l'email
                 publishToQueue('email_queue', {
@@ -73,10 +78,11 @@ async function processPaymentEvent(msg) {
 
             if (event) {
                 // 2. Vider les caches Redis
-                await client.del('events');
-                await client.del('category_events');
-                await client.del('nearby_events');
-                await client.del(`my_events_${metadata.userId}`);
+                await cache.clearPattern('events_*');
+                await cache.clearPattern('category_events_*');
+                await cache.clearPattern('nearby_events_*');
+                await cache.clearPattern(`my_events_${metadata.userId}`);
+                await cache.clearPattern(`event_details_*${eventId}*`);
 
                 // 3. Envoyer l'email
                 publishToQueue('email_queue', {

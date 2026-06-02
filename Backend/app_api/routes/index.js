@@ -3,6 +3,7 @@ var router = express.Router();
 var ctrlEvent = require('../controller/EventControllers');
 var ctrlTicket = require('../controller/TicketControllers');
 var ctrlUser = require('../controller/UserControllers');
+var ctrlPayment = require('../controller/PaymentControllers');
 var cache = require('../middleware/cache');
 
 
@@ -46,7 +47,7 @@ router.route('/events/category')
 
 
 router.route('/events/mine')
-    .get(ctrlUser.requireAuth, cache((req) => `my_events_${req.user._id}`, 60), ctrlEvent.getMyEvents);
+    .get(ctrlUser.requireAuth, cache((req) => `my_events_${req.user.id}`, 60), ctrlEvent.getMyEvents);
 
 
 
@@ -56,6 +57,9 @@ router.route('/events/:eventid')
     .put(ctrlUser.requireAuth, ctrlEvent.upload.single("image"), ctrlEvent.updateEvent)
     .delete(ctrlUser.requireAuth, ctrlEvent.deleteEvent);
 
+router.route('/events/:eventid/pay')
+    .post(ctrlUser.requireAuth, ctrlEvent.payEvent);
+
 router.route('/events/:eventid/participants')
     .get(ctrlUser.requireAuth, cache('event_participants', 60), ctrlEvent.getEventParticipants);
 
@@ -64,7 +68,7 @@ router.route('/events/:eventid/participants')
 
 router.route('/tickets')
     .post(ctrlUser.requireAuth, ctrlTicket.buyTicket)
-    .get(ctrlUser.requireAuth, cache('user_tickets', 60), ctrlTicket.getUserTickets);
+    .get(ctrlUser.requireAuth, cache((req) => `user_tickets_${req.user.id}`, 60), ctrlTicket.getUserTickets);
 
 router.route('/tickets/verify')
     .post(ctrlUser.requireAuth, ctrlTicket.verifyTicket);
@@ -80,6 +84,12 @@ router.route('/tickets/code/:code')
     .get(cache('ticket_by_code', 60), ctrlUser.requireAuth, ctrlTicket.getTicketByCode);
 
 router.route('/tickets/:ticketid')
-    .delete(cache('ticket_details', 60), ctrlUser.requireAuth, ctrlTicket.cancelTicket);
+    .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
+
+router.route('/payment/success')
+    .get(ctrlPayment.paymentSuccess);
+
+router.route('/payment/cancel')
+    .get(ctrlPayment.paymentCancel);
 
 module.exports = router;

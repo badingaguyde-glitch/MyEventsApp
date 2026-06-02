@@ -41,6 +41,21 @@ const MyEvents = () => {
         }
     };
 
+    const handlePay = async (id) => {
+        try {
+            setMessage({ text: 'Generating payment session...', type: 'success' });
+            const res = await EventService.payEvent(id, user.token);
+            if (res.data && res.data.stripeUrl) {
+                window.location.href = res.data.stripeUrl;
+            } else {
+                setMessage({ text: 'Event activated successfully!', type: 'success' });
+                fetchMyEvents();
+            }
+        } catch (err) {
+            setMessage({ text: err.response?.data?.message || 'Failed to initiate payment.', type: 'error' });
+        }
+    };
+
     if (loading) return <Loader message="Loading your events..." />;
 
     return (
@@ -60,6 +75,18 @@ const MyEvents = () => {
                 </div>
             )}
 
+            {events.some(e => e.status === 'pending_payment') && (
+                <div className="p-4 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-start gap-3 text-sm">
+                    <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                    <div>
+                        <h4 className="font-bold text-amber-300">Action Required: Unpaid Activation Fees</h4>
+                        <p className="mt-1 text-xs">
+                            One or more of your hosted events require an activation fee. Please check your emails (including spam) for the payment link to publish your events, or click "Pay Activation Fee" on the event card below.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {events.map((event, index) => (
                     <motion.div
@@ -72,9 +99,14 @@ const MyEvents = () => {
                         <div className="p-6 space-y-6">
                             <div className="flex justify-between items-start gap-3">
                                 <h3 className="text-xl font-bold truncate min-w-0">{event.title}</h3>
-                                <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest shrink-0 ${event.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
-                                    }`}>
-                                    {event.status}
+                                <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest shrink-0 ${
+                                    event.status === 'active' 
+                                        ? 'bg-emerald-500/10 text-emerald-400' 
+                                        : event.status === 'pending_payment'
+                                        ? 'bg-amber-500/10 text-amber-400'
+                                        : 'bg-rose-500/10 text-rose-400'
+                                }`}>
+                                    {event.status === 'pending_payment' ? 'pending payment' : event.status}
                                 </div>
                             </div>
 
@@ -86,6 +118,21 @@ const MyEvents = () => {
                                 </p>
                                 <p className="flex items-center gap-2"><Users size={14} className="text-primary" /> {event.soldTickets || 0} / {event.capacity} Spots Filled</p>
                             </div>
+
+                            {event.status === 'pending_payment' && (
+                                <div className="space-y-3 mt-4">
+                                    <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-semibold flex items-start gap-2">
+                                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                                        <span>Activation fee pending. Please check your email (including spam) to complete the payment, or pay directly below.</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePay(event._id)}
+                                        className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition-all uppercase tracking-widest cursor-pointer border-none flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10"
+                                    >
+                                        💳 Pay Activation Fee
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="pt-6 flex flex-wrap sm:flex-nowrap items-center justify-between border-b-none border-light border-t gap-3">
                                 <div className="flex gap-2 w-full sm:w-auto overflow-x-auto">

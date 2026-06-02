@@ -11,12 +11,15 @@ require('./app_api/models/db');
 // Lancement des Workers RabbitMQ en arrière-plan
 require('./app_api/config/mailSender');
 require('./app_api/config/paymentProcessor');
+require('./app_api/config/cleanupProcessor');
 
 var apiRouter = require('./app_api/routes/index');
 
 var cors = require('cors');
 
 var app = express();
+
+app.set('trust proxy', true);
 
 app.use(logger('dev'));
 app.use(cors());

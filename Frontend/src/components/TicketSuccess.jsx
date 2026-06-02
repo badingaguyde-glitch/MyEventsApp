@@ -23,7 +23,7 @@ const TicketSuccess = () => {
                 <div className="space-y-3">
                     <h1 className="text-3xl font-black text-white">Payment Successful!</h1>
                     <p className="text-slate-400 font-medium leading-relaxed">
-                        Your transaction was completed successfully. We're processing your ticket and you will receive an email confirmation with your QR code shortly.
+                        Your transaction was completed successfully. We're processing your ticket. Please check your email inbox (including spam folder) for your confirmation email with the ticket QR code shortly.
                     </p>
                 </div>
 

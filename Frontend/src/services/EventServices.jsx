@@ -8,7 +8,9 @@ const getEventById = (id) => {
     return http.get(`/events/${id}`);
 };
 
-const BASE_URL = "https://my-events-app-backend.vercel.app/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL 
+    ? `${import.meta.env.VITE_API_BASE_URL}/api` 
+    : "http://localhost:5000/api";
 
 const createEvent = async (data, token) => {
     const response = await fetch(`${BASE_URL}/events`, {
@@ -71,6 +73,12 @@ const getEventParticipants = (id, token) => {
     });
 };
 
+const payEvent = (id, token) => {
+    return http.post(`/events/${id}/pay`, { clientType: 'web' }, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const EventService = {
     getAllEvents,
     getEventById,
@@ -81,7 +89,8 @@ const EventService = {
     getNearbyEvents,
     filterByCategory,
     getMyEvents,
-    getEventParticipants
+    getEventParticipants,
+    payEvent
 };
 
 export default EventService;

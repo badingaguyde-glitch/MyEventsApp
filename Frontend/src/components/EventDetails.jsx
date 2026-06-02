@@ -45,7 +45,7 @@ const EventDetails = () => {
 
         try {
             
-            const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id }, user.token);
+            const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id || user.id, clientType: 'web' }, user.token);
             if (response.data && response.data.stripeUrl) {
                 window.location.href = response.data.stripeUrl;
             } else {

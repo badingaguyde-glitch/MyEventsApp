@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Trash2, CheckCircle2 } from 'lucide-react';
+import { Calendar, MapPin, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const TicketCard = ({ ticket, index, onCancel }) => {
     return (
@@ -14,8 +14,14 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                 <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-primary shrink-0" />
-                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest truncate">Confirmed Ticket</span>
+                            {ticket.status === 'pending_payment' ? (
+                                <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                            ) : (
+                                <CheckCircle2 size={16} className="text-primary shrink-0" />
+                            )}
+                            <span className={`text-[10px] font-bold uppercase tracking-widest truncate ${ticket.status === 'pending_payment' ? 'text-amber-500' : 'text-primary'}`}>
+                                {ticket.status === 'pending_payment' ? 'Pending Payment' : 'Confirmed Ticket'}
+                            </span>
                         </div>
                         <h3 className="text-lg md:text-xl font-bold truncate">{ticket.event?.title}</h3>
                     </div>
@@ -44,6 +50,13 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                         </div>
                     </div>
                 </div>
+
+                {ticket.status === 'pending_payment' && (
+                    <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-semibold flex items-start gap-2">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        <span>Payment pending. Please check your email (including spam) to complete the payment for this ticket.</span>
+                    </div>
+                )}
 
                 <div className="pt-6 border-b border-t-dashed flex flex-wrap sm:flex-nowrap justify-between items-end gap-4 border-b-none">
                     <div className="min-w-0">

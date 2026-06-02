@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import TicketService from '../services/TicketServices';
+import EventService from '../services/EventServices';
 import { motion } from 'framer-motion';
 import { QrCode, Search, CheckCircle2, XCircle, AlertCircle, User, Calendar } from 'lucide-react';
 
@@ -10,17 +11,41 @@ const VerifyTicket = () => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [message, setMessage] = useState({ text: '', type: '' });
+    const [events, setEvents] = useState([]);
+    const [selectedEventId, setSelectedEventId] = useState('');
+    const [loadingEvents, setLoadingEvents] = useState(true);
+
+    useEffect(() => {
+        if (user?.token) {
+            fetchOrganizerEvents();
+        }
+    }, [user]);
+
+    const fetchOrganizerEvents = async () => {
+        try {
+            const res = await EventService.getMyEvents(user.token);
+            const userEvents = Array.isArray(res.data) ? res.data : [];
+            setEvents(userEvents);
+            if (userEvents.length > 0) {
+                setSelectedEventId(userEvents[0]._id);
+            }
+        } catch (err) {
+            console.error('Failed to load events for verification:', err);
+        } finally {
+            setLoadingEvents(false);
+        }
+    };
 
     const handleVerify = async (e) => {
         e.preventDefault();
-        if (!ticketCode.trim()) return;
+        if (!ticketCode.trim() || !selectedEventId) return;
 
         setLoading(true);
         setResult(null);
         setMessage({ text: '', type: '' });
 
         try {
-            const res = await TicketService.verifyTicket({ ticketCode }, user.token);
+            const res = await TicketService.verifyTicket({ ticketCode, eventId: selectedEventId }, user.token);
             setResult(res.data);
             setMessage({ text: 'Ticket verified successfully!', type: 'success' });
         } catch (err) {
@@ -50,6 +75,31 @@ const VerifyTicket = () => {
             >
                 <form onSubmit={handleVerify} className="space-y-10">
                     <div>
+                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Select Event to Verify</label>
+                        {loadingEvents ? (
+                            <div className="text-slate-400 text-xs font-bold animate-pulse">Loading events...</div>
+                        ) : events.length === 0 ? (
+                            <div className="p-4 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20 text-xs font-bold flex items-center gap-3">
+                                <AlertCircle size={18} />
+                                You have not created any active events yet.
+                            </div>
+                        ) : (
+                            <select 
+                                value={selectedEventId}
+                                onChange={(e) => setSelectedEventId(e.target.value)}
+                                className="input h-18 text-base font-bold bg-white/[0.03] border-white/10 text-white focus:bg-white/[0.05] w-full px-4 rounded-xl cursor-pointer"
+                                style={{ colorScheme: 'dark' }}
+                            >
+                                {events.map(ev => (
+                                    <option key={ev._id} value={ev._id} className="bg-slate-900 text-white">
+                                        {ev.title} ({new Date(ev.date).toLocaleDateString()})
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+
+                    <div>
                         <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Secure Ticket Reference</label>
                         <div className="relative group">
                             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary group-focus-within:scale-110 transition-transform" size={24} />
@@ -59,13 +109,14 @@ const VerifyTicket = () => {
                                 placeholder="E.G. TKT-7382-XXXX"
                                 value={ticketCode}
                                 onChange={(e) => setTicketCode(e.target.value.toUpperCase())}
+                                disabled={events.length === 0}
                             />
                         </div>
                     </div>
 
                     <button 
                         type="submit"
-                        disabled={loading || !ticketCode.trim()}
+                        disabled={loading || !ticketCode.trim() || !selectedEventId}
                         className="btn-primary w-full py-6 text-sm uppercase tracking-[0.3em] font-black shadow-xl shadow-primary/20"
                     >
                         {loading ? 'Authenticating...' : 'Authorize Access'}

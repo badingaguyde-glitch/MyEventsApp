@@ -3,6 +3,7 @@ var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
 var client = require('../config/redis');
+var cache = require('../middleware/cache');
 require('dotenv').config();
 var calculateDistance = require('./utils/calculate');
 const { publishToQueue } = require('../config/rabbitmq');
@@ -12,7 +13,7 @@ const createEvent = async (req, res) => {
     try {
         const {
             title, description, category, date, time,
-            location, capacity, price, coordinates
+            location, capacity, price, coordinates, clientType
         } = req.body;
 
         if (!title || !description || !category || !date || !time || !location || !capacity) {
@@ -42,6 +43,19 @@ const createEvent = async (req, res) => {
         // Montant de la commission depuis les variables d'environnement (par défaut 500 centimes = 5€)
         const feeAmount = process.env.EVENT_CREATION_FEE ? parseInt(process.env.EVENT_CREATION_FEE) : 500;
 
+        if (feeAmount === 0) {
+            event.status = 'active';
+            await event.save();
+            await cache.clearPattern('events_*');
+            await cache.clearPattern('category_events_*');
+            await cache.clearPattern('nearby_events_*');
+            await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
+            return res.status(201).json({
+                message: "Événement créé avec succès",
+                event: event
+            });
+        }
+
         // On appelle le contrôleur Stripe pour créer la session
         const { createCheckoutSession } = require('./PaymentControllers');
 
@@ -58,20 +72,41 @@ const createEvent = async (req, res) => {
                     userId: req.user.id.toString(),
                     userEmail: req.user.email,
                     userName: req.user.name,
-                    userLastName: req.user.lastName
+                    userLastName: req.user.lastName,
+                    clientType: clientType || 'mobile'
                 },
-                successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/events/success`,
-                cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/events/cancel`
+                successUrl: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'mobile'}`,
+                cancelUrl: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'mobile'}`
             }
         };
 
         const stripeRes = {
             status: (code) => ({
-                json: (data) => res.status(201).json({
-                    message: "Événement en attente de paiement",
-                    event: event,
-                    stripeUrl: data.url // On renvoie l'URL de paiement au front
-                })
+                json: (data) => {
+                    if (code !== 200) {
+                        return res.status(code).json({
+                            message: "Stripe error during event creation",
+                            error: data.error || data.message
+                        });
+                    }
+                    publishToQueue('email_queue', {
+                        type: 'event_pending_email',
+                        user: {
+                            name: req.user.name,
+                            lastName: req.user.lastName,
+                            email: req.user.email
+                        },
+                        event: {
+                            title: event.title
+                        },
+                        receiptUrl: data.url
+                    });
+                    return res.status(201).json({
+                        message: "Événement en attente de paiement",
+                        event: event,
+                        stripeUrl: data.url // On renvoie l'URL de paiement au front
+                    });
+                }
             })
         };
 
@@ -372,7 +407,8 @@ const updateEvent = async (req, res) => {
         }
 
 
-        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+        const organizerId = event.organizer && event.organizer._id ? event.organizer._id.toString() : event.organizer.toString();
+        if (organizerId !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to update this event'
             });
@@ -413,10 +449,11 @@ const updateEvent = async (req, res) => {
 
         const updatedEvent = await event.populate('organizer', 'name lastName email');
         await event.save();
-        await client.del('events'); // Clear the events cache
-        await client.del('category_events'); // Clear the category events cache
-        await client.del('nearby_events');
-        await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
+        await cache.clearPattern('events_*');
+        await cache.clearPattern('category_events_*');
+        await cache.clearPattern('nearby_events_*');
+        await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
+        await cache.clearPattern(`event_details_*${event._id}*`);
 
         publishToQueue('email_queue', {
             type: 'event_updated_email',
@@ -467,14 +504,15 @@ const deleteEvent = async (req, res) => {
                 { event: event._id, status: 'active' },
                 { status: 'cancelled' }
             );
-            await client.del('tickets'); // Clear the tickets cache
-            await client.del('user_tickets'); // Clear the user's tickets cache
-            await client.del('ticket_availability'); // Clear the ticket availability cache
-            await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
-            await client.del('events'); // Clear the events cache
-            await client.del('category_events'); // Clear the category events cache
-            await client.del('nearby_events'); // Clear the nearby events cache
-            await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
+            await cache.clearPattern('tickets_*');
+            await cache.clearPattern('user_tickets_*');
+            await cache.clearPattern('ticket_availability_*');
+            await cache.clearPattern(`ticket_by_code_*${event._id}*`);
+            await cache.clearPattern('events_*');
+            await cache.clearPattern('category_events_*');
+            await cache.clearPattern('nearby_events_*');
+            await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
+            await cache.clearPattern(`event_details_*${event._id}*`);
 
             event.status = 'cancelled';
             await event.save();
@@ -485,14 +523,15 @@ const deleteEvent = async (req, res) => {
         } else if (req.user.role === 'admin') {
             await Ticket.deleteMany({ event: event._id });
             await event.deleteOne();
-            await client.del('tickets'); // Clear the tickets cache
-            await client.del('user_tickets'); // Clear the user's tickets cache
-            await client.del('ticket_availability'); // Clear the ticket availability cache
-            await client.del(`ticket_by_code_${event._id}`); // Clear the ticket by code cache for this event
-            await client.del('events'); // Clear the events cache
-            await client.del('category_events'); // Clear the category events cache
-            await client.del('nearby_events'); // Clear the nearby events cache
-            await client.del(`my_events_${req.user._id}`); // Clear the user's events cache
+            await cache.clearPattern('tickets_*');
+            await cache.clearPattern('user_tickets_*');
+            await cache.clearPattern('ticket_availability_*');
+            await cache.clearPattern(`ticket_by_code_*${event._id}*`);
+            await cache.clearPattern('events_*');
+            await cache.clearPattern('category_events_*');
+            await cache.clearPattern('nearby_events_*');
+            await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
+            await cache.clearPattern(`event_details_*${event._id}*`);
             res.json({ message: 'Event and associated tickets deleted successfully' });
         }
 
@@ -614,6 +653,97 @@ const getEventParticipants = async (req, res) => {
     }
 };
 
+const payEvent = async (req, res) => {
+    try {
+        const { clientType } = req.body;
+        const event = await Event.findById(req.params.eventid);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        if (event.status !== 'pending_payment') {
+            return res.status(400).json({ message: 'This event is not pending payment' });
+        }
+
+        const feeAmount = process.env.EVENT_CREATION_FEE ? parseInt(process.env.EVENT_CREATION_FEE) : 500;
+
+        if (feeAmount === 0) {
+            event.status = 'active';
+            await event.save();
+            await cache.clearPattern('events_*');
+            await cache.clearPattern('category_events_*');
+            await cache.clearPattern('nearby_events_*');
+            await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
+            await cache.clearPattern(`event_details_*${event._id}*`);
+            return res.status(200).json({
+                message: "Événement activé avec succès",
+                event: event
+            });
+        }
+
+        const { createCheckoutSession } = require('./PaymentControllers');
+
+        const stripeReq = {
+            body: {
+                amount: feeAmount,
+                currency: 'eur',
+                name: `Commission de création: ${event.title}`,
+                description: 'Frais de mise en ligne de votre événement sur BANTU MyEvents',
+                metadata: {
+                    type: 'event_commission',
+                    eventId: event._id.toString(),
+                    userId: req.user.id.toString(),
+                    userEmail: req.user.email,
+                    userName: req.user.name,
+                    userLastName: req.user.lastName,
+                    clientType: clientType || 'mobile'
+                },
+                successUrl: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'mobile'}`,
+                cancelUrl: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'mobile'}`
+            }
+        };
+
+        const stripeRes = {
+            status: (code) => ({
+                json: (data) => {
+                    if (code !== 200) {
+                        return res.status(code).json({
+                            message: "Stripe error during event payment generation",
+                            error: data.error || data.message
+                        });
+                    }
+                    publishToQueue('email_queue', {
+                        type: 'event_pending_email',
+                        user: {
+                            name: req.user.name,
+                            lastName: req.user.lastName,
+                            email: req.user.email
+                        },
+                        event: {
+                            title: event.title
+                        },
+                        receiptUrl: data.url
+                    });
+                    return res.status(200).json({
+                        message: "Session de paiement créée",
+                        stripeUrl: data.url
+                    });
+                }
+            })
+        };
+
+        await createCheckoutSession(stripeReq, stripeRes);
+
+    } catch (error) {
+        console.error('Pay event error:', error);
+        res.status(500).json({ message: 'Server error during payment generation', error: error.message });
+    }
+};
+
 module.exports = {
     createEvent,
     getAllEvents,
@@ -625,5 +755,6 @@ module.exports = {
     deleteEvent,
     getMyEvents,
     getEventParticipants,
+    payEvent,
     upload
 };

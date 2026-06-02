@@ -51,7 +51,7 @@ const Profile = () => {
     const handleDeleteAccount = async () => {
         setDeleting(true);
         try {
-            await UserDataService.deleteUser(user._id, user.token);
+            await UserDataService.deleteUser(user._id || user.id, user.token);
             dispatch(logout());
             navigate('/');
         } catch (err) {
