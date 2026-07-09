@@ -2,28 +2,42 @@ const client = require('../config/redis');
 
 const cache = (keyFn, ttl = 60) => {
     return async (req, res, next) => {
+        // Si le client Redis n'est pas connecté, on ignore le cache et on continue normalement
+        if (!client.isOpen) {
+            return next();
+        }
 
         const key = typeof keyFn === "function"
             ? keyFn(req)
             : `${keyFn}_${req.originalUrl}`;
 
-        const data = await client.get(key);
+        try {
+            const data = await client.get(key);
 
-        if (data) {
-            console.log('cache hit for key:', key);
-            return res.json(JSON.parse(data));
+            if (data) {
+                console.log('cache hit for key:', key);
+                return res.json(JSON.parse(data));
+            }
+
+            const originalJson = res.json.bind(res);
+
+            res.json = async (body) => {
+                try {
+                    if (client.isOpen) {
+                        await client.setEx(key, ttl, JSON.stringify(body));
+                        console.log(`cache miss for key: ${key}`);
+                    }
+                } catch (cacheErr) {
+                    console.error(`Failed to write to cache for key ${key}:`, cacheErr.message);
+                }
+                return originalJson(body);
+            };
+
+            next();
+        } catch (err) {
+            console.error(`Cache read error for key ${key}:`, err.message);
+            next(); // Si la lecture échoue, on continue sans planter
         }
-
-        const originalJson = res.json.bind(res);
-
-        res.json = async (body) => {
-            await client.setEx(key, ttl, JSON.stringify(body));
-
-            console.log(`cache miss for key: ${key}`);
-            return originalJson(body);
-        };
-
-        next();
     };
 };
 
