@@ -20,6 +20,15 @@ router.route('/user/generate-code')
 router.route('/user/verify-code')
     .post(ctrlUser.checkEmail);
 
+router.route('/user/forgot-password')
+    .post(ctrlUser.forgotPassword);
+
+router.route('/user/verify-reset-code')
+    .post(ctrlUser.verifyResetCode);
+
+router.route('/user/reset-password')
+    .post(ctrlUser.resetPassword);
+
 router.route('/user/login')
     .post(ctrlUser.login);
 

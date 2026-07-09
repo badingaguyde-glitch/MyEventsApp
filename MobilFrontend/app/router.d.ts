@@ -11,6 +11,9 @@ declare module 'expo-router' {
       | '/profile'
       | '/login'
       | '/register'
+      | '/forgot-password'
+      | '/reset-password'
+      | '/new-password'
       | `/event/${string}`
       | `/ticket/${string}`
       | '/modal/event';

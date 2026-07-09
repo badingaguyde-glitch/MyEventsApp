@@ -28,13 +28,28 @@ const deleteUser = (id, token) => {
     });
 };
 
+const forgotPassword = (data) => {
+    return http.post("/user/forgot-password", data);
+};
+
+const verifyResetCode = (data) => {
+    return http.post("/user/verify-reset-code", data);
+};
+
+const resetPassword = (data) => {
+    return http.post("/user/reset-password", data);
+};
+
 const UserDataService = {
     generateCode,
     verifyCode,
     register,
     login,
     updateProfile,
-    deleteUser
+    deleteUser,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword
 };
 
 export default UserDataService;

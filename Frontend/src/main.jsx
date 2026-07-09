@@ -1,6 +1,9 @@
 import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import NewPassword from './components/NewPassword';
 import EventList from './components/EventList';
 import EventDetails from './components/EventDetails';
 import CreateEvent from './components/CreateEvents';
@@ -40,6 +43,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="search" element={<EventSearch />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+            <Route path="new-password" element={<NewPassword />} />
             <Route path="events" element={<EventList />} />
             <Route path="events/:id" element={<EventDetails />} />
             <Route path="create-event" element={<CreateEvent />} />
