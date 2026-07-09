@@ -208,6 +208,24 @@ async function handleMessage(msg) {
             `),
             attachments: [LOGO_ATTACHMENT]
         });
+    } else if (type === 'reset_password_code_email') {
+        await sendEmail({
+            to: email,
+            subject: 'Réinitialisation de votre mot de passe',
+            html: emailWrapper(`
+                <h1>Réinitialisation de mot de passe</h1>
+                <p>Bonjour,</p>
+                <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte <span class="highlight">BANTU MyEvents</span>.</p>
+                <p>Veuillez utiliser le code ci-dessous pour procéder au changement :</p>
+                
+                <div class="code-display">
+                    ${code}
+                </div>
+                
+                <p>Ce code est valide pendant <span class="highlight">10 minutes</span>. Si vous n'avez pas demandé ce changement, vous pouvez ignorer cet e-mail en toute sécurité.</p>
+            `),
+            attachments: [LOGO_ATTACHMENT]
+        });
     } else if (type === 'ticket_pending_email') {
         const timeoutHours = process.env.PAYMENT_TIMEOUT_HOURS || 2;
         await sendEmail({

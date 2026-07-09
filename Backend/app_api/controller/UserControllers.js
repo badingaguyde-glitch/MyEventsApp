@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 const { publishToQueue } = require('../config/rabbitmq');
 
 const verificationCodes = new Map();
+const resetPasswordCodes = new Map();
+
 
 const generateRegistrationCode = async (req, res) => {
     try {
@@ -249,6 +251,103 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        resetPasswordCodes.set(email, {
+            code,
+            expiresAt: Date.now() + 10 * 60 * 1000
+        });
+        
+        publishToQueue('email_queue', {
+            type: 'reset_password_code_email',
+            email,
+            code
+        });
+        
+        res.status(200).json({ message: 'Reset code sent' });
+    } catch (error) {
+        console.error('forgotPassword error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const verifyResetCode = async (req, res) => {
+    try {
+        const { email, code } = req.body;
+        if (!email || !code) {
+            return res.status(400).json({ message: 'Email and code are required' });
+        }
+        
+        const record = resetPasswordCodes.get(email);
+        if (!record) {
+            return res.status(400).json({ message: 'No reset code found for this email' });
+        }
+        
+        if (Date.now() > record.expiresAt) {
+            resetPasswordCodes.delete(email);
+            return res.status(400).json({ message: 'Reset code expired' });
+        }
+        
+        if (record.code !== code.toString()) {
+            return res.status(400).json({ message: 'Invalid reset code' });
+        }
+        
+        res.status(200).json({ message: 'Reset code verified successfully' });
+    } catch (error) {
+        console.error('verifyResetCode error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email, code, newPassword } = req.body;
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({ message: 'Email, code, and new password are required' });
+        }
+        
+        const record = resetPasswordCodes.get(email);
+        if (!record) {
+            return res.status(400).json({ message: 'No reset session found for this email' });
+        }
+        
+        if (Date.now() > record.expiresAt) {
+            resetPasswordCodes.delete(email);
+            return res.status(400).json({ message: 'Reset session expired' });
+        }
+        
+        if (record.code !== code.toString()) {
+            return res.status(400).json({ message: 'Invalid code' });
+        }
+        
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+        
+        resetPasswordCodes.delete(email);
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('resetPassword error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     generateRegistrationCode,
     checkEmail,
@@ -258,5 +357,8 @@ module.exports = {
     deleteUser,
     requireAuth,
     requireAdminOrOwner,
-    requireAdmin
+    requireAdmin,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword
 };

@@ -334,6 +334,12 @@ export default function Login() {
             <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color={COLORS.secondary} />
           </TouchableOpacity>
         </View>
+        <TouchableOpacity 
+          className='self-end mt-2'
+          onPress={() => router.push('/forgot-password' as any)}
+        >
+          <Text className='text-gray-500 font-semibold text-sm'>Forgot Password?</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity 
