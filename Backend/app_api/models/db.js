@@ -1,9 +1,15 @@
 require('dotenv').config();
 
+const dns = require('dns');
+// Configurer des DNS publics stables (Google et Cloudflare) pour contourner les problèmes de résolution SRV de certains routeurs/box internet
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
 var mongoose = require('mongoose');
 
 var dbURI = process.env.MONGODB_URI;
-mongoose.connect(dbURI);
+mongoose.connect(dbURI).catch(err => {
+    console.error("Mongoose initial connection error:", err.message);
+});
 
 mongoose.connection.on('connected', function(){
     console.log('Mongoose connected to ' + dbURI);
