@@ -38,8 +38,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Renvoyer un statut 204 pour éviter les erreurs de favicon.ico
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api', apiRouter);
+
+// Gestion des requêtes non trouvées (404)
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Resource not found' });
+});
+
+// Gestionnaire d'erreurs global (500)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal server error', error: err.message });
+});
 
 module.exports = app;
