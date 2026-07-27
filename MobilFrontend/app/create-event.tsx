@@ -29,6 +29,7 @@ export default function CreateEvent() {
     capacity: '',
     price: '',
     image: null as any,
+    coOrganizers: '',
     coordinates: {
       lat: '',
       lng: '',
@@ -96,6 +97,12 @@ export default function CreateEvent() {
       return
     }
 
+    const userPlan = user?.plan || 'free';
+    if (userPlan === 'free' && parseInt(formData.capacity) > 100) {
+      Alert.alert('Forfait Gratuit', "Les organisateurs gratuits ne peuvent pas créer d'événements de plus de 100 participants. Veuillez passer au forfait Professionnel.");
+      return;
+    }
+
     setLoading(true)
     try {
       // Create location object as a proper object (not stringified separately)
@@ -111,6 +118,12 @@ export default function CreateEvent() {
         coordinatesArray = [parseFloat(formData.coordinates.lng), parseFloat(formData.coordinates.lat)]
       }
 
+      // Prepare co-organizers array if enterprise plan
+      let coOrganizersArray = undefined
+      if (formData.coOrganizers && userPlan === 'enterprise') {
+        coOrganizersArray = formData.coOrganizers.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
       // Create data object for JSON request instead of FormData for complex nested objects
       const eventData = {
         title: formData.title,
@@ -121,7 +134,8 @@ export default function CreateEvent() {
         location: locationObject,
         capacity: parseInt(formData.capacity),
         price: parseFloat(formData.price) || 0,
-        coordinates: coordinatesArray
+        coordinates: coordinatesArray,
+        coOrganizers: coOrganizersArray
       }
 
       console.log('Submitting event data:', JSON.stringify(eventData, null, 2))
@@ -396,6 +410,26 @@ export default function CreateEvent() {
             />
           </View>
         </View>
+
+        {/* Co-Organizers Section */}
+        {user?.plan === 'enterprise' ? (
+          <View className='mb-4'>
+            <Text className='text-gray-700 mb-2 font-semibold'>Co-Organizers (User IDs, comma-separated)</Text>
+            <TextInput
+              className='bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm'
+              placeholder="Ex: 66abefc12..., 66abefc23..."
+              value={formData.coOrganizers}
+              onChangeText={(text) => setFormData({ ...formData, coOrganizers: text })}
+              autoCapitalize="none"
+            />
+          </View>
+        ) : (
+          <View className='mb-4 bg-gray-50 border border-gray-100 rounded-xl p-4'>
+            <Text className='text-gray-500 text-xs font-semibold'>
+              💡 L'ajout de co-organisateurs et d'équipes est réservé aux membres Entreprise.
+            </Text>
+          </View>
+        )}
 
         {/* Image */}
         <View className='mb-6'>

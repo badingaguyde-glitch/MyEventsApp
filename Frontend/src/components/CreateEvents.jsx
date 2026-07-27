@@ -27,7 +27,8 @@ const CreateEvents = () => {
     price: '',
     longitude: '',
     latitude: '',
-    image: null
+    image: null,
+    coOrganizers: ''
   });
 
   const handleChange = (e) => {
@@ -43,6 +44,14 @@ const CreateEvents = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // 1. Enforce free tier capacity limits (< 100)
+    const userPlan = user.plan || 'free';
+    if (userPlan === 'free' && Number(formData.capacity) > 100) {
+      setError("Les organisateurs gratuits ne peuvent pas créer d'événements de plus de 100 participants. Veuillez passer au forfait Professionnel.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = new FormData();
@@ -66,6 +75,13 @@ const CreateEvents = () => {
         data.append("image", formData.image);
       }
 
+      // 2. Append co-organizers for Enterprise tier
+      if (formData.coOrganizers && userPlan === 'enterprise') {
+        const coOrgsArray = formData.coOrganizers.split(',').map(s => s.trim()).filter(Boolean);
+        coOrgsArray.forEach(id => {
+          data.append("coOrganizers", id);
+        });
+      }
 
       const response = await EventService.createEvent(data, user.token);
       dispatch(checkOrganizerStatus(user.token));
@@ -284,6 +300,32 @@ const CreateEvents = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Co-Organisateurs (Teams) */}
+            <div>
+              {user.plan === 'enterprise' ? (
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                    Co-Organisateurs (IDs séparés par des virgules)
+                  </label>
+                  <input
+                    type="text"
+                    name="coOrganizers"
+                    className="input"
+                    placeholder="Ex: 66abefc12..., 66abefc23..."
+                    value={formData.coOrganizers}
+                    onChange={handleChange}
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Ajoutez des membres d'équipe en renseignant leurs identifiants uniques séparés par des virgules.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-xs text-slate-400">
+                  💡 L'ajout de <strong>co-organisateurs et d'équipes</strong> est une fonctionnalité réservée aux membres <span className="text-brand-accent font-bold">Entreprise</span>.
+                </div>
+              )}
             </div>
 
             {/* Image */}

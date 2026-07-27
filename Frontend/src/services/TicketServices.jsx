@@ -40,6 +40,12 @@ const bulkVerifyTickets = (data, token) => {
     });
 };
 
+const bulkCancelTickets = (ticketIds, token) => {
+    return http.post("/tickets/bulk-cancel", { ticketIds }, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const TicketService = {
     buyTicket,
     getUserTickets,
@@ -47,7 +53,8 @@ const TicketService = {
     verifyTicket,
     getTicketByCode,
     checkAvailability,
-    bulkVerifyTickets
+    bulkVerifyTickets,
+    bulkCancelTickets
 };
 
 export default TicketService;

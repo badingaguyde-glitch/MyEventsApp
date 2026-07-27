@@ -13,11 +13,36 @@ const createEvent = async (req, res) => {
     try {
         const {
             title, description, category, date, time,
-            location, capacity, price, coordinates, clientType
+            location, capacity, price, coordinates, clientType, coOrganizers
         } = req.body;
 
         if (!title || !description || !category || !date || !time || !location || !capacity) {
             return res.status(400).json({ message: 'Please provide all required fields' });
+        }
+
+        const userPlan = req.user.plan || 'free';
+        
+        let coOrganizersIds = [];
+        if (coOrganizers && coOrganizers.length > 0) {
+            if (userPlan !== 'enterprise') {
+                return res.status(403).json({
+                    message: "L'ajout de co-organisateurs et d'équipes est une fonctionnalité exclusive aux comptes Entreprise."
+                });
+            }
+            
+            // Si c'est déjà un tableau ou une chaîne séparée par des virgules
+            const coOrgsArray = Array.isArray(coOrganizers) 
+                ? coOrganizers 
+                : coOrganizers.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+            
+            const users = await User.find({ email: { $in: coOrgsArray } });
+            coOrganizersIds = users.map(u => u._id);
+        }
+        
+        if (userPlan === 'free' && capacity > 100){
+            return res.status(400).json({
+                message: "Les organisateurs avec un plan Gratuit ne peuvent pas créer d'événements de plus de 100 participants. Veuillez passer au forfait Professionnel."
+            });
         }
 
         let imageUrl = 'default-event.jpg';
@@ -37,7 +62,8 @@ const createEvent = async (req, res) => {
             image: imageUrl,
             coordinates: coordinates || [0, 0],
             organizer: req.user.id,
-            status: 'pending_payment'
+            status: 'pending_payment',
+            coOrganizers: coOrganizersIds
         });
 
         // Montant de la commission depuis les variables d'environnement (par défaut 500 centimes = 5€)
@@ -425,8 +451,23 @@ const updateEvent = async (req, res) => {
             capacity,
             price,
             status,
-            coordinates
+            coordinates,
+            coOrganizers
         } = req.body;
+
+        const userPlan = req.user.plan || 'free';
+        if (coOrganizers !== undefined) {
+            if (userPlan !== 'enterprise') {
+                return res.status(403).json({ 
+                    message: "L'ajout de co-organisateurs et d'équipes est réservé exclusivement aux comptes Entreprise." 
+                });
+            }
+            const coOrgsArray = Array.isArray(coOrganizers) 
+                ? coOrganizers 
+                : coOrganizers.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+            const users = await User.find({ email: { $in: coOrgsArray } });
+            event.coOrganizers = users.map(u => u._id);
+        }
 
         event.title = title || event.title;
         event.description = description || event.description;

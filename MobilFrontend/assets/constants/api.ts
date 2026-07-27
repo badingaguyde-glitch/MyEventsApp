@@ -11,6 +11,9 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || Platform.select({
 const api = axios.create({
     baseURL: API_BASE_URL,
     timeout: 10000,
+    headers: {
+        'x-bantu-client-key': 'BantuAppClientSecretSecured2026!'
+    }
 });
 
 // Request interceptor to add token

@@ -15,6 +15,7 @@ const eventSchema = new mongoose.Schema({
     price: { type: Number, required: true, min: 0 },
     image: { type: String, required: true, default: 'default-event.jpg' },
     organizer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    coOrganizers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     status: { type: String, required: true, enum: ['active', 'cancelled', 'completed', 'pending_payment'], default: 'pending_payment' },
 
     createdAt: { type: Date, default: Date.now }

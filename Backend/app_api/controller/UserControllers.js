@@ -82,7 +82,7 @@ const requireAuth = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
-        req.user = { id: user._id.toString(), role: user.role, email: user.email };
+        req.user = { id: user._id.toString(), role: user.role, email: user.email, plan: user.plan || 'free' };
         next();
     } catch (error) {
         console.error('Auth error: ', error);
@@ -139,7 +139,8 @@ const registerUser = async (req, res) => {
                     lastName: user.lastName,
                     email: user.email,
                     interests: user.interests,
-                    role: user.role
+                    role: user.role,
+                    plan: user.plan || 'free'
                 }
             });
         }
@@ -170,6 +171,7 @@ const login = async (req, res) => {
             email: user.email,
             interests: user.interests,
             role: user.role,
+            plan: user.plan || 'free',
             token: jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' }),
             tickets: user.myTickets
         });

@@ -17,7 +17,8 @@ const createEvent = async (data, token) => {
         method: 'POST',
         headers: {
             // Pas de Content-Type ici — très important ! fetch gérera le 'multipart/form-data; boundary=...' natif
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+            "x-bantu-client-key": "BantuAppClientSecretSecured2026!"
         },
         body: data
     });
@@ -32,7 +33,8 @@ const updateEvent = async (id, data, token) => {
     const response = await fetch(`${BASE_URL}/events/${id}`, {
         method: 'PUT',
         headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+            "x-bantu-client-key": "BantuAppClientSecretSecured2026!"
         },
         body: data
     });

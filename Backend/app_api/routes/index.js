@@ -85,7 +85,10 @@ router.route('/tickets/verify')
 router.route('/tickets/bulk-verify')
     .post(ctrlUser.requireAuth, ctrlTicket.bulkVerifyTickets);
 
-
+    
+router.route('/tickets/bulk-cancel')
+    .post(ctrlUser.requireAuth, ctrlTicket.bulkCancelTickets);
+        
 router.route('/tickets/event/:eventId/availability')
     .get(cache('ticket_availability', 60), ctrlTicket.checkAvailability);
 

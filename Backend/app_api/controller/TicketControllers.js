@@ -212,7 +212,8 @@ const verifyTicket = async (req, res) => {
         }
 
 
-        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+        const isCoOrganizer = event.coOrganizers && event.coOrganizers.some(coId => coId.toString() === req.user.id);
+        if (event.organizer.toString() !== req.user.id && !isCoOrganizer && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to verify tickets for this event'
             });
@@ -446,7 +447,8 @@ const bulkVerifyTickets = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        if (event.organizer.toString() !== req.user.id && req.user.role !== 'admin') {
+        const isCoOrganizer = event.coOrganizers && event.coOrganizers.some(coId => coId.toString() === req.user.id);
+        if (event.organizer.toString() !== req.user.id && !isCoOrganizer && req.user.role !== 'admin') {
             return res.status(403).json({
                 message: 'Not authorized to verify tickets for this event'
             });
@@ -530,6 +532,36 @@ const bulkVerifyTickets = async (req, res) => {
     }
 };
 
+const bulkCancelTickets = async (req,res)=>{
+    try{
+        const userPlan = req.user.plan || 'free';
+        if (userPlan !== 'enterprise'){
+            return res.status(403).json({
+                message: "La gestion de remboursement en masse est réservée exclusivement aux comptes Entreprise."
+            });
+        }
+
+        const { ticketIds } = req.body;
+        if (!ticketIds || !Array.isArray(ticketIds)) {
+            return res.status(400).json({
+                message:"Veuillez fournir un tableau d'identifiants de tickets (ticketsIds)."
+            });
+        }
+
+        const result = await Ticket.updateMany(
+            {_id: { $in: ticketIds}, status: {$ne: 'cancelled'}},
+            { $set: { status: 'cancelled' } }
+        );
+        res.status(200).json({
+            message: "Remboursement/annulation en masse effectuée avec succès.",
+            modifiedCount: result.modifiedCount
+        });
+    }catch (error){
+        console.error('Bulk cancel tickets error:', error);
+        res.status(500).json({message:"Erreur serveur lors de l'annulation en masse."});
+    }
+};
+
 module.exports = {
     buyTicket,
     getUserTickets,
@@ -537,5 +569,6 @@ module.exports = {
     cancelTicket,
     getTicketByCode,
     checkAvailability,
-    bulkVerifyTickets
+    bulkVerifyTickets,
+    bulkCancelTickets
 };

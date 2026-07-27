@@ -41,9 +41,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Renvoyer un statut 204 pour éviter les erreurs de favicon.ico
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// Middleware to restrict API access to Bantu official Web/Mobile clients
+const requireClientSecret = (req, res, next) => {
+  const clientKey = req.headers['x-bantu-client-key'];
+  const expectedKey = process.env.BANTU_CLIENT_KEY || 'BantuAppClientSecretSecured2026!';
+  
+  if (clientKey !== expectedKey) {
+    return res.status(403).json({
+      message: 'Access Denied: Invalid Client Signature. Requests must originate from BANTU official applications.'
+    });
+  }
+  next();
+};
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/api', apiRouter);
+app.use('/api', requireClientSecret, apiRouter);
 
 // Gestion des requêtes non trouvées (404)
 app.use((req, res, next) => {
