@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Ticket, ShieldCheck, Users, QrCode, Sparkles } from "lucide-react";
+import { ArrowRight, Ticket, ShieldCheck, Users, QrCode, Sparkles, Smartphone, Download } from "lucide-react";
 import { features } from "@/data/features";
 
 export default function Home() {
@@ -184,22 +184,88 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* --- 5. CTA SECTION --- */}
+      {/* --- 5. SECTION TÉLÉCHARGEMENT APPLICATION MOBILE --- */}
+      <section className="py-16 text-center">
+        <div className="max-w-5xl mx-auto p-8 md:p-12 rounded-3xl bg-white/[0.01] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[60px] pointer-events-none" />
+          
+          <div className="space-y-4 max-w-xl z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-semibold">
+              <Smartphone className="h-3.5 w-3.5 animate-pulse" /> Application Mobile
+            </span>
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white">
+              Gérez les entrées directement sur le terrain
+            </h2>
+            <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+              Téléchargez notre application Android officielle pour scanner les billets QR Code à l'entrée de vos événements, valider les accès en temps réel et sécuriser vos entrées sans aucune fraude.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 min-w-[220px] w-full md:w-auto z-10">
+            <a
+              href="/bantu-myevents.apk"
+              download="bantu-myevents.apk"
+              className="flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accentHover text-white font-bold px-6 py-4 rounded-xl transition-all shadow-lg shadow-brand-accent/20 text-center text-base"
+            >
+              <Download className="h-5 w-5" />
+              Télécharger l'APK
+            </a>
+            <span className="text-xs text-zinc-500 text-center">
+              Version Android officielle 1.0.0
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* --- 5. SECTION TÉLÉCHARGEMENT APPLICATION MOBILE --- */}
+      <section className="py-16 text-center">
+        <div className="max-w-5xl mx-auto p-8 md:p-12 rounded-3xl bg-white/[0.01] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[60px] pointer-events-none" />
+          
+          <div className="space-y-4 max-w-xl z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-semibold">
+              <Smartphone className="h-3.5 w-3.5 animate-pulse" /> Application Mobile
+            </span>
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white">
+              Gerez les entrees directement sur le terrain
+            </h2>
+            <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+              Telechargez notre application Android officielle pour scanner les billets QR Code a l'entree de vos evenements, valider les acces en temps reel et securiser vos entrees sans aucune fraude.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 min-w-[220px] w-full md:w-auto z-10">
+            <a
+              href="https://138-68-145-245.nip.io/bantu-myevents.apk"
+              download="bantu-myevents.apk"
+              className="flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accentHover text-white font-bold px-6 py-4 rounded-xl transition-all shadow-lg shadow-brand-accent/20 text-center text-base"
+            >
+              <Download className="h-5 w-5" />
+              Telecharger l'APK
+            </a>
+            <span className="text-xs text-zinc-500 text-center">
+              Version Android officielle 1.0.0
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* --- 6. CTA SECTION --- */}
       <section className="mt-16 py-16 rounded-3xl bg-gradient-to-b from-brand-accent/10 to-transparent border border-brand-accent/10 text-center relative overflow-hidden px-6">
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-brand-accent/10 rounded-full blur-[80px]" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-brand-accent/10 rounded-full blur-[80px]" />
         
         <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
-          Prêt à lancer votre prochain événement ?
+          Pret a lancer votre prochain evenement ?
         </h2>
         <p className="text-zinc-300 max-w-xl mx-auto mb-10 leading-relaxed">
-          Rejoignez des centaines d'organisateurs qui font confiance à BANTU MY EVENT pour simplifier leurs billetteries et éliminer la fraude aux entrées.
+          Rejoignez des centaines d'organisateurs qui font confiance a BANTU MY EVENT pour simplifier leurs billetteries et eliminer la fraude aux entrees.
         </p>
         <a
           href={frontendUrl}
           className="inline-flex items-center gap-2 bg-brand-accent hover:bg-brand-accentHover text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-brand-accent/20 text-base"
         >
-          Créer un événement maintenant
+          Creer un evenement maintenant
           <ArrowRight className="h-5 w-5" />
         </a>
       </section>

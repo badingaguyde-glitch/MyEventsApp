@@ -43,11 +43,11 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Middleware to restrict API access to Bantu official Web/Mobile clients
 const requireClientSecret = (req, res, next) => {
-  // Autoriser les requêtes OPTIONS de preflight CORS sans clé client
-  if (req.method === 'OPTIONS') {
+  if (req.method === 'OPTIONS') return next();
+  if (req.originalUrl && (req.originalUrl.startsWith('/api/payment/success') || req.originalUrl.startsWith('/api/payment/cancel'))) {
     return next();
   }
-  
+
   const clientKey = req.headers['x-bantu-client-key'];
   const expectedKey = process.env.BANTU_CLIENT_KEY || 'BantuAppClientSecretSecured2026!';
   
