@@ -71,8 +71,8 @@ async function generateEmailPayload(messageData) {
         to = user.email;
         subject = `Your ticket for ${event.title}`;
         const qrData = ticket.code.toString();
-        // Génération du QR code en base64 pour l'injecter directement dans le corps HTML
-        const qrImage = await qrCode.toDataURL(qrData);
+        // Utilisation d'une API publique sécurisée pour générer le QR code en HTTP, évitant le blocage du base64 par Gmail
+        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
         htmlContent = emailWrapper(`
             <h1>Congratulations on your purchase!</h1>
@@ -91,7 +91,7 @@ async function generateEmailPayload(messageData) {
 
             <p>Please present this QR Code at the entrance of the event:</p>
             <div class="qr-section">
-                <img src="${qrImage}" alt="Access QR Code" />
+                <img src="${qrImageUrl}" alt="Access QR Code" />
                 <p style="font-size: 12px; color: #a0aec0; margin-top: 10px;">Ticket Code: ${ticket.code}</p>
             </div>
             
