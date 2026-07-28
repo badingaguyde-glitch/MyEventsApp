@@ -106,31 +106,6 @@ async function processPaymentEvent(msg) {
     }
 }
 
-async function startPaymentProcessor(retries = 5) {
-    try {
-        const connection = await amqplib.connect(process.env.RABBITMQ_URL || 'amqp://rabbitmq');
-        const channel = await connection.createChannel();
-        await channel.assertQueue(Queue, { durable: true });
-        console.log('PaymentProcessor: En attente de paiements sur la file', Queue);
+// startPaymentProcessor(); // Désactivé car le traitement est désormais effectué en tâche de fond locale via rabbitmq.js
 
-        channel.consume(Queue, async (msg) => {
-            if (msg !== null) {
-                console.log('Nouveau paiement à traiter...');
-                try {
-                    await processPaymentEvent(msg);
-                    channel.ack(msg); // On confirme que c'est traité
-                } catch (err) {
-                    console.error('Erreur lors du traitement du paiement:', err);
-                    channel.nack(msg, false, false); // On rejette le message en cas d'erreur
-                }
-            }
-        });
-    } catch (err) {
-        console.error('Erreur de connexion RabbitMQ pour le PaymentProcessor:', err);
-        if (retries > 0) {
-            setTimeout(() => startPaymentProcessor(retries - 1), 5000);
-        }
-    }
-}
-
-startPaymentProcessor();
+module.exports = { processPaymentEvent };
