@@ -39,5 +39,13 @@ export const features: Feature[] = [
         description: "Facilitez l'achat en proposant des méthodes de paiement locales adaptées comme le Mobile Money, en plus des cartes bancaires traditionnelles.",
         benefits: ["Adapté aux marchés locaux", "Transactions sécurisées", "Remboursements gérés plus facilement"],
         icon: "wallet"
+    },
+    {
+        slug: "billets-personnalisables",
+        title: "Billets PDF Personnalisables",
+        shortDesc: "Éditeur de billets électroniques et aperçu live (Option PRO).",
+        description: "Permettez aux créateurs de personnaliser l'aspect de leurs billets PDF (couleurs, polices, logo sponsor) avec un aperçu interactif en temps réel.",
+        benefits: ["Branding professionnel", "Aperçu instantané en direct", "Optimisé pour impression & mobile"],
+        icon: "smartphone"
     }
 ];

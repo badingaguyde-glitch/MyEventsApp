@@ -149,13 +149,14 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
         >
           {features.map((feature) => {
             const IconComponent = 
               feature.slug === "billetterie" ? Ticket :
               feature.slug === "qr-code" ? QrCode :
-              feature.slug === "gestion-participants" ? Users : ShieldCheck;
+              feature.slug === "gestion-participants" ? Users :
+              feature.slug === "billets-personnalisables" ? Smartphone : ShieldCheck;
 
             return (
               <motion.div 

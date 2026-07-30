@@ -24,6 +24,8 @@ export default function PricingPage() {
                 "Participants illimités",
                 "Billets payants et gratuits",
                 "Paiements locaux (Mobile Money & Cartes)",
+                "Éditeur de billets PDF personnalisés (couleurs, texte)",
+                "Bannière d'événement sur les billets PDF",
                 "Scanner QR Code haute performance",
                 "Support prioritaire par email & chat",
                 "Statistiques de ventes avancées",
@@ -37,6 +39,8 @@ export default function PricingPage() {
             description: "Pour les grands organisateurs de festivals multilocations et grands stades.",
             features: [
                 "Gestion multi-organisateurs & équipes",
+                "Personnalisation graphique avancée des billets",
+                "Affichage des logos sponsors sur les billets",
                 "API & Webhooks dédiés",
                 "Hébergement de données souverain",
                 "Gestion des remboursements en masse",
