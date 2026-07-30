@@ -58,6 +58,7 @@ const downloadTicketPDF = async (req, res) => {
 
         // 3. Initialiser le document PDF (A4 standard)
         const doc = new PDFDocument({ size: 'A4', margin: 40 });
+        const borderRadius = 15;
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Billet-${ticket.ticketCode || ticket._id}.pdf`);
         doc.pipe(res);
