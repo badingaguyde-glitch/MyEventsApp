@@ -103,6 +103,19 @@ async function processPaymentEvent(msg) {
                 console.log(`Événement ${eventId} activé suite au paiement.`);
             }
         }
+
+        // --- CAS 3: UPGRADE D'ABONNEMENT ---
+        else if (metadata.type === 'plan_upgrade') {
+            const User = require('../models/User');
+            const user = await User.findByIdAndUpdate(
+                metadata.userId,
+                { plan: metadata.plan },
+                { new: true }
+            );
+            if (user) {
+                console.log(`User ${metadata.userId} upgraded to plan ${metadata.plan} via webhook.`);
+            }
+        }
     }
 }
 

@@ -184,6 +184,18 @@ const paymentSuccess = async (req, res) => {
                             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
                             redirectUrl = `${frontendUrl}/tickets/success`;
                         }
+                    } else if (metadata.type === 'plan_upgrade') {
+                        const User = mongoose.model('User');
+                        const user = await User.findById(metadata.userId);
+                        if (user) {
+                            user.plan = metadata.plan;
+                            await user.save();
+                            console.log(`Success Callback: Sync upgraded user ${metadata.userId} to ${metadata.plan}`);
+                        }
+                        if (isWeb) {
+                            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                            redirectUrl = `${frontendUrl}/pricing?success=true`;
+                        }
                     }
                 }
             }
@@ -278,6 +290,69 @@ const paymentSuccess = async (req, res) => {
 };
 
 /**
+ * Crée une session Stripe Checkout pour la mise à niveau de l'abonnement
+ */
+const createPlanUpgradeSession = async (req, res) => {
+    try {
+        const { plan, clientType } = req.body;
+        const userId = req.user.id;
+        const User = require('../models/User');
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        if (plan !== 'pro' && plan !== 'enterprise') {
+            return res.status(400).json({ message: "Plan invalide. Choisissez 'pro' ou 'enterprise'." });
+        }
+
+        let amount = 1900; // 19.00 EUR par défaut pour Pro
+        let name = "Forfait Bantu PRO - 1 Mois";
+        let description = "Commission réduite à 2.5%, tickets PDF personnalisables illimités, support prioritaire.";
+
+        if (plan === 'enterprise') {
+            amount = 9900; // 99.00 EUR pour Entreprise
+            name = "Forfait Bantu ENTREPRISE - 1 Mois";
+            description = "Commission minimale de 1% flat, multi-organisateurs, logo sponsor, API dédiée.";
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'eur',
+                        product_data: {
+                            name: name,
+                            description: description,
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'web'}`,
+            cancel_url: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'web'}&type=plan_upgrade`,
+            metadata: {
+                type: 'plan_upgrade',
+                userId: userId.toString(),
+                userEmail: user.email,
+                userName: user.name,
+                userLastName: user.lastName,
+                plan: plan,
+                clientType: clientType || 'web'
+            },
+        });
+
+        res.status(200).json({ url: session.url, sessionId: session.id });
+    } catch (error) {
+        console.error('Plan Upgrade Session Error:', error);
+        res.status(500).json({ message: "Erreur lors de la création du paiement d'abonnement", error: error.message });
+    }
+};
+
+/**
  * Page d'annulation de paiement affichée à l'utilisateur après redirection Stripe
  */
 const paymentCancel = (req, res) => {
@@ -286,6 +361,8 @@ const paymentCancel = (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         if (type === 'ticket') {
             return res.redirect(`${frontendUrl}/my-tickets`);
+        } else if (type === 'plan_upgrade') {
+            return res.redirect(`${frontendUrl}/pricing`);
         } else {
             return res.redirect(`${frontendUrl}/my-events`);
         }
@@ -376,5 +453,6 @@ module.exports = {
     createCheckoutSession,
     stripeWebhook,
     paymentSuccess,
-    paymentCancel
+    paymentCancel,
+    createPlanUpgradeSession
 };

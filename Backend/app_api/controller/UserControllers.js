@@ -350,6 +350,27 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json({
+            _id: user._id,
+            name: user.name,
+            lastName: user.lastName,
+            email: user.email,
+            interests: user.interests,
+            role: user.role,
+            plan: user.plan || 'free'
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({ message: 'Server error during profile retrieval' });
+    }
+};
+
 module.exports = {
     generateRegistrationCode,
     checkEmail,
@@ -362,5 +383,6 @@ module.exports = {
     requireAdmin,
     forgotPassword,
     verifyResetCode,
-    resetPassword
+    resetPassword,
+    getProfile
 };
