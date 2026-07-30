@@ -53,6 +53,20 @@ const createEvent = async (req, res) => {
             } catch (uploadError) {
                 console.error('Image upload failed:', uploadError.message);
             }
+        } else if (req.body.image) {
+            if (typeof req.body.image === 'string' && req.body.image.startsWith('data:image/')) {
+                try {
+                    const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, "");
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    const uploadResult = await uploadToCloudinary(buffer);
+                    imageUrl = uploadResult.secure_url;
+                } catch (uploadError) {
+                    console.error('Base64 image upload failed:', uploadError.message);
+                    imageUrl = req.body.image;
+                }
+            } else {
+                imageUrl = req.body.image;
+            }
         }
 
         // On crée l'événement avec le statut 'pending_payment'
@@ -483,6 +497,20 @@ const updateEvent = async (req, res) => {
                 event.image = uploadResult.secure_url;
             } catch (uploadError) {
                 console.error('Image upload failed on update:', uploadError.message);
+            }
+        } else if (req.body.image) {
+            if (typeof req.body.image === 'string' && req.body.image.startsWith('data:image/')) {
+                try {
+                    const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, "");
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    const uploadResult = await uploadToCloudinary(buffer);
+                    event.image = uploadResult.secure_url;
+                } catch (uploadError) {
+                    console.error('Base64 image upload failed on update:', uploadError.message);
+                    event.image = req.body.image;
+                }
+            } else {
+                event.image = req.body.image;
             }
         }
         event.status = status || event.status;
