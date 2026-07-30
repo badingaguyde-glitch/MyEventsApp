@@ -69,88 +69,47 @@ const createEvent = async (req, res) => {
             }
         }
 
-        // On crée l'événement avec le statut 'pending_payment'
+        // On crée l'événement directement en statut 'active'
         const event = await Event.create({
             title, description, category, date, time, location, capacity,
             price: price || 0,
             image: imageUrl,
             coordinates: coordinates || [0, 0],
             organizer: req.user.id,
-            status: 'pending_payment',
+            status: 'active',
             coOrganizers: coOrganizersIds
         });
 
-        // Montant de la commission depuis les variables d'environnement (par défaut 500 centimes = 5€)
-        const feeAmount = process.env.EVENT_CREATION_FEE ? parseInt(process.env.EVENT_CREATION_FEE) : 500;
+        // Vider le cache Redis pour actualiser la liste des événements
+        await cache.clearPattern('events_*');
+        await cache.clearPattern('category_events_*');
+        await cache.clearPattern('nearby_events_*');
+        await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
 
-        if (feeAmount === 0) {
-            event.status = 'active';
-            await event.save();
-            await cache.clearPattern('events_*');
-            await cache.clearPattern('category_events_*');
-            await cache.clearPattern('nearby_events_*');
-            await cache.clearPattern(`my_events_${req.user.id || req.user._id}`);
-            return res.status(201).json({
-                message: "Événement créé avec succès",
-                event: event
+        // Notification d'événement créé par e-mail
+        try {
+            publishToQueue('email_queue', {
+                type: 'event_created_email',
+                user: {
+                    name: req.user.name,
+                    lastName: req.user.lastName,
+                    email: req.user.email
+                },
+                event: {
+                    id: event._id,
+                    title: event.title,
+                    date: event.date,
+                    location: event.location
+                }
             });
+        } catch (e) {
+            console.error("Failed to queue email:", e);
         }
 
-        // On appelle le contrôleur Stripe pour créer la session
-        const { createCheckoutSession } = require('./PaymentControllers');
-
-        // On simule un objet req/res pour réutiliser notre fonction createCheckoutSession
-        const stripeReq = {
-            body: {
-                amount: feeAmount,
-                currency: 'eur',
-                name: `Commission de création: ${title}`,
-                description: 'Frais de mise en ligne de votre événement sur BANTU MyEvents',
-                metadata: {
-                    type: 'event_commission',
-                    eventId: event._id.toString(),
-                    userId: req.user.id.toString(),
-                    userEmail: req.user.email,
-                    userName: req.user.name,
-                    userLastName: req.user.lastName,
-                    clientType: clientType || 'mobile'
-                },
-                successUrl: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'mobile'}`,
-                cancelUrl: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'mobile'}`
-            }
-        };
-
-        const stripeRes = {
-            status: (code) => ({
-                json: (data) => {
-                    if (code !== 200) {
-                        return res.status(code).json({
-                            message: "Stripe error during event creation",
-                            error: data.error || data.message
-                        });
-                    }
-                    publishToQueue('email_queue', {
-                        type: 'event_pending_email',
-                        user: {
-                            name: req.user.name,
-                            lastName: req.user.lastName,
-                            email: req.user.email
-                        },
-                        event: {
-                            title: event.title
-                        },
-                        receiptUrl: data.url
-                    });
-                    return res.status(201).json({
-                        message: "Événement en attente de paiement",
-                        event: event,
-                        stripeUrl: data.url // On renvoie l'URL de paiement au front
-                    });
-                }
-            })
-        };
-
-        await createCheckoutSession(stripeReq, stripeRes);
+        return res.status(201).json({
+            message: "Événement créé avec succès",
+            event: event
+        });
 
     } catch (error) {
         console.error('Create event error:', error);

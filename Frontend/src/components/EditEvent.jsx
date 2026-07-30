@@ -5,6 +5,7 @@ import EventService from '../services/EventServices';
 import { motion } from 'framer-motion';
 import { Save, X, Calendar, MapPin, Users, DollarSign, Tag, Clock, AlertCircle } from 'lucide-react';
 import Loader from './Loader';
+import PromoWidget from './PromoWidget';
 
 const EditEvent = () => {
     const { id } = useParams();
@@ -486,6 +487,7 @@ const EditEvent = () => {
                     </div>
                 </form>
             </motion.div>
+            <PromoWidget userPlan={user?.plan} />
         </div>
     );
 };

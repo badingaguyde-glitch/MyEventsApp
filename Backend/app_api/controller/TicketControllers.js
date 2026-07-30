@@ -8,6 +8,41 @@ const PDFDocument = require('pdfkit');
 const qrcode = require('qrcode');
 const axios = require('axios');
 
+// Calcul de la commission de la plateforme selon le forfait de l'organisateur et les options premium utilisées
+const calculateTicketCommission = (price, plan, event, sendSms = false) => {
+    if (price <= 0) return 0;
+
+    let percentRate = 0.05; // 5.0% par défaut (Gratuit)
+    let fixedFee = 0.99;    // 0.99 €
+    
+    if (plan === 'pro') {
+        percentRate = 0.025; // 2.5%
+        fixedFee = 0.49;    // 0.49 €
+    } else if (plan === 'enterprise') {
+        percentRate = 0.01;  // 1.0%
+        fixedFee = 0.0;     // 0.0 €
+    }
+
+    let commission = (price * percentRate) + fixedFee;
+
+    // Frais additionnels (layouts Premium pour les comptes gratuits)
+    if (plan === 'free') {
+        if (event.ticketTemplate && (event.ticketTemplate.layoutType === 'modern' || event.ticketTemplate.layoutType === 'badge')) {
+            commission += 0.15; // +0.15 $ par billet
+        }
+        if (event.ticketTemplate && (event.ticketTemplate.customNotes || event.ticketTemplate.termsAndConditions)) {
+            commission += 0.10; // +0.10 $ par billet
+        }
+    }
+
+    // Frais de notification SMS (si activé, applicable à tous)
+    if (sendSms) {
+        commission += 0.10; // +0.10 $ par billet
+    }
+
+    return Math.round(commission * 100) / 100;
+};
+
 
 
 
@@ -20,7 +55,7 @@ const buyTicket = async (req, res) => {
             return res.status(400).json({ message: 'Event ID required' });
         }
 
-        const event = await Event.findById(eventId);
+        const event = await Event.findById(eventId).populate('organizer');
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
@@ -85,16 +120,20 @@ const buyTicket = async (req, res) => {
             return res.status(201).json({ message: 'Free ticket acquired successfully', ticket: populatedTicket });
         }
 
-        // Si payant, on redirige vers Stripe
+        // Si payant, on redirige vers Stripe avec la commission incluse
         const { createCheckoutSession } = require('./PaymentControllers');
+        const organizerPlan = event.organizer?.plan || 'free';
+        const sendSms = req.body.sendSms === true;
+        const commission = calculateTicketCommission(ticket.price, organizerPlan, event, sendSms);
+        const totalAmountCents = Math.round((ticket.price + commission) * 100);
 
         const stripeReq = {
             body: {
                 // Stripe demande le montant en centimes
-                amount: Math.round(ticket.price * 100),
+                amount: totalAmountCents,
                 currency: 'eur',
                 name: `Ticket pour : ${event.title}`,
-                description: `Entrée pour l'événement du ${new Date(event.date).toLocaleDateString()}`,
+                description: `Entrée pour l'événement du ${new Date(event.date).toLocaleDateString()} (Commission de service incluse)`,
                 metadata: {
                     type: 'ticket',
                     ticketId: ticket._id.toString(),
@@ -107,7 +146,10 @@ const buyTicket = async (req, res) => {
                     eventDate: event.date.toString(),
                     eventLocation: JSON.stringify(event.location),
                     ticketCode: ticket.ticketCode,
-                    clientType: clientType || 'mobile'
+                    clientType: clientType || 'mobile',
+                    basePrice: ticket.price.toString(),
+                    commission: commission.toString(),
+                    sendSms: sendSms.toString()
                 },
                 successUrl: `${req.protocol}://${req.get('host')}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&clientType=${clientType || 'mobile'}`,
                 cancelUrl: `${req.protocol}://${req.get('host')}/api/payment/cancel?clientType=${clientType || 'mobile'}`
