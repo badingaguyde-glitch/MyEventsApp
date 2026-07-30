@@ -15,22 +15,22 @@ export default function Home() {
     {
       title: "Tableau de Bord",
       description: "Suivez vos ventes, gérez vos participants et consultez vos revenus globaux en un coup d'œil grâce à notre interface d'analyse intuitive.",
-      image: "/images/Capture d'écran 2026-07-30 132510.png"
+      image: "/images/Organizer-hub.png"
     },
     {
-      title: "Créateur d'Événements",
-      description: "Créez vos fiches événements en moins de deux minutes en renseignant la description, la date et la géolocalisation de vos salles.",
-      image: "/images/Capture d'écran 2026-07-30 132532.png"
+      title: "Découverte",
+      description: "Explorez les événements créés, filtrez par catégorie ou recherchez par titre avec une interface moderne et fluide.",
+      image: "/images/Discover.png"
     },
     {
-      title: "Modèles de Billets",
-      description: "Personnalisez graphiquement l'apparence de vos billets PDF en choisissant les couleurs, le layout et en intégrant vos sponsors.",
-      image: "/images/Capture d'écran 2026-07-30 132609.png"
+      title: "Espace Client",
+      description: "Espace utilisateur pour retrouver tous vos billets achetés, prêts à être téléchargés en PDF ou scannés.",
+      image: "/images/My-Tickets.png"
     },
     {
-      title: "Scanner QR Code",
-      description: "Validez les billets en temps réel et sécurisez les accès à l'entrée de vos événements grâce au scanner intégré fluide.",
-      image: "/images/Capture d'écran 2026-07-30 132935.png"
+      title: "Scanner & Vérification",
+      description: "Scanner en temps réel ou validation par code de référence pour éliminer les fraudes à l'entrée de vos événements.",
+      image: "/images/ticket-verification-web.png"
     }
   ];
 
@@ -57,18 +57,18 @@ export default function Home() {
 
       {/* --- 1. HERO SECTION --- */}
       <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center text-center">
-        <motion.div 
-          initial="hidden" 
-          animate="visible" 
+        <motion.div
+          initial="hidden"
+          animate="visible"
           variants={fadeIn}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-semibold mb-8"
         >
           <Sparkles className="h-3.5 w-3.5" /> Redéfinir l'expérience événementielle
         </motion.div>
 
-        <motion.h1 
-          initial="hidden" 
-          animate="visible" 
+        <motion.h1
+          initial="hidden"
+          animate="visible"
           variants={fadeIn}
           className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl leading-[1.1] mb-8"
         >
@@ -78,9 +78,9 @@ export default function Home() {
           </span>
         </motion.h1>
 
-        <motion.p 
-          initial="hidden" 
-          animate="visible" 
+        <motion.p
+          initial="hidden"
+          animate="visible"
           variants={fadeIn}
           className="text-zinc-400 text-lg md:text-xl max-w-2xl leading-relaxed mb-12"
         >
@@ -88,9 +88,9 @@ export default function Home() {
         </motion.p>
 
         {/* Boutons CTA */}
-        <motion.div 
-          initial="hidden" 
-          animate="visible" 
+        <motion.div
+          initial="hidden"
+          animate="visible"
           variants={fadeIn}
           className="flex flex-col sm:flex-row gap-4 w-full justify-center px-4"
         >
@@ -111,7 +111,7 @@ export default function Home() {
       </section>
 
       {/* --- 2. CHIFFRES CLÉS (Statistics) --- */}
-      <motion.section 
+      <motion.section
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -138,7 +138,7 @@ export default function Home() {
 
       {/* --- 3. DÉMONSTRATION VISUELLE (Mockup) --- */}
       <section className="py-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -147,9 +147,9 @@ export default function Home() {
         >
           {/* Overlay d'ambiance évènement */}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent z-10" />
-          <img 
-            src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200" 
-            alt="Showcase de festival musical avec foule enthousiaste" 
+          <img
+            src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200"
+            alt="Showcase de festival musical avec foule enthousiaste"
             className="w-full h-full object-cover brightness-75 scale-105 hover:scale-100 transition-transform duration-[2s]"
           />
           <div className="absolute bottom-8 left-8 z-20 text-left max-w-lg">
@@ -170,7 +170,7 @@ export default function Home() {
           Tous les outils nécessaires pour structurer, promouvoir et piloter vos événements.
         </p>
 
-        <motion.div 
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -178,14 +178,14 @@ export default function Home() {
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center"
         >
           {features.map((feature) => {
-            const IconComponent = 
+            const IconComponent =
               feature.slug === "billetterie" ? Ticket :
-              feature.slug === "qr-code" ? QrCode :
-              feature.slug === "gestion-participants" ? Users :
-              feature.slug === "billets-personnalisables" ? Smartphone : ShieldCheck;
+                feature.slug === "qr-code" ? QrCode :
+                  feature.slug === "gestion-participants" ? Users :
+                    feature.slug === "billets-personnalisables" ? Smartphone : ShieldCheck;
 
             return (
-              <motion.div 
+              <motion.div
                 key={feature.slug}
                 variants={fadeIn}
                 whileHover={{ y: -6, borderColor: "rgba(255, 76, 59, 0.4)" }}
@@ -198,11 +198,11 @@ export default function Home() {
                 <p className="text-zinc-400 text-sm leading-relaxed mb-6 flex-1">
                   {feature.shortDesc}
                 </p>
-                <Link 
-                  href={`/features/${feature.slug}`} 
+                <Link
+                  href={`/features/${feature.slug}`}
                   className="text-sm font-bold text-brand-accent hover:text-brand-accentHover inline-flex items-center gap-1 group/link"
                 >
-                  En savoir plus 
+                  En savoir plus
                   <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
                 </Link>
               </motion.div>
@@ -215,7 +215,7 @@ export default function Home() {
       <section className="py-16 text-center">
         <div className="max-w-5xl mx-auto p-8 md:p-12 rounded-3xl bg-white/[0.01] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-left relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[60px] pointer-events-none" />
-          
+
           <div className="space-y-4 max-w-xl z-10">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-semibold">
               <Smartphone className="h-3.5 w-3.5 animate-pulse" /> Application Mobile
@@ -230,7 +230,7 @@ export default function Home() {
 
           <div className="flex flex-col gap-3 min-w-[220px] w-full md:w-auto z-10">
             <a
-              href="/bantu-myevents.apk"
+              href="https://138-68-145-245.nip.io/bantu-myevents.apk"
               download="bantu-myevents.apk"
               className="flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accentHover text-white font-bold px-6 py-4 rounded-xl transition-all shadow-lg shadow-brand-accent/20 text-center text-base"
             >
@@ -265,11 +265,10 @@ export default function Home() {
               <button
                 key={idx}
                 onClick={() => setActiveTab(idx)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === idx
-                    ? "bg-brand-accent text-white shadow-lg shadow-brand-accent/20"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === idx
+                  ? "bg-brand-accent text-white shadow-lg shadow-brand-accent/20"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 {shot.title}
               </button>
@@ -318,7 +317,7 @@ export default function Home() {
       <section className="mt-16 py-16 rounded-3xl bg-gradient-to-b from-brand-accent/10 to-transparent border border-brand-accent/10 text-center relative overflow-hidden px-6">
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-brand-accent/10 rounded-full blur-[80px]" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-brand-accent/10 rounded-full blur-[80px]" />
-        
+
         <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
           Pret a lancer votre prochain evenement ?
         </h2>
