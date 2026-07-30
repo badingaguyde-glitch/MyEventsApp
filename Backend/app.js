@@ -44,7 +44,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // Middleware to restrict API access to Bantu official Web/Mobile clients
 const requireClientSecret = (req, res, next) => {
   if (req.method === 'OPTIONS') return next();
-  if (req.originalUrl &&(req.originalUrl.includes('/pdf')) || (req.originalUrl.startsWith('/api/payment/success') || req.originalUrl.startsWith('/api/payment/cancel'))) {
+  if (req.originalUrl && (req.originalUrl.includes('/pdf') || req.originalUrl.startsWith('/api/payment/success') || req.originalUrl.startsWith('/api/payment/cancel'))) {
     return next();
   }
 
