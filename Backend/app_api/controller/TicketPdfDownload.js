@@ -8,11 +8,11 @@ const downloadTicketPDF = async (req, res) => {
     try {
         const ticketId = req.params.id;
 
-        // 1. Récupérer le ticket et l'événement associé (avec l'organisateur)
-        const ticket = await Ticket.findById(ticketId);
+        // 1. Récupérer le ticket et l'événement associé (avec l'organisateur et l'acheteur)
+        const ticket = await Ticket.findById(ticketId).populate('user');
         if (!ticket) return res.status(404).json({ message: "Billet non trouvé." });
 
-        const event = await Event.findById(ticket.eventId).populate('organizer');
+        const event = await Event.findById(ticket.event).populate('organizer');
         if (!event) return res.status(404).json({ message: "Événement associé non trouvé." });
 
         // 2. Déterminer les règles de style selon le plan de l'organisateur
@@ -66,6 +66,11 @@ const downloadTicketPDF = async (req, res) => {
         // Titre de l'événement à afficher
         const ticketTitle = customTitle || event.title;
 
+        // Informations sur le participant (acheteur)
+        const userName = ticket.user?.name || '';
+        const userLastName = ticket.user?.lastName || '';
+        const userEmail = ticket.user?.email || '';
+
         // Générer le QR Code sous forme de buffer PNG
         const qrBuffer = await qrcode.toBuffer(ticket.ticketCode || ticket._id.toString(), { margin: 1 });
 
@@ -108,7 +113,7 @@ const downloadTicketPDF = async (req, res) => {
             }
 
             leftY += 20;
-            doc.font(`${fontFamily}-Bold`).text('Nom :', 90, leftY).font(fontFamily).text(`${ticket.userName || ''} ${ticket.userLastName || ''}`, 140, leftY);
+            doc.font(`${fontFamily}-Bold`).text('Nom :', 90, leftY).font(fontFamily).text(`${userName} ${userLastName}`, 140, leftY);
 
             if (showPrice) {
                 leftY += 20;
@@ -139,7 +144,7 @@ const downloadTicketPDF = async (req, res) => {
             doc.image(qrBuffer, 217, badgeY, { width: 160, height: 160 });
             badgeY += 175;
 
-            doc.fillColor(primaryColor).fontSize(18).font(`${fontFamily}-Bold`).text(`${ticket.userName || ''} ${ticket.userLastName || ''}`, 160, badgeY, { align: 'center', width: 275 });
+            doc.fillColor(primaryColor).fontSize(18).font(`${fontFamily}-Bold`).text(`${userName} ${userLastName}`, 160, badgeY, { align: 'center', width: 275 });
             badgeY += 25;
 
             doc.fillColor(textColor).fontSize(10).font(fontFamily).text(`Date : ${new Date(event.date).toLocaleDateString('fr-FR')}`, 160, badgeY, { align: 'center', width: 275 });
@@ -185,7 +190,7 @@ const downloadTicketPDF = async (req, res) => {
             }
 
             doc.font(`${fontFamily}-Bold`).text('PARTICIPANT :', 60, currentY)
-                .font(fontFamily).text(`${ticket.userName || ''} ${ticket.userLastName || ''} (${ticket.userEmail || ''})`, 180, currentY);
+                .font(fontFamily).text(`${userName} ${userLastName} (${userEmail})`, 180, currentY);
             currentY += 25;
 
             if (showPrice) {
