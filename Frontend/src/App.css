@@ -113,6 +113,15 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-sans);
+}
 select {
   background-color: transparent;
   color: white;
@@ -135,7 +144,7 @@ select option {
   max-width: 100%;
   padding: 0.85rem 1.25rem;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-white);
+  border: 0.5cap solid rgba(120, 143, 215, 0.17);
   border-radius: 1rem;
   color: white;
   outline: none;
@@ -146,6 +155,23 @@ select option {
 .input:focus {
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.05);
+}
+.attention {
+  font-size:14px;
+  color:var(--amber-400);
+  border: 2px solid var(--amber-400);
+  box-shadow: 0 0 10px var(--amber-400);
+  border-radius: 25px;
+  animation: breathingShadow 2s ease-in-out infinite;
+}
+
+@keyframes breathingShadow {
+  0%, 100% {
+      box-shadow: 0 0 10px var(--amber-400);
+    }
+    50% {
+      box-shadow: 0 0 20px var(--amber-400);
+    }
 }
 
 .btn-primary {

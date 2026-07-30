@@ -16,6 +16,12 @@ const login = (data) => {
     return http.post("/user/login", data);
 };
 
+const logout = ()=>{
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userPlan");
+}
+
 const updateProfile = (data, token) => {
     return http.put("/user", data, {
         headers: { Authorization: `Bearer ${token}` }
@@ -63,7 +69,8 @@ const UserDataService = {
     verifyResetCode,
     resetPassword,
     getProfile,
-    upgradePlan
+    upgradePlan,
+    logout
 };
 
 export default UserDataService;
