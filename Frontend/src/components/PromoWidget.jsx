@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Sparkles, X, ArrowRight, ShieldCheck, Zap, Percent, CheckCircle2 } from 'lucide-react';
 
 const PromoWidget = ({ userPlan }) => {
@@ -138,15 +139,13 @@ const PromoWidget = ({ userPlan }) => {
                         <span className="promo-footer-left">
                             {isFree ? "Économie de 50%" : "Commission minimale"}
                         </span>
-                        <a
-                            href="/pricing"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            to="/pricing"
                             className={`promo-btn-cta ${isFree ? 'free' : 'pro'}`}
                         >
                             {isFree ? "Passer à PRO" : "Découvrir Entreprise"}
                             <ArrowRight size={12} style={{ marginLeft: 4 }} />
-                        </a>
+                        </Link>
                     </div>
                 </motion.div>
             )}

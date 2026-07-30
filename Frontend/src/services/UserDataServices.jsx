@@ -40,6 +40,18 @@ const resetPassword = (data) => {
     return http.post("/user/reset-password", data);
 };
 
+const getProfile = (token) => {
+    return http.get("/user/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+const upgradePlan = (data, token) => {
+    return http.post("/payment/upgrade-plan", data, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const UserDataService = {
     generateCode,
     verifyCode,
@@ -49,7 +61,9 @@ const UserDataService = {
     deleteUser,
     forgotPassword,
     verifyResetCode,
-    resetPassword
+    resetPassword,
+    getProfile,
+    upgradePlan
 };
 
 export default UserDataService;

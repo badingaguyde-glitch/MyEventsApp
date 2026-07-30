@@ -21,6 +21,7 @@ import TicketSuccess from './components/TicketSuccess';
 import TicketCancel from './components/TicketCancel';
 import Template from './components/Template';
 import ProtectedRoute from './components/ProtectedRoute';
+import Pricing from './components/Pricing';
 import store from './redux/store';
 import { Provider } from 'react-redux';
 import "./App.css";
@@ -59,6 +60,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="verify-ticket" element={<ProtectedRoute><VerifyTicket /></ProtectedRoute>} />
             <Route path="tickets/success" element={<TicketSuccess />} />
             <Route path="tickets/cancel" element={<TicketCancel />} />
+            <Route path="pricing" element={<Pricing />} />
+            <Route path="prices" element={<Pricing />} />
             <Route path="*" element={<PageError />} />
           </Route>
         </Routes>

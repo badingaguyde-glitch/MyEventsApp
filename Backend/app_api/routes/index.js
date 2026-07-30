@@ -15,6 +15,9 @@ router.route('/user')
     .post(ctrlUser.registerUser)
     .put(ctrlUser.requireAuth, ctrlUser.updateProfile);
 
+router.route('/user/profile')
+    .get(ctrlUser.requireAuth, ctrlUser.getProfile);
+
 router.route('/user/generate-code')
     .post(ctrlUser.generateRegistrationCode);
 
@@ -100,6 +103,9 @@ router.route('/tickets/:ticketid')
     .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
 
 router.get('/tickets/:id/pdf',ctrlTicketPdf.downloadTicketPDF);
+
+router.route('/payment/upgrade-plan')
+    .post(ctrlUser.requireAuth, ctrlPayment.createPlanUpgradeSession);
 
 router.route('/payment/success')
     .get(ctrlPayment.paymentSuccess);
