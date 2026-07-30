@@ -520,3 +520,313 @@ div{
   padding:5px;
 }
 
+/* ==========================================
+   BANTU PROMO WIDGET CUSTOM STYLES
+   ========================================== */
+.promo-card {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 999999 !important;
+  width: 350px !important;
+  max-width: calc(100vw - 48px) !important;
+  border-radius: 24px !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  text-align: left !important;
+  color: #ffffff !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
+@keyframes border-glow-free {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 76, 59, 0.2), inset 0 0 10px rgba(255, 76, 59, 0.05); border-color: rgba(255, 76, 59, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 76, 59, 0.55), inset 0 0 20px rgba(255, 76, 59, 0.2); border-color: rgba(255, 76, 59, 0.8); }
+}
+
+@keyframes border-glow-pro {
+  0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2), inset 0 0 10px rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.55), inset 0 0 20px rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.8); }
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 24px; }
+}
+
+.promo-glow-active-free {
+  animation: border-glow-free 2.5s infinite ease-in-out !important;
+}
+
+.promo-glow-active-pro {
+  animation: border-glow-pro 2.5s infinite ease-in-out !important;
+}
+
+.promo-glow-idle-free {
+  border-color: rgba(255, 76, 59, 0.45) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.promo-glow-idle-pro {
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.promo-grid-bg {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+  background-size: 12px 12px !important;
+  opacity: 0.9 !important;
+  z-index: 0 !important;
+  animation: grid-move 10s linear infinite !important;
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.15) !important;
+}
+
+.promo-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 10 !important;
+}
+
+.promo-header-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.promo-icon-box {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.promo-icon-box.free {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #f87171 !important;
+}
+
+.promo-icon-box.pro {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: #818cf8 !important;
+}
+
+.promo-label {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.15em !important;
+  color: #94a3b8 !important;
+  text-transform: uppercase !important;
+}
+
+.promo-close-btn {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 6px !important;
+  border-radius: 9999px !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s !important;
+  z-index: 20 !important;
+}
+
+.promo-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.promo-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  z-index: 10 !important;
+}
+
+.promo-title {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+  color: #ffffff !important;
+}
+
+.promo-desc {
+  font-size: 12px !important;
+  color: #cbd5e1 !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  font-weight: 500 !important;
+}
+
+.promo-comparison-box {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 16px !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  z-index: 10 !important;
+}
+
+.promo-comp-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  color: #94a3b8 !important;
+}
+
+.promo-progress-bg {
+  height: 8px !important;
+  border-radius: 9999px !important;
+  background: #1e293b !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.promo-progress-fill {
+  height: 100% !important;
+  border-radius: 9999px !important;
+}
+
+.promo-progress-fill.free {
+  background: linear-gradient(90deg, #ef4444, #f59e0b) !important;
+  width: 50% !important;
+}
+
+.promo-progress-fill.pro {
+  background: linear-gradient(90deg, #f59e0b, #10b981) !important;
+  width: 75% !important;
+}
+
+.promo-scale-labels {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.promo-rate-badge {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.promo-rate-badge.free-act { color: #f87171 !important; }
+.promo-rate-badge.pro-target { color: #34d399 !important; }
+.promo-rate-badge.pro-act { color: #fbbf24 !important; }
+.promo-rate-badge.ent-target { color: #34d399 !important; }
+
+.promo-perks-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  z-index: 10 !important;
+}
+
+.promo-perks-title {
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+.promo-perks-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.promo-perk-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 11px !important;
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+}
+
+.promo-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding-top: 12px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 10 !important;
+}
+
+.promo-footer-left {
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+}
+
+.promo-btn-cta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+  transition: all 0.2s !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+.promo-btn-cta.free {
+  background: #ef4444 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+.promo-btn-cta.free:hover {
+  background: #dc2626 !important;
+}
+
+.promo-btn-cta.pro {
+  background: #6366f1 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+}
+
+.promo-btn-cta.pro:hover {
+  background: #4f46e5 !important;
+}
+
+.promo-enterprise-badge {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 999999 !important;
+  background: #0f172a !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #34d399 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
