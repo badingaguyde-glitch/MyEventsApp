@@ -5,6 +5,7 @@ import EventService from '../services/EventServices';
 import { motion } from 'framer-motion';
 import { TrendingUp, Users, Calendar, Ticket, ArrowUpRight, Plus, QrCode } from 'lucide-react';
 import Loader from './Loader';
+import PromoWidget from './PromoWidget';
 
 const Organizerdashboard = () => {
     const user = useSelector((state) => state.user);
@@ -106,6 +107,7 @@ const Organizerdashboard = () => {
                     </div>
                 </div>
             </div>
+            <PromoWidget userPlan={user?.plan} />
         </div>
     );
 };

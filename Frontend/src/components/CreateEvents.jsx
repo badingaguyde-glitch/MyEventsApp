@@ -6,6 +6,7 @@ import { checkOrganizerStatus } from '../redux/reducer';
 import { motion } from 'framer-motion';
 import { AlertCircle, Save, X, Calendar, MapPin, Users, DollarSign, Image as ImageIcon, Tag, Clock } from 'lucide-react';
 import Loader from './Loader';
+import PromoWidget from './PromoWidget';
 
 const CreateEvents = () => {
   const user = useSelector((state) => state.user);
@@ -361,6 +362,7 @@ const CreateEvents = () => {
 
           </form>
         </motion.div>
+        <PromoWidget userPlan={user?.plan} />
       </div>
     </div>
   );

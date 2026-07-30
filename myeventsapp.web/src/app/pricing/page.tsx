@@ -4,11 +4,14 @@ export default function PricingPage() {
     const plans = [
         {
             name: "Gratuit",
-            price: "0 €",
-            description: "Pour les petits événements, rassemblements familiaux ou associatifs.",
+            price: "5.0 %",
+            suffix: " + 0,99 € / billet",
+            description: "Pour commencer à vendre des billets sans aucun frais de création.",
             features: [
+                "Création d'événements 100% gratuite",
                 "Jusqu'à 100 participants",
-                "Billets gratuits uniquement",
+                "Billets payants et gratuits",
+                "Frais de service : 5.0% + 0,99 € / billet",
                 "Validation par QR Code standard",
                 "Support par email sous 48h",
             ],
@@ -17,12 +20,14 @@ export default function PricingPage() {
         },
         {
             name: "Professionnel",
-            price: "1.5 %",
-            suffix: " / billet vendu",
+            price: "2.5 %",
+            suffix: " + 0,49 € / billet",
             description: "Pour les festivals, concerts et conférences commerciales.",
             features: [
+                "Création d'événements 100% gratuite",
                 "Participants illimités",
                 "Billets payants et gratuits",
+                "Frais de service réduits : 2.5% + 0,49 € / billet",
                 "Paiements locaux (Mobile Money & Cartes)",
                 "Éditeur de billets PDF personnalisés (couleurs, texte)",
                 "Bannière d'événement sur les billets PDF",
@@ -35,9 +40,12 @@ export default function PricingPage() {
         },
         {
             name: "Entreprise",
-            price: "Sur devis",
+            price: "1.0 %",
+            suffix: " flat par billet",
             description: "Pour les grands organisateurs de festivals multilocations et grands stades.",
             features: [
+                "Création d'événements 100% gratuite",
+                "Frais de service minimaux : 1.0% flat (sans frais fixe)",
                 "Gestion multi-organisateurs & équipes",
                 "Personnalisation graphique avancée des billets",
                 "Affichage des logos sponsors sur les billets",
