@@ -4,7 +4,9 @@ const User = require('../models/User');
 const client = require('../config/redis');
 const cache = require('../middleware/cache');
 const { publishToQueue } = require('../config/rabbitmq');
-
+const PDFDocument = require('pdfkit');
+const qrcode = require('qrcode');
+const axios = require('axios');
 
 
 
@@ -532,10 +534,10 @@ const bulkVerifyTickets = async (req, res) => {
     }
 };
 
-const bulkCancelTickets = async (req,res)=>{
-    try{
+const bulkCancelTickets = async (req, res) => {
+    try {
         const userPlan = req.user.plan || 'free';
-        if (userPlan !== 'enterprise'){
+        if (userPlan !== 'enterprise') {
             return res.status(403).json({
                 message: "La gestion de remboursement en masse est réservée exclusivement aux comptes Entreprise."
             });
@@ -544,21 +546,21 @@ const bulkCancelTickets = async (req,res)=>{
         const { ticketIds } = req.body;
         if (!ticketIds || !Array.isArray(ticketIds)) {
             return res.status(400).json({
-                message:"Veuillez fournir un tableau d'identifiants de tickets (ticketsIds)."
+                message: "Veuillez fournir un tableau d'identifiants de tickets (ticketsIds)."
             });
         }
 
         const result = await Ticket.updateMany(
-            {_id: { $in: ticketIds}, status: {$ne: 'cancelled'}},
+            { _id: { $in: ticketIds }, status: { $ne: 'cancelled' } },
             { $set: { status: 'cancelled' } }
         );
         res.status(200).json({
             message: "Remboursement/annulation en masse effectuée avec succès.",
             modifiedCount: result.modifiedCount
         });
-    }catch (error){
+    } catch (error) {
         console.error('Bulk cancel tickets error:', error);
-        res.status(500).json({message:"Erreur serveur lors de l'annulation en masse."});
+        res.status(500).json({ message: "Erreur serveur lors de l'annulation en masse." });
     }
 };
 

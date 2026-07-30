@@ -4,6 +4,7 @@ var ctrlEvent = require('../controller/EventControllers');
 var ctrlTicket = require('../controller/TicketControllers');
 var ctrlUser = require('../controller/UserControllers');
 var ctrlPayment = require('../controller/PaymentControllers');
+var ctrlTicketPdf = require('../controller/TicketPdfDownload');
 var cache = require('../middleware/cache');
 
 
@@ -97,6 +98,8 @@ router.route('/tickets/code/:code')
 
 router.route('/tickets/:ticketid')
     .delete(ctrlUser.requireAuth, ctrlTicket.cancelTicket);
+
+router.get('/tickets/:id/pdf',ctrlTicketPdf.downloadTicketPDF);
 
 router.route('/payment/success')
     .get(ctrlPayment.paymentSuccess);

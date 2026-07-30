@@ -4,7 +4,7 @@ import { Calendar, MapPin, Trash2, CheckCircle2, AlertCircle } from 'lucide-reac
 
 const TicketCard = ({ ticket, index, onCancel }) => {
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -25,7 +25,7 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                         </div>
                         <h3 className="text-lg md:text-xl font-bold truncate">{ticket.event?.title}</h3>
                     </div>
-                    <button 
+                    <button
                         onClick={() => onCancel(ticket._id)}
                         className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all bg-rose-500/10"
                         title="Cancel Booking"
@@ -69,7 +69,19 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                     </div>
                 </div>
             </div>
-            
+            {ticket.status !== 'pending_payment' && (
+                <div className="pt-4 border-t border-light flex justify-end">
+                    <a
+                        href={`https://138-68-145-245.nip.io/api/tickets/${ticket._id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 no-underline"
+                    >
+                        📥 Download my Ticket PDF
+                    </a>
+                </div>
+            )}
+
             {/* Ticket Cutout Effect */}
             <div className="ticket-cutout-left"></div>
             <div className="ticket-cutout-right"></div>

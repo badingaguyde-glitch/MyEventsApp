@@ -65,14 +65,15 @@ async function generateEmailPayload(messageData) {
             <p>Your account has been successfully created. You can now explore and participate in the best events near you.</p>
             <a href="${process.env.FRONTEND_URL || '#'}" class="button">Explore Events</a>
         `);
-    } 
-    
+    }
+
     else if (type === 'ticket_purchase_email') {
         to = user.email;
         subject = `Your ticket for ${event.title}`;
         const qrData = ticket.code.toString();
         // Utilisation d'une API publique sécurisée pour générer le QR code en HTTP, évitant le blocage du base64 par Gmail
         const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+        const pdfDownloadUrl = `https://138-68-145-245.nip.io/api/tickets/${ticket._id || ticket.id}/pdf`;
 
         htmlContent = emailWrapper(`
             <h1>Congratulations on your purchase!</h1>
@@ -86,7 +87,7 @@ async function generateEmailPayload(messageData) {
                 </ul>
             </div>
             ${receiptUrl ? `<div style="text-align: center; margin: 20px 0;">
-                <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">Voir mon reçu de paiement</a>
+                <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">View my payment receipt</a>
             </div>` : ''}
 
             <p>Please present this QR Code at the entrance of the event:</p>
@@ -94,11 +95,16 @@ async function generateEmailPayload(messageData) {
                 <img src="${qrImageUrl}" alt="Access QR Code" />
                 <p style="font-size: 12px; color: #a0aec0; margin-top: 10px;">Ticket Code: ${ticket.code}</p>
             </div>
+            <br />
+            <p>For your convenience, you can also download your ticket in PDF format:</p>
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="${pdfDownloadUrl}" target="_blank" class="button" style="background-color: #3182ce;">📥 Download my Ticket PDF</a>
+            </div>
             
             <p>See you soon for an unforgettable experience!</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'event_created_email') {
         to = user.email;
         subject = `Your event "${event.title}" has been created!`;
@@ -114,14 +120,14 @@ async function generateEmailPayload(messageData) {
                 </ul>
             </div>
             ${receiptUrl ? `<div style="text-align: center; margin: 20px 0;">
-                <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">Voir mon reçu de commission</a>
+                <a href="${receiptUrl}" target="_blank" class="button" style="background-color: #48bb78;">View my commission receipt</a>
             </div>` : ''}
 
             <p>It's time to share your event and invite your attendees!</p>
             <a href="${process.env.FRONTEND_URL || '#'}/events/${event.id}" class="button">Manage My Event</a>
         `);
-    } 
-    
+    }
+
     else if (type === 'event_deleted_email') {
         to = user.email;
         subject = `Your event "${event.title}" has been cancelled`;
@@ -129,8 +135,8 @@ async function generateEmailPayload(messageData) {
             <h1>Event Cancelled</h1>
             <p>Hi ${user.name}, we confirm that your event <span class="highlight">${event.title}</span> has been successfully removed from our platform.</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'event_updated_email') {
         to = user.email;
         subject = `Update for your event "${event.title}"`;
@@ -146,8 +152,8 @@ async function generateEmailPayload(messageData) {
                 </ul>
             </div>
         `);
-    } 
-    
+    }
+
     else if (type === 'user_deletion_email') {
         to = user.email;
         subject = `Your account has been deleted`;
@@ -156,8 +162,8 @@ async function generateEmailPayload(messageData) {
             <p>We confirm that your BANTU MyEvents account has been deleted according to your request.</p>
             <p>We hope to see you again soon!</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'registration_code_email') {
         to = email;
         subject = 'Your verification code';
@@ -172,8 +178,8 @@ async function generateEmailPayload(messageData) {
             
             <p>This code will expire in <span class="highlight">10 minutes</span>. If you did not initiate this request, you can safely ignore this email.</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'reset_password_code_email') {
         to = email;
         subject = 'Réinitialisation de votre mot de passe';
@@ -189,8 +195,8 @@ async function generateEmailPayload(messageData) {
             
             <p>Ce code est valide pendant <span class="highlight">10 minutes</span>. Si vous n'avez pas demandé ce changement, vous pouvez ignorer cet e-mail en toute sécurité.</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'ticket_pending_email') {
         to = user.email;
         subject = `Action Required: Pay for your ticket for ${event.title}`;
@@ -204,8 +210,8 @@ async function generateEmailPayload(messageData) {
                 <a href="${receiptUrl || '#'}" class="button" style="background-color: #f59e0b;">💳 Complete Payment Now</a>
             </div>
         `);
-    } 
-    
+    }
+
     else if (type === 'event_pending_email') {
         to = user.email;
         subject = `Action Required: Activate your event "${event.title}"`;
@@ -219,8 +225,8 @@ async function generateEmailPayload(messageData) {
                 <a href="${receiptUrl || '#'}" class="button" style="background-color: #f59e0b;">💳 Pay Event Fee Now</a>
             </div>
         `);
-    } 
-    
+    }
+
     else if (type === 'ticket_expired_email') {
         to = user.email;
         subject = `Ticket Reservation Expired: ${event.title}`;
@@ -230,8 +236,8 @@ async function generateEmailPayload(messageData) {
             <p>Since the payment was not received within the required timeframe, your ticket reservation (Code: <strong>${ticket.code}</strong>) has expired and has been deleted.</p>
             <p>If you still wish to attend, please visit the event page and reserve a new ticket.</p>
         `);
-    } 
-    
+    }
+
     else if (type === 'event_expired_email') {
         to = user.email;
         subject = `Event Registration Expired: "${event.title}"`;
@@ -241,8 +247,8 @@ async function generateEmailPayload(messageData) {
             <p>Since the activation fee was not paid within the required timeframe, your event creation request has expired and was deleted from our database.</p>
             <p>If you still wish to publish this event, please create a new event request and complete the payment.</p>
         `);
-    } 
-    
+    }
+
     else {
         console.log('Type de message inconnu pour la génération d\'email:', type);
         return null;

@@ -8,6 +8,7 @@ import { Ticket, COLORS } from '@/assets/constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAuth } from '@/context/AuthContext'
 import QRCode from 'react-native-qrcode-svg'
+import { Linking } from 'react-native';
 
 export default function MyTickets() {
   const { user, loading: authLoading } = useAuth()
@@ -21,7 +22,7 @@ export default function MyTickets() {
       setLoading(false)
       return
     }
-    
+
     try {
       // Using the correct endpoint from your routes: GET /api/tickets
       const response = await api.get('/tickets')
@@ -43,8 +44,8 @@ export default function MyTickets() {
       'Are you sure you want to cancel this ticket?',
       [
         { text: 'No', style: 'cancel' },
-        { 
-          text: 'Yes', 
+        {
+          text: 'Yes',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -116,7 +117,7 @@ export default function MyTickets() {
           <Text className='text-gray-500 text-center mb-8'>
             Please login to view your tickets
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             className='bg-black w-full py-4 rounded-xl'
             onPress={() => router.push('/login')}
           >
@@ -149,7 +150,7 @@ export default function MyTickets() {
           <Text className='text-gray-500 text-center mb-8'>
             {"You haven't purchased any tickets yet. Browse events and get your tickets now!"}
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             className='bg-black w-full py-4 rounded-xl'
             onPress={() => router.push('/events')}
           >
@@ -183,7 +184,7 @@ export default function MyTickets() {
           })
 
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               className='mx-4 mb-4 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'
               onPress={() => setSelectedTicket(item)}
             >
@@ -225,7 +226,7 @@ export default function MyTickets() {
                 )}
 
                 {item.status === 'active' && item.eventStatus !== 'past' && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     className='mt-3 bg-red-50 py-2 rounded-lg'
                     onPress={() => cancelTicket(item._id)}
                   >
@@ -268,7 +269,7 @@ export default function MyTickets() {
           transparent={true}
           onRequestClose={() => setSelectedTicket(null)}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             className='flex-1 bg-black/50 justify-center items-center'
             activeOpacity={1}
             onPress={() => setSelectedTicket(null)}
@@ -286,8 +287,8 @@ export default function MyTickets() {
                 </View>
               ) : (
                 <View className='items-center mb-4'>
-                  <QRCode 
-                    value={selectedTicket.ticketCode} 
+                  <QRCode
+                    value={selectedTicket.ticketCode}
                     size={180}
                   />
                 </View>
@@ -304,12 +305,20 @@ export default function MyTickets() {
               <Text className='text-center text-primary font-bold text-lg mt-2'>
                 ${selectedTicket.price}
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 className='mt-4 bg-black py-3 rounded-xl'
                 onPress={() => setSelectedTicket(null)}
               >
                 <Text className='text-white text-center font-bold'>Close</Text>
               </TouchableOpacity>
+              {selectedTicket.status !== 'pending_payment' && (
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`https://138-68-145-245.nip.io/api/tickets/${selectedTicket._id}/pdf`)}
+                  className="mt-3 py-2.5 bg-blue-600 rounded-lg flex-row items-center justify-center"
+                >
+                  <Text className="text-white font-bold text-xs">📥 Télécharger le billet PDF</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </TouchableOpacity>
         </Modal>
