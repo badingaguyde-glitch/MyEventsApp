@@ -236,4 +236,4 @@ const downloadTicketPDF = async (req, res) => {
     }
 };
 
-export default { downloadTicketPDF };
+module.exports = { downloadTicketPDF };
