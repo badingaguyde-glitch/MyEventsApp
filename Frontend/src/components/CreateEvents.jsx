@@ -134,12 +134,12 @@ const CreateEvents = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="form space-y-8">
 
             {/* Event Narrative */}
             <div className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                <label className="label block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ">
                   Event Narrative
                 </label>
                 <input
@@ -154,7 +154,7 @@ const CreateEvents = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                <label className="label block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
                   Event Detail
                 </label>
                 <textarea
@@ -170,7 +170,7 @@ const CreateEvents = () => {
 
               {/* Category */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                <label className="label block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
                   Category
                 </label>
                 <div className="relative">
@@ -193,7 +193,7 @@ const CreateEvents = () => {
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                <label className="label block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
                   Orchestration Venue
                 </label>
 
@@ -323,7 +323,7 @@ const CreateEvents = () => {
                   </p>
                 </div>
               ) : (
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-xs text-slate-400">
+                <div className="attention p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-xs text-slate-400">
                   💡 L'ajout de <strong>co-organisateurs et d'équipes</strong> est une fonctionnalité réservée aux membres <span className="text-brand-accent font-bold">Entreprise</span>.
                 </div>
               )}
@@ -331,7 +331,7 @@ const CreateEvents = () => {
 
             {/* Image */}
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+              <label className="label block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
                 Event Image
               </label>
               <input

@@ -5,7 +5,7 @@ import { logout, checkOrganizerStatus } from '../redux/reducer';
 import { Calendar, Ticket, User, LogOut, Search, Home as HomeIcon, QrCode, Shield, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {createPortal} from 'react-dom';
+import { createPortal } from 'react-dom';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,16 +21,16 @@ const Navbar = () => {
         }
     }, [isLoggedIn, user]);
     React.useEffect(() => {
-    if (isOpen) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
 
-    return () => {
-        document.body.style.overflow = '';
-    };
-}, [isOpen]);
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -66,61 +66,61 @@ const Navbar = () => {
                                 className="nav-sidebar z-[1001]"
                             >
                                 <div className="p-6 flex flex-col h-full">
-                                <div className="flex justify-between items-center mb-10">
-                                    <span className="text-sm font-black uppercase tracking-[0.2em] text-primary">Menu</span>
-                                    <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-white transition-all bg-white/5 rounded-lg border border-white/10">
-                                        <X size={20} />
-                                    </button>
-                                </div>
+                                    <div className="flex justify-between items-center mb-10">
+                                        <span className="text-sm font-black uppercase tracking-[0.2em] text-primary">Menu</span>
+                                        <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-white transition-all bg-white/5 rounded-lg border border-white/10">
+                                            <X size={20} />
+                                        </button>
+                                    </div>
 
-                                <div className="space-y-2">
-                                    {navLinks.map((link) => (
-                                        <Link
-                                            key={link.path}
-                                            to={link.path}
-                                            onClick={() => setIsOpen(false)}
-                                            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white no-underline"
-                                        >
-                                            <div className="p-2 bg-white/5 rounded-lg">
-                                                <link.icon size={18} className="text-primary" />
-                                            </div>
-                                            {link.name}
-                                        </Link>
-                                    ))}
-                                </div>
-
-                                <div className="mt-auto pt-8 border-t border-light">
-                                    {isLoggedIn ? (
-                                        <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        {navLinks.map((link) => (
                                             <Link
-                                                to="/profile"
+                                                key={link.path}
+                                                to={link.path}
                                                 onClick={() => setIsOpen(false)}
-                                                className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white no-underline"
+                                                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white no-underline"
                                             >
-                                                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
-                                                    <User size={18} className="text-primary" />
+                                                <div className="p-2 bg-white/5 rounded-lg">
+                                                    <link.icon size={18} className="text-primary" />
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] text-slate-500">Account</span>
-                                                    <span>{user.name}</span>
-                                                </div>
+                                                {link.name}
                                             </Link>
-                                            <button
-                                                onClick={() => { handleLogout(); setIsOpen(false); }}
-                                                className="w-full flex items-center gap-4 p-4 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-all text-sm font-bold uppercase tracking-widest bg-none border-none cursor-pointer"
-                                            >
-                                                <LogOut size={18} />
-                                                Sign Out
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-4">
-                                            <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl no-underline">Login</Link>
-                                            <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary rounded-2xl no-underline">Sign Up</Link>
-                                        </div>
-                                    )}
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-auto pt-8 border-t border-light">
+                                        {isLoggedIn ? (
+                                            <div className="space-y-4">
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white no-underline"
+                                                >
+                                                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
+                                                        <User size={18} className="text-primary" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-slate-500">Account</span>
+                                                        <span>{user.name}</span>
+                                                    </div>
+                                                </Link>
+                                                <button
+                                                    onClick={() => { handleLogout(); setIsOpen(false); }}
+                                                    className="w-full flex items-center gap-4 p-4 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-all text-sm font-bold uppercase tracking-widest bg-none border-none cursor-pointer"
+                                                >
+                                                    <LogOut size={18} />
+                                                    Sign Out
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col gap-4">
+                                                <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl no-underline">Login</Link>
+                                                <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary rounded-2xl no-underline">Sign Up</Link>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
                             </motion.div>
                         </>
                     )}

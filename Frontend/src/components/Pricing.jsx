@@ -57,6 +57,7 @@ const Pricing = () => {
                 setError("Impossible de démarrer la session de paiement.");
                 setLoading(false);
             }
+            UserDataService.logout();
         } catch (err) {
             console.error("Upgrade error:", err);
             setError(err.response?.data?.message || "Erreur lors de l'initialisation du paiement.");
@@ -79,12 +80,12 @@ const Pricing = () => {
             <div className="flex flex-col items-center text-center space-y-4">
                 <button 
                     onClick={() => navigate('/organizer-dashboard')}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm self-start mb-4"
+                    className="btn-secondary flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm self-start mb-4"
                 >
                     <ArrowLeft className="h-4 w-4" /> Retour au tableau de bord
                 </button>
                 
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white">
+                <h1 className="text-gradient text-4xl md:text-5xl font-black tracking-tight text-white">
                     Choisissez le forfait qui s'adapte à votre <span className="neon-text font-black">envergure</span>
                 </h1>
                 <p className="text-zinc-400 max-w-xl text-base">
@@ -153,7 +154,7 @@ const Pricing = () => {
 
                     <button 
                         disabled
-                        className="w-full mt-8 bg-zinc-800/50 text-zinc-500 font-bold py-3 px-4 rounded-xl border border-white/5 text-center text-sm cursor-not-allowed"
+                        className={`${currentPlan === 'free' ? 'btn-secondary' : 'btn-primary'} w-full mt-8 bg-zinc-800/50 text-zinc-500 font-bold py-3 px-4 rounded-xl border border-white/5 text-center text-sm cursor-not-allowed`}
                     >
                         {currentPlan === 'free' ? 'Déjà actif' : 'Forfait basique'}
                     </button>
@@ -215,10 +216,10 @@ const Pricing = () => {
                         disabled={loading || currentPlan === 'pro' || currentPlan === 'enterprise'}
                         className={`w-full mt-8 font-bold py-3 px-4 rounded-xl text-center text-sm transition-all flex justify-center items-center gap-2 ${
                             currentPlan === 'pro'
-                                ? 'bg-brand-accent/20 text-brand-accent border border-brand-accent/30 cursor-not-allowed'
+                                ? 'btn-secondary bg-brand-accent/20 text-brand-accent border border-brand-accent/30 cursor-not-allowed'
                                 : currentPlan === 'enterprise'
-                                ? 'bg-zinc-800 text-zinc-500 border border-white/5 cursor-not-allowed'
-                                : 'bg-brand-accent hover:bg-brand-accentHover text-white shadow-lg shadow-brand-accent/20 cursor-pointer'
+                                ? ' bg-zinc-800 text-zinc-500 border border-white/5 cursor-not-allowed'
+                                : 'btn-primary bg-brand-accent hover:bg-brand-accentHover text-white shadow-lg shadow-brand-accent/20 cursor-pointer'
                         }`}
                     >
                         {loading ? (
@@ -280,13 +281,13 @@ const Pricing = () => {
                         </ul>
                     </div>
 
-                    <button 
+                    <button
                         onClick={() => handleUpgrade('enterprise')}
                         disabled={loading || currentPlan === 'enterprise'}
                         className={`w-full mt-8 font-bold py-3 px-4 rounded-xl text-center text-sm transition-all flex justify-center items-center gap-2 ${
                             currentPlan === 'enterprise'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed'
-                                : 'bg-white/5 hover:bg-white/10 text-white border border-white/10 cursor-pointer'
+                                ? 'btn-secondary bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed'
+                                : 'btn-primary bg-white/5 hover:bg-white/10 text-white border border-white/10 cursor-pointer'
                         }`}
                     >
                         {loading ? (

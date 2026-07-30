@@ -126,7 +126,7 @@ const EditEvent = () => {
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Event Title</label>
+                            <label className=" block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Event Title</label>
                             <input
                                 type="text" name="title" required
                                 className="input"
@@ -470,9 +470,10 @@ const EditEvent = () => {
                             <p className="text-xs text-slate-400 max-w-lg mx-auto">
                                 Devenez membre <strong>BANTU PRO</strong> pour déverrouiller l'accès complet à la personnalisation graphique des billets (modèles Classique/Modern/Badge, choix des couleurs et polices, logos sponsors, et prévisualisation live).
                             </p>
+                            <a href='/pricing'>
                             <button type="button" className="btn-primary text-xs py-2.5 px-6">
                                 Découvrir l'offre PRO
-                            </button>
+                            </button></a>
                         </div>
                     )}
 
