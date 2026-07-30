@@ -10,7 +10,7 @@ const getEventById = (id) => {
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL 
     ? `${import.meta.env.VITE_API_BASE_URL}/api` 
-    : "http://localhost:5000/api";
+    : "https://138-68-145-245.nip.io/api";
 
 const createEvent = async (data, token) => {
     const response = await fetch(`${BASE_URL}/events`, {
