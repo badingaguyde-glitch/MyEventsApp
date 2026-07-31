@@ -8,10 +8,15 @@ export default function Footer() {
         <footer className="bg-brand-dark/30 border-t border-white/5 py-16 mt-24">
             <div className="mx-auto max-w-7xl px-6 grid grid-cols-2 md:grid-cols-5 gap-12">
                 <div className="col-span-2 flex flex-col gap-4">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="bg-brand-accent p-2 rounded-lg text-white">
-                            <Ticket className="h-5 w-5" />
-                        </div>
+                    <Link href="/" className="flex items-center gap-3">
+                        <img 
+                            src="/images/logo.png" 
+                            alt="BANTU" 
+                            className="h-9 w-auto object-contain"
+                            onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                            }}
+                        />
                         <span className="text-lg font-bold tracking-tight text-white">
                             BANTU <span className="text-brand-accent">MY EVENT</span>
                         </span>

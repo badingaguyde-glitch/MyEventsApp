@@ -12,10 +12,15 @@ export default function Header() {
         <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/5">
             <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="bg-brand-accent p-2 rounded-lg text-white group-hover:scale-105 transition-transform">
-                        <Ticket className="h-6 w-6" />
-                    </div>
+                <Link href="/" className="flex items-center gap-3 group">
+                    <img 
+                        src="/images/logo.png" 
+                        alt="BANTU" 
+                        className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
                     <span className="text-xl font-bold tracking-tight text-white">
                         BANTU <span className="text-brand-accent">MY EVENT</span>
                     </span>

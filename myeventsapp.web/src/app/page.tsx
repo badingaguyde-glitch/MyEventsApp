@@ -148,7 +148,7 @@ export default function Home() {
           {/* Overlay d'ambiance évènement */}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent z-10" />
           <img
-            src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200"
+            src="/images/Banner1.jpg"
             alt="Showcase de festival musical avec foule enthousiaste"
             className="w-full h-full object-cover brightness-75 scale-105 hover:scale-100 transition-transform duration-[2s]"
           />
@@ -209,6 +209,61 @@ export default function Home() {
             );
           })}
         </motion.div>
+      </section>
+
+      {/* --- SECTION GALERIE D'ÉVÉNEMENTS LOCAUX --- */}
+      <section className="py-16 text-center">
+        <div className="max-w-5xl mx-auto space-y-8">
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-xs font-semibold">
+              <Sparkles className="h-3.5 w-3.5" /> Galerie Locale
+            </span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white animate-fade-in">
+              Propulsé par BANTU sur le terrain
+            </h2>
+            <p className="text-zinc-400 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
+              Découvrez les ambiances authentiques et les événements locaux gérés de bout en bout grâce à notre plateforme.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="relative h-64 rounded-2xl overflow-hidden group border border-white/5 shadow-lg">
+              <img
+                src="/images/Banner1.jpg"
+                alt="Concert local BANTU"
+                className="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 text-left">
+                <span className="text-[10px] uppercase tracking-wider text-brand-accent font-bold mb-1">Musique & Concerts</span>
+                <h4 className="text-lg font-bold text-white">Bantu Live Sessions</h4>
+              </div>
+            </div>
+
+            <div className="relative h-64 rounded-2xl overflow-hidden group border border-white/5 shadow-lg">
+              <img
+                src="/images/banner2.jpg"
+                alt="Conférence professionnelle"
+                className="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 text-left">
+                <span className="text-[10px] uppercase tracking-wider text-brand-accent font-bold mb-1">Corporate & Tech</span>
+                <h4 className="text-lg font-bold text-white">Forum BANTU Entreprendre</h4>
+              </div>
+            </div>
+
+            <div className="relative h-64 rounded-2xl overflow-hidden group border border-white/5 shadow-lg">
+              <img
+                src="/images/banner3.jpg"
+                alt="Festival local"
+                className="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 text-left">
+                <span className="text-[10px] uppercase tracking-wider text-brand-accent font-bold mb-1">Festivals & Culture</span>
+                <h4 className="text-lg font-bold text-white">Festival des Arts de Dakar</h4>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* --- 5. SECTION TÉLÉCHARGEMENT APPLICATION MOBILE --- */}

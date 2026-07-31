@@ -38,6 +38,27 @@ export default function PressPage() {
           </button>
         </div>
       </div>
+
+      {/* Visual Assets Showcase */}
+      <div className="p-8 rounded-3xl bg-white/[0.01] border border-white/5 space-y-6">
+        <h3 className="text-xl font-bold text-white mb-4">Aperçu des Ressources Officielles</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-zinc-950/50 border border-white/5 flex flex-col items-center justify-center h-32">
+            <img src="/images/logo.png" alt="BANTU Logo" className="max-h-16 w-auto object-contain mb-2" />
+            <span className="text-[10px] text-zinc-500 font-mono">logo.png</span>
+          </div>
+          <div className="p-4 rounded-2xl bg-zinc-950/50 border border-white/5 flex flex-col items-center justify-center h-32">
+            <img src="/images/icon.png" alt="BANTU Icon" className="max-h-16 w-auto rounded-xl object-contain mb-2" />
+            <span className="text-[10px] text-zinc-500 font-mono">icon.png</span>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden border border-white/5 h-32 group col-span-2">
+            <img src="/images/Banner1.jpg" alt="BANTU Banner" className="w-full h-full object-cover brightness-75" />
+            <div className="absolute inset-0 bg-black/40 flex items-end p-3">
+              <span className="text-[10px] text-zinc-300 font-mono">Banner1.jpg</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
