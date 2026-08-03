@@ -31,3 +31,8 @@ process.on('SIGINT',function(){
 require('./User');
 require('./Event');
 require('./Ticket');
+require('./ServiceProvider');
+require('./Booking');
+require('./SocialPost');
+require('./ChatMessage');
+require('./Notification');

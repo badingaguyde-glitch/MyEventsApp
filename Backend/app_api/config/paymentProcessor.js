@@ -116,6 +116,36 @@ async function processPaymentEvent(msg) {
                 console.log(`User ${metadata.userId} upgraded to plan ${metadata.plan} via webhook.`);
             }
         }
+
+        // --- CAS 4: UPGRADE VISIBILITE PRESTATAIRE ---
+        else if (metadata.type === 'provider_premium_upgrade') {
+            const ServiceProvider = mongoose.model('ServiceProvider');
+            const provider = await ServiceProvider.findById(metadata.providerId);
+            if (provider) {
+                provider.visibilityTier = 'premium';
+                provider.premiumExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                await provider.save();
+                console.log(`Provider ${metadata.providerId} upgraded to premium via webhook.`);
+            }
+        }else if(metadata.type === 'service_booking'){
+            const Booking = mongoose.model('Booking');
+            const SericeProvider = mongoose.model('ServiceProvider');
+            const booking = await Booking.findById(metadata.bookingId);
+            if(booking){
+                booking.paymentStatus = 'paid';
+                booking.status = 'accepted';
+                await booking.save();
+                console.log(`Booking ${metadata.bookingId} marked as paid and accepted via webhook.`);
+
+                const provider = await SericeProvider.findById(booking.provider);
+                if(provider){
+                    provider.unavailableDates.push(booking.bookingDate);
+                    await provider.save();
+                }
+
+                console.log(`Réservation ${metadata.bookingId} marquée comme payée et acceptée, et la date ajoutée aux indisponibilités du prestataire.`);
+            }
+        }
     }
 }
 

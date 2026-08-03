@@ -120,7 +120,7 @@ export interface User {
   lastName: string;
   email: string;
   interests: string[];
-  role: 'user' | 'admin' | 'event_organizer';
+  role: 'user' | 'admin' | 'event_organizer' | 'service_provider';
   token?: string;
 }
 

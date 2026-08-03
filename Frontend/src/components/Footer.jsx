@@ -7,10 +7,12 @@ const Footer = () => {
             <div className="flex flex-col items-center gap-12">
                 <div className="space-y-6 max-w-lg mx-auto">
                     <div className="flex items-center justify-center gap-3 text-2xl font-black tracking-tighter text-white">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Calendar className="text-primary" size={24} />
-                        </div>
-                        <span className="uppercase tracking-widest text-lg">MyEvents</span>
+                        <img 
+                            src="/logo.png" 
+                            alt="BANTU Logo" 
+                            style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+                        />
+                        <span className="uppercase tracking-widest text-lg">BANTU MY EVENT</span>
                     </div>
                     <p className="text-slate-500 text-sm font-medium leading-relaxed">
                         Connecting global communities through unforgettable experiences. The nexus for professional event orchestration and discovery.
@@ -19,11 +21,13 @@ const Footer = () => {
 
                 <div className="flex flex-col md:flex-row flex-wrap justify-center gap-10 md:gap-16 w-full">
                     <div className="space-y-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 w-full md:w-auto text-center md:text-left">
-                        <p className="text-white">Platform</p>
+                        <a href="#" className="p-3 text-slate-400 hover:text-primary transition-all no-underline text-inherit">
+                                Platform
+                        </a>
                         <ul className="space-y-3">
-                            <li className="hover:text-primary transition-colors cursor-pointer">Discovery</li>
-                            <li className="hover:text-primary transition-colors cursor-pointer">Ticketing</li>
-                            <li className="hover:text-primary transition-colors cursor-pointer">Verification</li>
+                            <a className="hover:text-primary transition-colors cursor-pointer">Discovery<br /></a>
+                            <a className="hover:text-primary transition-colors cursor-pointer">Ticketing<br/></a>
+                            <a className="hover:text-primary transition-colors cursor-pointer">Verification</a>
                         </ul>
                     </div>
                     <div className="space-y-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 w-full md:w-auto text-center md:text-left">

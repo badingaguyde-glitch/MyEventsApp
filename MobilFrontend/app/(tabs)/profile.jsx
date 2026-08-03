@@ -312,10 +312,53 @@ export default function Profile() {
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  className='flex-row justify-between items-center py-4'
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
                   onPress={() => router.push('/mytickets')}
                 >
                   <Text className='text-black font-semibold'>My Tickets</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
+                  onPress={() => router.push('/marketplace')}
+                >
+                  <Text className='text-black font-semibold'>Marketplace Prestataires</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
+                  onPress={() => router.push('/social-feed')}
+                >
+                  <Text className='text-black font-semibold'>Fil Social</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
+                </TouchableOpacity>
+
+                <View className='flex-row justify-between items-center py-4 border-b border-gray-100'>
+                  <Text className='text-black font-semibold'>Profil Public (Réseau)</Text>
+                  <TouchableOpacity 
+                    onPress={async () => {
+                      try {
+                        const newPublicState = !user.isProfilePublic;
+                        const res = await api.put('/user', { isProfilePublic: newPublicState });
+                        updateUser(res.data);
+                        Alert.alert('Succès', `Profil rendu ${newPublicState ? 'public' : 'confidentiel'}`);
+                      } catch(e) {
+                        Alert.alert('Erreur', 'Impossible de modifier le profil');
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-lg ${user.isProfilePublic ? 'bg-green-600' : 'bg-gray-400'}`}
+                  >
+                    <Text className='text-white text-xs font-bold'>{user.isProfilePublic ? 'Activé' : 'Désactivé'}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity 
+                  className='flex-row justify-between items-center py-4 border-b border-gray-100'
+                  onPress={() => router.push('/provider-dashboard')}
+                >
+                  <Text className='text-black font-semibold'>Espace Prestataire</Text>
                   <Ionicons name="chevron-forward" size={20} color={COLORS.secondary} />
                 </TouchableOpacity>
 

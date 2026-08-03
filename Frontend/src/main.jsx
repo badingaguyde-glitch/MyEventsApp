@@ -22,6 +22,11 @@ import TicketCancel from './components/TicketCancel';
 import Template from './components/Template';
 import ProtectedRoute from './components/ProtectedRoute';
 import Pricing from './components/Pricing';
+import Marketplace from './components/Marketplace';
+import ProviderProfile from './components/ProviderProfile';
+import ProviderDashboard from './components/ProviderDashboard';
+import SocialFeed from './components/SocialFeed';
+import EventChat from './components/EventChat';
 import store from './redux/store';
 import { Provider } from 'react-redux';
 import "./App.css";
@@ -62,6 +67,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="tickets/cancel" element={<TicketCancel />} />
             <Route path="pricing" element={<Pricing />} />
             <Route path="prices" element={<Pricing />} />
+            <Route path="marketplace" element={<Marketplace />} />
+            <Route path="providers/:id" element={<ProviderProfile />} />
+            <Route path="provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
+            <Route path="social-feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
+            <Route path="events/:id/chat" element={<ProtectedRoute><EventChat /></ProtectedRoute>} />
             <Route path="*" element={<PageError />} />
           </Route>
         </Routes>

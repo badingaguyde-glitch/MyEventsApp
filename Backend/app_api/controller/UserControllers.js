@@ -91,7 +91,7 @@ const requireAuth = async (req, res, next) => {
 };
 
 const requireAdminOrOwner = (req, res, next) => {
-    if (req.user.role !== 'admin' && req.user.role !== 'event_organizer' && req.user.id !== req.event.organizer.toString()) {
+    if (req.user.role !== 'admin' && req.user.role !== 'event_organizer' && req.user.role !== 'service_provider' && req.user.id !== req.event.organizer.toString()) {
         return res.status(403).json({ message: 'Admin or event organizer access required' });
     }
     next();

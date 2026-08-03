@@ -5,6 +5,10 @@ var ctrlTicket = require('../controller/TicketControllers');
 var ctrlUser = require('../controller/UserControllers');
 var ctrlPayment = require('../controller/PaymentControllers');
 var ctrlTicketPdf = require('../controller/TicketPdfDownload');
+var ctrlProvider = require('../controller/ServiceProviderControllers');
+var ctrlBooking = require('../controller/BookingControllers');
+var ctrlSocial = require('../controller/SocialControllers');
+var ctrlNotif = require('../controller/NotificationControllers');
 var cache = require('../middleware/cache');
 
 
@@ -112,5 +116,86 @@ router.route('/payment/success')
 
 router.route('/payment/cancel')
     .get(ctrlPayment.paymentCancel);
+
+// ==========================================
+// PRESTATAIRES & MARKETPLACE ROUTES
+// ==========================================
+router.route('/providers')
+    .get(ctrlProvider.getProviders)
+    .post(ctrlUser.requireAuth, ctrlProvider.upsertProviderProfile);
+
+router.route('/providers/availability')
+    .put(ctrlUser.requireAuth, ctrlProvider.updateAvailability);
+
+router.route('/providers/premium-upgrade')
+    .post(ctrlUser.requireAuth, ctrlProvider.createPremiumSubscriptionSession);
+
+router.route('/providers/:id')
+    .get(ctrlProvider.getProviderById);
+
+router.route('/providers/:id/reviews')
+    .post(ctrlUser.requireAuth, ctrlProvider.addReview);
+
+// ==========================================
+// DEMANDES DE RESERVATIONS (BOOKINGS) ROUTES
+// ==========================================
+router.route('/bookings')
+    .post(ctrlUser.requireAuth, ctrlBooking.createBooking);
+
+router.route('/bookings/my-requests')
+    .get(ctrlUser.requireAuth, ctrlBooking.getOrganizerBookings);
+
+router.route('/bookings/my-jobs')
+    .get(ctrlUser.requireAuth, ctrlBooking.getProviderBookings);
+
+router.route('/bookings/:id/status')
+    .put(ctrlUser.requireAuth, ctrlBooking.updateBookingStatus);
+
+// ==========================================
+// RÉSEAU SOCIAL & CHAT ROUTES
+// ==========================================
+router.route('/users/:userId/follow')
+    .post(ctrlUser.requireAuth, ctrlSocial.toggleFollow);
+
+router.route('/events/:eventId/like')
+    .post(ctrlUser.requireAuth, ctrlSocial.toggleLikeEvent);
+
+router.route('/events/:eventId/attendees')
+    .get(ctrlUser.requireAuth, ctrlSocial.getEventAttendees);
+
+router.route('/events/:eventId/chat/upload')
+    .post(ctrlUser.requireAuth, ctrlSocial.uploadChatMedia);
+
+router.route('/events/:eventId/chat')
+    .get(ctrlUser.requireAuth, ctrlSocial.getEventMessages)
+    .post(ctrlUser.requireAuth, ctrlSocial.sendEventMessage);
+
+router.route('/posts')
+    .get(ctrlUser.requireAuth, ctrlSocial.getSocialFeed)
+    .post(ctrlUser.requireAuth, ctrlSocial.createPost);
+
+router.route('/posts/:postId/like')
+    .post(ctrlUser.requireAuth, ctrlSocial.toggleLikePost);
+
+router.route('/posts/:postId/comments')
+    .post(ctrlUser.requireAuth, ctrlSocial.addCommentToPost);
+
+// ==========================================
+// NOTIFICATIONS ROUTES
+// ==========================================
+router.route('/notifications')
+    .get(ctrlUser.requireAuth, ctrlNotif.getMyNotifications);
+
+router.route('/notifications/unread-count')
+    .get(ctrlUser.requireAuth, ctrlNotif.getUnreadCount);
+
+router.route('/notifications/mark-all-read')
+    .put(ctrlUser.requireAuth, ctrlNotif.markAllAsRead);
+
+router.route('/notifications/:id/read')
+    .put(ctrlUser.requireAuth, ctrlNotif.markAsRead);
+
+router.route('/user/push-token')
+    .put(ctrlUser.requireAuth, ctrlNotif.savePushToken);
 
 module.exports = router;

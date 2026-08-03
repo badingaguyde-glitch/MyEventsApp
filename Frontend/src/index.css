@@ -3,23 +3,53 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  font-family: var(--font-sans);
+
+  color-scheme: light;
+  color: #0f172a;
+  background-color: #f8fafc; /* Fond clair */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Variables Bantu adaptées pour le thème clair */
   --primary: #111111;
   --primary-hover: #222222;
-  --bg-dark: #0a0a0b;
-  --bg-card: #161617;
-  --text-main: #f8fafc;
-  --text-muted: #888888;
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-white: #e2e8f0;
   --accent: #FF4C3B;
   --accent-hover: #e03d2e;
+}
+/* ==========================================================================
+   AJUSTEMENTS DU THEME CLAIR
+   ========================================================================== */
+.input, select, select option {
+  color: var(--text-main) !important;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.input::placeholder {
+  color: var(--slate-400) !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+}
+
+/* S'assurer que les titres de tableaux ne sont pas blancs */
+th {
+  color: var(--slate-500) !important;
+}
+
+/* Adapter les textes blancs dans les cartes pour rester lisibles */
+.card-content, .card p, .event-desc {
+  color: var(--text-muted) !important;
 }
 
 body {

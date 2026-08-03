@@ -2,11 +2,13 @@ var mongoose = require('mongoose');
 var Event = mongoose.model('Event');
 var Ticket = mongoose.model('Ticket');
 var User = mongoose.model('User');
+var Notification = mongoose.model('Notification');
 var client = require('../config/redis');
 var cache = require('../middleware/cache');
 require('dotenv').config();
 var calculateDistance = require('./utils/calculate');
 const { publishToQueue } = require('../config/rabbitmq');
+const { sendExpoPushNotifications } = require('../config/pushHelper');
 
 
 const createEvent = async (req, res) => {
@@ -104,6 +106,44 @@ const createEvent = async (req, res) => {
             });
         } catch (e) {
             console.error("Failed to queue email:", e);
+        }
+
+        // Notifier les abonnés de l'organisateur
+        try {
+            const organizer = await User.findById(req.user.id).select('followers name lastName');
+            if (organizer && organizer.followers && organizer.followers.length > 0) {
+                // 1. Créer les notifications en base
+                const notifications = organizer.followers.map(followerId => ({
+                    recipient: followerId,
+                    sender: req.user.id,
+                    type: 'new_event',
+                    title: `Nouvel événement de ${organizer.name} ${organizer.lastName}`,
+                    body: `"${event.title}" — ${new Date(event.date).toLocaleDateString('fr-FR')} à ${event.location}`,
+                    refModel: 'Event',
+                    refId: event._id
+                }));
+                await Notification.insertMany(notifications);
+
+                // 2. Récupérer les tokens Expo des abonnés pour les push natifs
+                const followers = await User.find(
+                    { _id: { $in: organizer.followers }, expoPushToken: { $ne: null } },
+                    'expoPushToken'
+                );
+
+                if (followers.length > 0) {
+                    const pushMessages = followers.map(f => ({
+                        to: f.expoPushToken,
+                        sound: 'default',
+                        title: `🎉 ${organizer.name} ${organizer.lastName} organise un nouvel événement !`,
+                        body: `"${event.title}" — ${new Date(event.date).toLocaleDateString('fr-FR')} à ${event.location}`,
+                        data: { eventId: event._id.toString(), type: 'new_event' }
+                    }));
+                    // Fire-and-forget — ne bloque pas la réponse HTTP
+                    sendExpoPushNotifications(pushMessages);
+                }
+            }
+        } catch (notifError) {
+            console.error('Failed to create follower notifications:', notifError);
         }
 
         return res.status(201).json({

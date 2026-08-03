@@ -2,16 +2,16 @@
 
 :root {
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg-dark: #0a0a0b;
-  --bg-card: rgba(255, 255, 255, 0.02);
-  --border-white: rgba(255, 255, 255, 0.08);
+  --bg-dark: #e1e2e2; /* Fond clair principal */
+  --bg-card: #ffffff; /* Cartes en blanc pur */
+  --border-white: rgba(15, 23, 42, 0.08); /* Bordure subtile foncée */
   --primary: #111111;
   --primary-hover: #222222;
-  --secondary: #666666;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --glass: rgba(255, 255, 255, 0.01);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  --secondary: #64748b;
+  --text-main: #0f172a; /* Texte ardoise foncé */
+  --text-muted: #475569;
+  --glass: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(15, 23, 42, 0.06);
   --accent: #FF4C3B;
   --accent-hover: #e03d2e;
   
@@ -21,15 +21,42 @@
   --rose-400: #FF4C3B;
   --emerald-400: #10b981;
   --amber-400: #f59e0b;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --bg-darker: #050505;
+  --slate-400: #64748b;
+  --slate-500: #475569;
+  --bg-darker: #f1f5f9; /* Arrière-plan secondaire plus clair */
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* ==========================================================================
+   AJUSTEMENTS DU THEME CLAIR
+   ========================================================================== */
+.input, select, select option {
+  color: var(--text-main) !important;
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.input::placeholder {
+  color: var(--slate-400) !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+}
+
+/* S'assurer que les titres de tableaux ne sont pas blancs */
+th {
+  color: var(--slate-500) !important;
+}
+
+/* Adapter les textes blancs dans les cartes pour rester lisibles */
+.card-content, .card p, .event-desc {
+  color: var(--text-muted) !important;
 }
 
 body {
@@ -99,10 +126,10 @@ body {
 
 /* Components */
 .glass {
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .card {
@@ -124,12 +151,12 @@ body {
 }
 select {
   background-color: transparent;
-  color: white;
+  color: var(--text-muted);
 }
 
 select option {
   background-color: #0f172a;
-  color: white;
+  color:var(--text-muted);
 }
 
 .card:hover {
@@ -146,7 +173,7 @@ select option {
   background: rgba(255, 255, 255, 0.03);
   border: 0.5cap solid rgba(120, 143, 215, 0.17);
   border-radius: 1rem;
-  color: white;
+  color: var(--text-muted);
   outline: none;
   font-family: inherit;
   transition: all 0.2s;
@@ -200,12 +227,27 @@ select option {
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
-  color: white;
+  color: rgb(163, 163, 163);
   padding: 0.85rem 1.75rem;
   border-radius: 1rem;
   font-weight: 600;
   transition: all 0.3s;
-  border: 1px solid var(--border-white);
+  border: 2px solid var(--border-white);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-secondary-menu {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgb(163, 163, 163);
+  padding: 0.85rem 1.75rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  border: 2px solid var(--border-white);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -215,7 +257,12 @@ select option {
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 0, 0, 0.597);
+}
+.btn-secondary-menu:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(0, 0, 0, 0.597);
+  color:white;
 }
 
 /* Navbar specific */
@@ -229,7 +276,19 @@ select option {
   gap: 0.5rem;
   text-decoration: none;
 }
-.nav-link:hover { color: white; }
+.nav-link-menu {
+  color: var(--slate-400);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.nav-link:hover { color: var(--bg-dark); }
+.nav-link-menu:hover { color: var(--text-main); }
 
 /* Utilities */
 .w-full { width: 100%; max-width: 100vw; overflow-x: hidden; }
@@ -298,7 +357,7 @@ select option {
   gap: 0.5rem;
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-main);
   flex-shrink: 0;
   text-decoration: none;
 }
@@ -324,7 +383,7 @@ select option {
 
 .nav-menu-btn {
   padding: 0.5rem;
-  color: white;
+  color: var(--text-muted);
   background: none;
   border: 1px solid var(--border-white);
   border-radius: 0.75rem;

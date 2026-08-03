@@ -41,7 +41,8 @@ const eventSchema = new mongoose.Schema({
         sponsorLogoUrl: { type: String, default: '' }
     },
 
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 module.exports = mongoose.model('Event', eventSchema);

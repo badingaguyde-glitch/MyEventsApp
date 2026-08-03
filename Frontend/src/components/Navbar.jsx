@@ -6,6 +6,7 @@ import { Calendar, Ticket, User, LogOut, Search, Home as HomeIcon, QrCode, Shiel
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -40,8 +41,11 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/', icon: HomeIcon },
         { name: 'Events', path: '/events', icon: Calendar },
+        { name: 'Marketplace', path: '/marketplace', icon: Search },
         { name: 'Search', path: '/search', icon: Search },
         ...(isLoggedIn ? [{ name: 'My Tickets', path: '/my-tickets', icon: Ticket }] : []),
+        ...(isLoggedIn ? [{ name: 'Fil Social', path: '/social-feed', icon: User }] : []),
+        ...(isLoggedIn ? [{ name: 'Espace Prestataire', path: '/provider-dashboard', icon: Shield }] : []),
         ...(isLoggedIn && (user?.role === 'organizer' || myEvents.length > 0) ? [{ name: 'Organizer', path: '/organizer-dashboard', icon: Shield }] : []),
         ...(isLoggedIn && user?.role === 'admin' ? [{ name: 'Admin', path: '/admin-dashboard', icon: Shield }] : []),
         ...(isLoggedIn && (user?.role === 'organizer' || user?.role === 'admin' || myEvents.length > 0) ? [{ name: 'Verify', path: '/verify-ticket', icon: QrCode }] : []),
@@ -79,7 +83,7 @@ const Navbar = () => {
                                                 key={link.path}
                                                 to={link.path}
                                                 onClick={() => setIsOpen(false)}
-                                                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white no-underline"
+                                                className="nav-link-menu flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white no-underline"
                                             >
                                                 <div className="p-2 bg-white/5 rounded-lg">
                                                     <link.icon size={18} className="text-primary" />
@@ -95,7 +99,7 @@ const Navbar = () => {
                                                 <Link
                                                     to="/profile"
                                                     onClick={() => setIsOpen(false)}
-                                                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white no-underline"
+                                                    className="nav-link-menu flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold uppercase tracking-widest text-white no-underline"
                                                 >
                                                     <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
                                                         <User size={18} className="text-primary" />
@@ -115,7 +119,7 @@ const Navbar = () => {
                                             </div>
                                         ) : (
                                             <div className="flex flex-col gap-4">
-                                                <Link to="/login" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl no-underline">Login</Link>
+                                                <Link to="/login" onClick={() => setIsOpen(false)} className="btn-secondary-menu block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white glass rounded-2xl no-underline">Login</Link>
                                                 <Link to="/register" onClick={() => setIsOpen(false)} className="block w-full text-center py-4 text-sm font-bold uppercase tracking-widest text-white btn-primary rounded-2xl no-underline">Sign Up</Link>
                                             </div>
                                         )}
@@ -129,11 +133,12 @@ const Navbar = () => {
             )}
             <nav className="glass sticky top-0 z-50 w-full border-b py-3">
                 <div className="container mx-auto flex items-center justify-between px-4">
-                    <Link to="/" className="nav-logo">
-                        <Calendar className="text-primary shrink-0" size={32} />
-                        <span className="text-gradient">
-                            MyEvents
-                        </span>
+                    <Link to="/" className="nav-logo flex items-center gap-2">
+                        <img 
+                            src="/logo.png" 
+                            alt="BANTU Logo" 
+                            style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
+                        />
                     </Link>
 
 
@@ -158,6 +163,7 @@ const Navbar = () => {
                             )}
                         </div>
 
+                        {isLoggedIn && <NotificationBell />}
 
                         <button
                             className="nav-menu-btn"
