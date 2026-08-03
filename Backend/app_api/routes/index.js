@@ -198,4 +198,13 @@ router.route('/notifications/:id/read')
 router.route('/user/push-token')
     .put(ctrlUser.requireAuth, ctrlNotif.savePushToken);
 
+// ==========================================
+// ADMIN ROUTES
+// ==========================================
+router.route('/admin/stats')
+    .get(ctrlUser.requireAuth, ctrlUser.requireAdmin, ctrlUser.getAdminDashboardStats);
+
+router.route('/admin/users')
+    .get(ctrlUser.requireAuth, ctrlUser.requireAdmin, ctrlUser.getAllUsers);
+
 module.exports = router;

@@ -58,6 +58,18 @@ const upgradePlan = (data, token) => {
     });
 };
 
+const getAdminStats = (token) => {
+    return http.get("/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
+const getAllUsers = (token) => {
+    return http.get("/admin/users", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const UserDataService = {
     generateCode,
     verifyCode,
@@ -70,7 +82,9 @@ const UserDataService = {
     resetPassword,
     getProfile,
     upgradePlan,
-    logout
+    logout,
+    getAdminStats,
+    getAllUsers
 };
 
 export default UserDataService;

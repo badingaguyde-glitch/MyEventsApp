@@ -3,11 +3,14 @@ import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import EventService from '../services/EventServices';
 import Loader from './Loader';
-import { Users, Calendar, Shield, Activity, BarChart3, Settings, Search, MoreHorizontal, User, DollarSign } from 'lucide-react';
+import UserDataService from '../services/UserDataServices';
+import { Users, Calendar, Shield, Activity, BarChart3, Settings, Search, MoreHorizontal, User, DollarSign, Mail } from 'lucide-react';
 
 const AdminDashboard = () => {
     const user = useSelector((state) => state.user);
-    const [events, setEvents] = useState([]);
+    const [stats, setStats] = useState({ users: 0, events: 0, sessions: 'LIVE', growth: 'N/A' });
+    const [usersList, setUsersList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -18,10 +21,14 @@ const AdminDashboard = () => {
 
     const fetchPlatformData = async () => {
         try {
-            const res = await EventService.getAllEvents();
-            setEvents(res.data);
+            const [statsRes, usersRes] = await Promise.all([
+                UserDataService.getAdminStats(user.token),
+                UserDataService.getAllUsers(user.token)
+            ]);
+            setStats(statsRes.data);
+            setUsersList(usersRes.data);
         } catch (err) {
-            console.error('Failed to load platform data');
+            console.error('Failed to load platform data', err);
         } finally {
             setLoading(false);
         }
@@ -48,10 +55,10 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
-                    { label: 'Active Users', value: '---', icon: Users, color: 'text-indigo-400' },
-                    { label: 'Platform Events', value: events.length, icon: Calendar, color: 'text-primary' },
-                    { label: 'Secured Sessions', value: 'LIVE', icon: Activity, color: 'text-emerald-400' },
-                    { label: 'Growth Vector', value: 'N/A', icon: BarChart3, color: 'text-amber-400' },
+                    { label: 'Active Users', value: stats.users, icon: Users, color: 'text-indigo-400' },
+                    { label: 'Platform Events', value: stats.events, icon: Calendar, color: 'text-primary' },
+                    { label: 'Secured Sessions', value: stats.sessions, icon: Activity, color: 'text-emerald-400' },
+                    { label: 'Growth Vector', value: stats.growth, icon: BarChart3, color: 'text-amber-400' },
                 ].map((stat, i) => (
                     <motion.div 
                         key={stat.label}
@@ -101,16 +108,62 @@ const AdminDashboard = () => {
                     <h2 className="text-2xl font-black">Identity Management</h2>
                     <div className="relative w-full md:w-72">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                        <input type="text" placeholder="Search identities..." className="input pl-12 py-3" />
+                        <input 
+                            type="text" 
+                            placeholder="Search identities..." 
+                            className="input pl-12 py-3"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-40">
-                    <Shield size={48} className="text-slate-600" />
-                    <div className="space-y-1">
-                        <p className="text-xl font-black uppercase tracking-wider text-slate-400">Governance Layer Protected</p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">User directory integration pending backend deployment</p>
-                    </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-white/10 text-slate-400 text-sm">
+                                <th className="pb-4 font-medium pl-4">User</th>
+                                <th className="pb-4 font-medium">Role</th>
+                                <th className="pb-4 font-medium">Plan</th>
+                                <th className="pb-4 font-medium text-right pr-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {usersList.filter(u => `${u.name} ${u.lastName} ${u.email}`.toLowerCase().includes(searchTerm.toLowerCase())).map((u) => (
+                                <tr key={u._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                    <td className="py-4 pl-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
+                                                {u.name?.charAt(0)}{u.lastName?.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-white">{u.name} {u.lastName}</p>
+                                                <p className="text-xs text-slate-400 flex items-center gap-1"><Mail size={10} /> {u.email}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="py-4">
+                                        <span className="px-2 py-1 bg-white/5 rounded text-xs font-medium text-slate-300 capitalize">{u.role?.replace('_', ' ')}</span>
+                                    </td>
+                                    <td className="py-4">
+                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${u.plan === 'enterprise' ? 'bg-indigo-500/20 text-indigo-400' : u.plan === 'pro' ? 'bg-primary/20 text-primary' : 'bg-slate-500/20 text-slate-400'}`}>
+                                            {u.plan || 'Free'}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 text-right pr-4">
+                                        <button className="p-2 hover:bg-white/10 rounded-lg text-slate-400 transition-colors">
+                                            <MoreHorizontal size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {usersList.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-8 text-slate-500">No users found</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

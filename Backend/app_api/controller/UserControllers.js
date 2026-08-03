@@ -371,6 +371,32 @@ const getProfile = async (req, res) => {
     }
 };
 
+const getAdminDashboardStats = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        const totalEvents = await mongoose.model('Event').countDocuments();
+        res.json({
+            users: totalUsers,
+            events: totalEvents,
+            sessions: 'LIVE',
+            growth: '+12%'
+        });
+    } catch (error) {
+        console.error('Get admin stats error:', error);
+        res.status(500).json({ message: 'Server error retrieving stats' });
+    }
+};
+
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-password');
+        res.json(users);
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({ message: 'Server error retrieving users' });
+    }
+};
+
 module.exports = {
     generateRegistrationCode,
     checkEmail,
@@ -384,5 +410,7 @@ module.exports = {
     forgotPassword,
     verifyResetCode,
     resetPassword,
-    getProfile
+    getProfile,
+    getAdminDashboardStats,
+    getAllUsers
 };
