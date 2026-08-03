@@ -13,9 +13,6 @@ export default function Footer() {
                             src="/images/logo.png" 
                             alt="BANTU" 
                             className="h-9 w-auto object-contain"
-                            onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                            }}
                         />
                         <span className="text-lg font-bold tracking-tight text-white">
                             BANTU <span className="text-brand-accent">MY EVENT</span>

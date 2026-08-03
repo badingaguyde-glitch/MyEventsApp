@@ -2,19 +2,19 @@
 
 @theme inline {
   --color-brand-dark: #111111;
-  --color-brand-gray:#666666;
-  --color-brand-accent:#ff4c3b;
-  --color-brand-accent-hover:#e03d2e;
-  --color-brand-light:#f7f7f7;
+  --color-brand-gray: #666666;
+  --color-brand-accent: #ff4c3b;
+  --color-brand-accent-hover: #e03d2e;
+  --color-brand-light: #f7f7f7;
 
   --font-sans: var(--font-outfit), system-ui, sans-serif;
 }
 
 :root {
-  --background: #060608;
-  --foreground: #f8fafc;
-  --card-bg: rgba(255,255,255,0.02);
-  --card-border: rgba(255,255,255,0.08);
+  --background: #e7e7e7; /* Fond clair élégant */
+  --foreground: #0f172a; /* Texte ardoise foncé */
+  --card-bg: #ffffff;    /* Cartes en blanc pur */
+  --card-border: rgba(15, 23, 42, 0.08); /* Bordure sombre très subtile */
 }
 
 body {
@@ -25,14 +25,14 @@ body {
 }
 
 .glass-panel {
-  background: rgba(17,17,17,0.7);
+  background: rgba(255, 255, 255, 0.75); /* Flou translucide blanc */
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -45,7 +45,46 @@ body {
   transform: translateX(-50%);
   width: min(100vw, 800px);
   height: 400px;
-  background: radial-gradient(circle, rgba(255,76,59,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 76, 59, 0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* ==========================================================================
+   SURCHARGE DE SÉCURITÉ THEME CLAIR (Évite le texte invisible)
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6, .text-white {
+  color: #0f172a !important; /* Force les titres à être sombres */
+}
+
+p, .text-zinc-400, .text-zinc-300 {
+  color: #475569 !important; /* Force les textes secondaires à être lisibles */
+}
+
+/* Conteneurs de cartes et panels */
+.bg-white\/\[0\.02\], 
+.bg-white\/\[0\.01\], 
+.bg-white\/5 {
+  background-color: #ffffff !important;
+  border: 2px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+.bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.03) !important;
+}
+
+.border-white\/5, 
+.border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Conserver le texte des boutons d'actions principaux en blanc */
+.bg-brand-accent, 
+.btn-primary, 
+a[href*="my-events-app-xi"] {
+  color: #ffffff !important;
+}
+.bg-brand-accent *, 
+.btn-primary * {
+  color: #ffffff !important;
 }

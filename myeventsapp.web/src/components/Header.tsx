@@ -17,9 +17,6 @@ export default function Header() {
                         src="/images/logo.png" 
                         alt="BANTU" 
                         className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                        }}
                     />
                     <span className="text-xl font-bold tracking-tight text-white">
                         BANTU <span className="text-brand-accent">MY EVENT</span>
