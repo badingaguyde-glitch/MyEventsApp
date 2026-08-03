@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const User = require('../app_api/models/User');
 const Event = require('../app_api/models/Event');
 const Ticket = require('../app_api/models/Ticket');
+require('../app_api/models/Notification');
 const { createEvent } = require('../app_api/controller/EventControllers');
 const { bulkCancelTickets } = require('../app_api/controller/TicketControllers');
 
