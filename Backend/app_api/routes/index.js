@@ -170,6 +170,9 @@ router.route('/events/:eventId/chat')
     .get(ctrlUser.requireAuth, ctrlSocial.getEventMessages)
     .post(ctrlUser.requireAuth, ctrlSocial.sendEventMessage);
 
+router.route('/posts/upload')
+    .post(ctrlUser.requireAuth, ctrlSocial.uploadPostMedia);
+
 router.route('/posts')
     .get(ctrlUser.requireAuth, ctrlSocial.getSocialFeed)
     .post(ctrlUser.requireAuth, ctrlSocial.createPost);

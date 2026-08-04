@@ -162,6 +162,41 @@ const EventDetails = () => {
                             >
                                 {booking ? 'Processing...' : <><Ticket size={20} className="gap-2" /> Purchase Secret Ticket</>}
                             </button>
+                            
+                            <button
+                                onClick={async () => {
+                                    if (!isLoggedIn) {
+                                        setMessage({ text: 'Vous devez être connecté pour accéder au chat.', type: 'error' });
+                                        return;
+                                    }
+                                    const organizerId = event.organizer?._id || event.organizer;
+                                    const myId = user._id || user.id;
+                                    if (user.role === 'admin' || (organizerId && myId && organizerId.toString() === myId.toString())) {
+                                        navigate(`/events/${id}/chat`);
+                                        return;
+                                    }
+                                    try {
+                                        const res = await TicketService.getUserTickets(user.token);
+                                        const myTickets = res.data;
+                                        const hasTicket = myTickets.some(t => {
+                                            const tEventId = t.event?._id || t.event;
+                                            return tEventId && tEventId.toString() === id.toString();
+                                        });
+                                        if (hasTicket) {
+                                            navigate(`/events/${id}/chat`);
+                                        } else {
+                                            setMessage({ text: 'Vous devez acheter un billet pour accéder au chat de cet événement.', type: 'error' });
+                                        }
+                                    } catch (err) {
+                                        setMessage({ text: 'Erreur lors de la vérification des accès.', type: 'error' });
+                                    }
+                                }}
+                                className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl font-bold bg-slate-800 text-white hover:bg-slate-700 transition-colors border border-slate-700"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                                Rejoindre le Chat de l'Événement
+                            </button>
+
                             {!isLoggedIn && (
                                 <p className="text-center text-[10px] font-bold text-slate-500 mt-6 uppercase tracking-[0.2em]">Authentication Required</p>
                             )}

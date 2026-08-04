@@ -6,11 +6,12 @@ import { router } from 'expo-router'
 import api from '@/assets/constants/api'
 import { COLORS } from '@/assets/constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as ImagePicker from 'expo-image-picker'
 
 export default function MobileSocialFeed() {
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [mediaUrl, setMediaUrl] = useState('')
+  const [mediaUri, setMediaUri] = useState('')
   const [caption, setCaption] = useState('')
   const [commentText, setCommentText] = useState<Record<string, string>>({})
   const [myUserId, setMyUserId] = useState('')
@@ -40,16 +41,61 @@ export default function MobileSocialFeed() {
     }
   }
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setMediaUri(result.assets[0].uri);
+    }
+  }
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission requise', 'Nous avons besoin de la permission pour utiliser la caméra.');
+      return;
+    }
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setMediaUri(result.assets[0].uri);
+    }
+  }
+
   const handleCreatePost = async () => {
-    if (!mediaUrl) return
+    if (!mediaUri) return
     try {
-      await api.post('/posts', { mediaUrl, mediaType: 'image', caption })
-      setMediaUrl('')
+      const formData = new FormData();
+      const filename = mediaUri.split('/').pop() || 'media.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+      
+      formData.append('media', { uri: mediaUri, name: filename, type } as any);
+
+      // Upload the file
+      const uploadRes = await api.post('/posts/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const { mediaUrl, mediaType } = uploadRes.data;
+
+      // Create the post
+      await api.post('/posts', { mediaUrl, mediaType, caption })
+      setMediaUri('')
       setCaption('')
       Alert.alert('Succès', 'Votre publication est en ligne !')
       loadFeed()
     } catch (e) {
       console.error(e)
+      Alert.alert('Erreur', 'Impossible de publier.')
     }
   }
 
@@ -93,12 +139,27 @@ export default function MobileSocialFeed() {
         ListHeaderComponent={
           <View className="p-4 bg-gray-50 border-b border-gray-100 gap-2">
             <Text className="text-xs font-bold text-gray-400 uppercase">Partagez un souvenir</Text>
-            <TextInput 
-              placeholder="Lien de l'image (URL)..." 
-              className="border border-gray-200 bg-white rounded-xl px-3 py-2 text-xs" 
-              value={mediaUrl} 
-              onChangeText={setMediaUrl} 
-            />
+            
+            {mediaUri ? (
+              <View className="relative h-40 rounded-xl overflow-hidden mb-2">
+                <Image source={{ uri: mediaUri }} className="w-full h-full" resizeMode="cover" />
+                <TouchableOpacity onPress={() => setMediaUri('')} className="absolute top-2 right-2 bg-black/50 p-1 rounded-full">
+                  <Ionicons name="close" size={20} color="white" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View className="flex-row gap-2 my-2">
+                <TouchableOpacity onPress={takePhoto} className="flex-1 bg-gray-200 py-3 rounded-xl flex-row justify-center items-center gap-2">
+                  <Ionicons name="camera" size={20} color="black" />
+                  <Text className="text-xs font-bold">Caméra</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={pickImage} className="flex-1 bg-gray-200 py-3 rounded-xl flex-row justify-center items-center gap-2">
+                  <Ionicons name="image" size={20} color="black" />
+                  <Text className="text-xs font-bold">Galerie</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            
             <TextInput 
               placeholder="Légende..." 
               className="border border-gray-200 bg-white rounded-xl px-3 py-2 text-xs h-12" 

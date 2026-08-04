@@ -9,7 +9,8 @@ const SocialFeed = () => {
     
     const [posts, setPosts] = useState([]);
     const [caption, setCaption] = useState('');
-    const [mediaUrl, setMediaUrl] = useState('');
+    const [mediaFile, setMediaFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
     const [mediaType, setMediaType] = useState('image');
     const [newComment, setNewComment] = useState({});
 
@@ -28,12 +29,26 @@ const SocialFeed = () => {
 
     const handleCreatePost = async (e) => {
         e.preventDefault();
+        if (!mediaFile) return;
+        setUploading(true);
         try {
-            await SocialServices.createPost({ mediaUrl, mediaType, caption }, token);
+            const formData = new FormData();
+            formData.append('media', mediaFile);
+            
+            const uploadRes = await SocialServices.uploadPostMedia(formData, token);
+            const { mediaUrl, mediaType: uploadedMediaType } = uploadRes.data;
+
+            await SocialServices.createPost({ mediaUrl, mediaType: uploadedMediaType, caption }, token);
             setCaption('');
-            setMediaUrl('');
+            setMediaFile(null);
+            document.getElementById('social-feed-file-input').value = "";
             loadFeed();
-        } catch (e) { console.error("Error creating post", e); }
+        } catch (e) { 
+            console.error("Error creating post", e);
+            alert("Erreur lors de la publication : " + (e.response?.data?.message || e.message));
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleLike = async (postId) => {
@@ -61,13 +76,13 @@ const SocialFeed = () => {
                 <h3 className="font-bold text-white text-md">Partagez un souvenir</h3>
                 <form onSubmit={handleCreatePost} className="space-y-4">
                     <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-slate-400 uppercase">Lien média (URL)</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Fichier média (Image ou Vidéo)</label>
                         <input 
-                            type="text" 
-                            placeholder="https://images.unsplash.com/..."
-                            className="input w-full p-3 rounded-xl border border-white/10 bg-white/5 text-sm"
-                            value={mediaUrl} 
-                            onChange={(e) => setMediaUrl(e.target.value)} 
+                            type="file" 
+                            id="social-feed-file-input"
+                            accept="image/*,video/*"
+                            className="input w-full p-2 rounded-xl border border-white/10 bg-white/5 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/80"
+                            onChange={(e) => setMediaFile(e.target.files[0])} 
                             required
                         />
                     </div>
@@ -99,7 +114,9 @@ const SocialFeed = () => {
                             onChange={(e) => setCaption(e.target.value)}
                         />
                     </div>
-                    <button type="submit" className="btn-primary py-2 px-6 text-xs uppercase font-bold">Publier</button>
+                    <button type="submit" disabled={uploading} className="btn-primary py-2 px-6 text-xs uppercase font-bold disabled:opacity-50">
+                        {uploading ? 'Publication en cours...' : 'Publier'}
+                    </button>
                 </form>
             </div>
 

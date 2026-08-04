@@ -36,6 +36,15 @@ const sendChatMessage = (eventId, content, token) => {
     return http.post(`/events/${eventId}/chat`, { content }, { headers: { Authorization: `Bearer ${token}` } });
 };
 
+const uploadPostMedia = (formData, token) => {
+    return http.post("/posts/upload", formData, { 
+        headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+        } 
+    });
+};
+
 const SocialServices = {
     getFeed,
     createPost,
@@ -45,7 +54,8 @@ const SocialServices = {
     toggleLikeEvent,
     getAttendees,
     getChatMessages,
-    sendChatMessage
+    sendChatMessage,
+    uploadPostMedia
 };
 
 export default SocialServices;

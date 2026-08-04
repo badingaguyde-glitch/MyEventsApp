@@ -170,6 +170,43 @@ const createPost = async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
+const uploadPostMedia = [upload.single('media'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'Aucun fichier reçu.' });
+
+        const { mimetype, size, originalname, buffer } = req.file;
+        const isImage = mimetype.startsWith('image/');
+        const isVideo = mimetype.startsWith('video/');
+
+        if (isImage && size > MAX_PHOTO_BYTES) {
+            return res.status(413).json({ message: `Image trop volumineuse (max ${MAX_PHOTO_BYTES / 1024 / 1024} MB).` });
+        }
+        if (isVideo && size > MAX_VIDEO_BYTES) {
+            return res.status(413).json({ message: `Vidéo trop volumineuse (max ${MAX_VIDEO_BYTES / 1024 / 1024} MB).` });
+        }
+
+        const resourceType = isVideo ? 'video' : isImage ? 'image' : 'raw';
+        const folder = `social_media/${req.user.id}`;
+
+        const uploadResult = await uploadBufferToCloudinary(buffer, {
+            resource_type: resourceType,
+            folder,
+            public_id: `${Date.now()}_${originalname.replace(/\.[^/.]+$/, '')}`
+        });
+
+        const mediaType = isImage ? 'image' : isVideo ? 'video' : 'file';
+
+        res.status(200).json({
+            mediaUrl: uploadResult.secure_url,
+            mediaType,
+            fileName: originalname
+        });
+    } catch (e) {
+        console.error('[Post Media Upload]', e);
+        res.status(500).json({ error: e.message });
+    }
+}];
+
 // Obtenir le fil d'actualités (Posts des comptes suivis + posts personnels)
 const getSocialFeed = async (req, res) => {
     try {
@@ -311,5 +348,6 @@ module.exports = {
     getEventAttendees,
     getEventMessages,
     sendEventMessage,
-    uploadChatMedia
+    uploadChatMedia,
+    uploadPostMedia
 };
