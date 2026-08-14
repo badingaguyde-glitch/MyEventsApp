@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Calendar, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EventService from '../services/EventServices';
@@ -7,24 +7,35 @@ import EventCard from './EventCard';
 import Loader from './Loader';
 
 const EventSearch = () => {
-    const [query, setQuery] = useState('');
+    const [searchParams] = useSearchParams();
+    const initialQuery = searchParams.get('q') || '';
+    const [query, setQuery] = useState(initialQuery);
     const [results, setResults] = useState([]);
     const [searching, setSearching] = useState(false);
     const navigate = useNavigate();
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+    useEffect(() => {
+        if (initialQuery) {
+            performSearch(initialQuery);
+        }
+    }, [initialQuery]);
 
+    const performSearch = async (searchQuery) => {
         setSearching(true);
         try {
-            const res = await EventService.searchEvents(query);
+            const res = await EventService.searchEvents(searchQuery);
             setResults(res.data);
         } catch (err) {
             console.error('Search failed');
         } finally {
             setSearching(false);
         }
+    };
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (!query.trim()) return;
+        performSearch(query);
     };
 
     return (

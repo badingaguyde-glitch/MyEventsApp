@@ -189,12 +189,13 @@ const updateProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-
         user.name = req.body.name || user.name;
         user.lastName = req.body.lastName || user.lastName;
         user.email = req.body.email || user.email;
         user.interests = req.body.interests || user.interests;
-
+        if (req.body.isProfilePublic !== undefined) {
+            user.isProfilePublic = req.body.isProfilePublic;
+        }
 
         if (req.body.password) {
             const salt = await bcrypt.genSalt(10);
@@ -210,6 +211,7 @@ const updateProfile = async (req, res) => {
             email: updatedUser.email,
             interests: updatedUser.interests,
             role: updatedUser.role,
+            isProfilePublic: updatedUser.isProfilePublic,
             token: jwt.sign({ id: updatedUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
         });
     } catch (error) {
@@ -363,11 +365,39 @@ const getProfile = async (req, res) => {
             email: user.email,
             interests: user.interests,
             role: user.role,
+            isProfilePublic: user.isProfilePublic,
             plan: user.plan || 'free'
         });
     } catch (error) {
         console.error('Get profile error:', error);
         res.status(500).json({ message: 'Server error during profile retrieval' });
+    }
+};
+
+const getPublicProfile = async (req, res) => {
+    try {
+        const targetUser = await User.findById(req.params.userid);
+        if (!targetUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        // Check if profile is public OR if requesting user is the target user themselves OR is an admin
+        if (!targetUser.isProfilePublic && req.user.id !== targetUser._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'This profile is private' });
+        }
+        res.json({
+            _id: targetUser._id,
+            name: targetUser.name,
+            lastName: targetUser.lastName,
+            interests: targetUser.interests,
+            role: targetUser.role,
+            isProfilePublic: targetUser.isProfilePublic,
+            plan: targetUser.plan,
+            followers: targetUser.followers,
+            following: targetUser.following
+        });
+    } catch (error) {
+        console.error('Get public profile error:', error);
+        res.status(500).json({ message: 'Server error retrieving public profile' });
     }
 };
 
@@ -411,6 +441,7 @@ module.exports = {
     verifyResetCode,
     resetPassword,
     getProfile,
+    getPublicProfile,
     getAdminDashboardStats,
     getAllUsers
 };

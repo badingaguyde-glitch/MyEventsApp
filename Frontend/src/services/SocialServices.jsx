@@ -45,6 +45,12 @@ const uploadPostMedia = (formData, token) => {
     });
 };
 
+const getUserPosts = (userId, token) => {
+    return http.get(`/posts/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const SocialServices = {
     getFeed,
     createPost,
@@ -55,7 +61,8 @@ const SocialServices = {
     getAttendees,
     getChatMessages,
     sendChatMessage,
-    uploadPostMedia
+    uploadPostMedia,
+    getUserPosts
 };
 
 export default SocialServices;

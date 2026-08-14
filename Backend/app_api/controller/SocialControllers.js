@@ -111,6 +111,11 @@ const toggleFollow = async (req, res) => {
             return res.status(403).json({ message: "Vous ne pouvez suivre que des organisateurs ou des prestataires." });
         }
 
+        // Only allow following organizers on a paid plan (PRO or Enterprise)
+        if (targetUser.role === 'event_organizer' && targetUser.plan === 'free') {
+            return res.status(403).json({ message: "Vous ne pouvez vous abonner qu'aux organisateurs possédant un forfait payant (PRO ou Entreprise)." });
+        }
+
         const isFollowing = currentUser.following.includes(targetUserId);
 
         if (isFollowing) {
@@ -338,6 +343,17 @@ const sendEventMessage = async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
+const getUserPosts = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const posts = await SocialPost.find({ user: userId })
+            .sort({ createdAt: -1 })
+            .populate('user', 'name lastName email')
+            .populate('event', 'title date location');
+        res.status(200).json(posts);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
 module.exports = {
     toggleFollow,
     toggleLikeEvent,
@@ -349,5 +365,6 @@ module.exports = {
     getEventMessages,
     sendEventMessage,
     uploadChatMedia,
-    uploadPostMedia
+    uploadPostMedia,
+    getUserPosts
 };

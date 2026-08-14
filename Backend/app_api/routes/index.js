@@ -43,6 +43,9 @@ router.route('/user/login')
 router.route('/user/:userid')
     .delete(ctrlUser.requireAuth, ctrlUser.deleteUser);
 
+router.route('/user/:userid/public')
+    .get(ctrlUser.requireAuth, ctrlUser.getPublicProfile);
+
 
 
 
@@ -176,6 +179,9 @@ router.route('/posts/upload')
 router.route('/posts')
     .get(ctrlUser.requireAuth, ctrlSocial.getSocialFeed)
     .post(ctrlUser.requireAuth, ctrlSocial.createPost);
+
+router.route('/posts/user/:userId')
+    .get(ctrlUser.requireAuth, ctrlSocial.getUserPosts);
 
 router.route('/posts/:postId/like')
     .post(ctrlUser.requireAuth, ctrlSocial.toggleLikePost);

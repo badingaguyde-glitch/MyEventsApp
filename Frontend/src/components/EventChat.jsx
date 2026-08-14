@@ -1,36 +1,21 @@
-/**
- * EventChat.jsx
- *
- * Chat de groupe de l'événement avec partage de médias.
- *
- * LIMITES APPLIQUÉES CÔTÉ CLIENT :
- *   - Photos  : max 5 MB  → compression Canvas automatique
- *               si toujours > 5 MB après compression max → zip automatique (jszip)
- *   - Vidéos  : max 120 secondes de durée → rejet avec message clair
- *               max 100 MB de taille → zip automatique (jszip)
- */
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Send, Paperclip, X, Play, Archive, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, X, Play, Archive, Image as ImageIcon, Smile } from 'lucide-react';
 import JSZip from 'jszip';
 import SocialServices from '../services/SocialServices';
 import http from '../services/http-common';
+import UserDataService from '../services/UserDataServices';
 
-// ─── Limites ─────────────────────────────────────────────────────────────────
-const MAX_PHOTO_BYTES = 5   * 1024 * 1024;   // 5 MB
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;   // 5 MB
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;   // 100 MB
-const MAX_VIDEO_SECS  = 120;                  // 2 minutes
+const MAX_VIDEO_SECS = 120;                  // 2 minutes
 
-// ─── Utilitaires ─────────────────────────────────────────────────────────────
-
-/** Compresse une image via Canvas jusqu'à passer sous MAX_PHOTO_BYTES.
- *  Stratégie : réduction progressive qualité + dimensions. */
 async function compressImage(file) {
     const attempts = [
         { quality: 0.80, maxDim: 1920 },
         { quality: 0.60, maxDim: 1280 },
-        { quality: 0.30, maxDim:  800 },
+        { quality: 0.30, maxDim: 800 },
     ];
 
     let currentBlob = file;
@@ -44,11 +29,11 @@ async function compressImage(file) {
             img.onload = () => {
                 let { width, height } = img;
                 if (width > maxDim || height > maxDim) {
-                    if (width > height) { height = Math.round(height * maxDim / width);  width = maxDim; }
-                    else                { width  = Math.round(width  * maxDim / height); height = maxDim; }
+                    if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+                    else { width = Math.round(width * maxDim / height); height = maxDim; }
                 }
                 const canvas = document.createElement('canvas');
-                canvas.width  = width;
+                canvas.width = width;
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                 URL.revokeObjectURL(url);
@@ -63,7 +48,7 @@ async function compressImage(file) {
 
 /** Zippe un Blob et renvoie un nouveau Blob .zip */
 async function zipBlob(blob, fileName) {
-    const zip  = new JSZip();
+    const zip = new JSZip();
     zip.file(fileName, blob);
     return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
 }
@@ -80,13 +65,44 @@ function getVideoDuration(file) {
     });
 }
 
+function UserAvatar({ name, onClick }) {
+    const letter = name ? name.charAt(0).toUpperCase() : '?';
+
+    const colors = [
+        '#ef4444', '#22c55e', '#3b82f6', '#eab308',
+        '#a855f7', '#ec4899', '#6366f1', '#14b8a6',
+        '#f97316', '#06b6d4', '#84cc16', '#f43f5e',
+        '#d946ef', '#8b5cf6', '#0ea5e9', '#10b981',
+        '#f59e0b', '#64748b', '#6b7280', '#78716c'
+    ];
+    let hash = 0;
+
+    const nameString = name || '';
+    for (let i = 0; i < nameString.length; i++) {
+        hash = nameString.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = colors[Math.abs(hash) % colors.length];
+
+    return (
+        <button
+            type="button"
+            className="chat-profil-btn text-white font-bold"
+            style={{ backgroundColor: color }}
+            onClick={onClick}
+            title={name}
+        >
+            {letter}
+        </button>
+    );
+}
+
 /** Retourne { blob, mediaType, fileName } prêt pour FormData. */
 async function prepareFile(file) {
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
-    let   blob    = file;
-    let   name    = file.name;
-    let   type    = 'file';
+    let blob = file;
+    let name = file.name;
+    let type = 'file';
 
     if (isImage) {
         type = 'image';
@@ -119,18 +135,31 @@ async function prepareFile(file) {
 // ─── Composant ────────────────────────────────────────────────────────────────
 
 const EventChat = () => {
-    const { id }  = useParams();
-    const token   = useSelector(state => state.user?.token);
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const token = useSelector(state => state.user?.token);
     const localUser = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
 
-    const [messages, setMessages]   = useState([]);
-    const [text, setText]           = useState('');
+    const [messages, setMessages] = useState([]);
+    const [text, setText] = useState('');
     const [uploading, setUploading] = useState(false);
     const [uploadInfo, setUploadInfo] = useState('');
-    const [preview, setPreview]     = useState(null); // { name, type, objectUrl }
+    const [preview, setPreview] = useState(null); // { name, type, objectUrl }
     const [pendingFile, setPendingFile] = useState(null);
-    const messagesEndRef = useRef(null);
-    const fileInputRef   = useRef(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker toggle state
+    const chatContainerRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const [isNewMessage, setIsNewMessage] = useState(false); // Flag to indicate if a new message has been sent
+
+    const popularEmojis = [
+        '😀', '😂', '😍', '🔥', '🎉', '👍', '❤️', '👏', 
+        '🙌', '🚀', '💯', '✨', '🌟', '😎', '💡', '🤔',
+        '🎫', '📅', '🎵', '🍻', '🎈', '🤩', '🎯', '💪'
+    ];
+
+    const handleEmojiSelect = (emoji) => {
+        setText(prev => prev + emoji);
+    };
 
     useEffect(() => {
         if (token && id) {
@@ -141,12 +170,20 @@ const EventChat = () => {
     }, [id, token]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        const container = chatContainerRef.current;
+        if (isNewMessage && container) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+            setIsNewMessage(false); // Reset flag to prevent repeating scrolls
+        }
+    }, [isNewMessage]);
 
     const loadMessages = async () => {
         try {
             const res = await SocialServices.getChatMessages(id, token);
+            setIsNewMessage(messages.length === res.data.length ? false : true);
             setMessages(res.data);
         } catch (e) { console.error('Error loading chat', e); }
     };
@@ -180,6 +217,7 @@ const EventChat = () => {
     const handleSend = async (e) => {
         e.preventDefault();
         if (!text.trim() && !pendingFile) return;
+        setShowEmojiPicker(false);
 
         if (pendingFile) {
             await sendMedia();
@@ -188,10 +226,15 @@ const EventChat = () => {
         }
     };
 
+    const handleUserAvatarClick = (userId) => {
+        navigate(`/organizer/${userId}`);
+    };
+
     const sendText = async () => {
         try {
             const res = await SocialServices.sendChatMessage(id, text, token);
             setMessages(prev => [...prev, res.data]);
+            setIsNewMessage(true);
             setText('');
         } catch (e) { console.error(e); }
     };
@@ -216,6 +259,7 @@ const EventChat = () => {
             }, { headers: { Authorization: `Bearer ${token}` } });
 
             setMessages(prev => [...prev, msgRes.data]);
+            setIsNewMessage(true);
             setText('');
             clearPreview();
         } catch (err) {
@@ -236,7 +280,8 @@ const EventChat = () => {
                     <img
                         src={msg.mediaUrl}
                         alt="média"
-                        className="rounded-xl max-w-[280px] max-h-48 object-cover cursor-pointer hover:opacity-90 transition"
+                        style={{ maxWidth: '240px', maxHeight: '180px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '12px' }}
+                        className="cursor-pointer hover:opacity-90 transition"
                     />
                 </a>
             );
@@ -244,21 +289,21 @@ const EventChat = () => {
 
         if (msg.mediaType === 'video') {
             return (
-                <a href={msg.mediaUrl} target="_blank" rel="noreferrer"
-                   className="flex items-center gap-2 mt-1.5 p-2.5 bg-indigo-900/40 rounded-xl max-w-[280px] hover:bg-indigo-900/60 transition">
-                    <Play size={22} className="text-indigo-400 shrink-0" />
-                    <div>
-                        <p className="text-xs font-bold text-indigo-200 truncate">{msg.fileName || 'Vidéo'}</p>
-                        <p className="text-[10px] text-indigo-400">Cliquer pour regarder</p>
-                    </div>
-                </a>
+                <div className="mt-1.5 rounded-xl overflow-hidden border border-indigo-500/20 bg-black/40" style={{ maxWidth: '280px' }}>
+                    <video
+                        src={msg.mediaUrl}
+                        controls
+                        preload="metadata"
+                        style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '180px', objectFit: 'contain' }}
+                    />
+                </div>
             );
         }
 
         // fichier / zip
         return (
             <a href={msg.mediaUrl} target="_blank" rel="noreferrer" download
-               className="flex items-center gap-2 mt-1.5 p-2.5 bg-white/5 border border-white/10 rounded-xl max-w-[280px] hover:bg-white/10 transition">
+                className="flex items-center gap-2 mt-1.5 p-2.5 bg-white/5 border border-white/10 rounded-xl max-w-[280px] hover:bg-white/10 transition">
                 <Archive size={20} className="text-slate-400 shrink-0" />
                 <div>
                     <p className="text-xs font-bold text-slate-200 truncate">{msg.fileName || 'Fichier compressé'}</p>
@@ -269,7 +314,7 @@ const EventChat = () => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto card glass p-6 h-[640px] flex flex-col justify-between text-left">
+        <div className="max-w-3xl mx-auto glass p-6 h-[640px] flex flex-col justify-between text-left">
             {/* Header */}
             <div className="border-b border-white/10 pb-3">
                 <h2 className="text-xl font-black text-white font-sans uppercase">Chat Room de l'Événement</h2>
@@ -279,19 +324,25 @@ const EventChat = () => {
             </div>
 
             {/* Message list */}
-            <div className="flex-grow overflow-y-auto my-4 pr-2 space-y-4">
+            <div ref={chatContainerRef} className="chat-container chat-messages-doodle flex-grow overflow-y-auto my-4 p-6 space-y-5 rounded-2xl border border-white/5 shadow-inner">
                 {messages.length === 0 ? (
-                    <p className="text-xs text-slate-400 text-center py-10">Aucun message pour le moment. Lancez la discussion !</p>
+                    <p className="text-xs text-slate-400 text-center py-10 bg-slate-950/20 rounded-xl">Aucun message pour le moment. Lancez la discussion !</p>
                 ) : (
                     messages.map((msg) => {
                         const isMe = msg.user?._id === localUser?.id;
                         return (
-                            <div key={msg._id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                <span className="text-[10px] text-slate-500 mb-0.5">
-                                    {msg.user?.name} {msg.user?.lastName} ({msg.user?.role})
-                                </span>
+                            <div key={msg._id} className={`chat-messages-container flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                                <div className={`flex items-center gap-2 mb-1.5 ${isMe ? 'display-right' : 'display-left'}`}>
+                                    <UserAvatar 
+                                        name={msg.user?.name + ' ' + msg.user?.lastName} 
+                                        onClick={() => handleUserAvatarClick(msg.user?._id)} 
+                                    />
+                                    <span className="text-[10px] text-slate-400 font-medium">
+                                        {msg.user?.name} {msg.user?.lastName} ({msg.user?.role})
+                                    </span>
+                                </div>
                                 {msg.content && (
-                                    <div className={`p-3 rounded-2xl max-w-sm text-xs ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white/5 text-slate-200 rounded-tl-none'}`}>
+                                    <div className={`p-3.5 rounded-2xl max-w-md  border shadow-sm ${isMe ? 'bg-indigo-600/90 text-white border-indigo-500/30 rounded-tr-none' : 'bg-slate-900/80 text-slate-200 border-white/10 rounded-tl-none'}`}>
                                         {msg.content}
                                     </div>
                                 )}
@@ -300,16 +351,15 @@ const EventChat = () => {
                         );
                     })
                 )}
-                <div ref={messagesEndRef} />
             </div>
 
             {/* Prévisualisation du fichier sélectionné */}
             {preview && (
                 <div className="flex items-center gap-3 p-2.5 mb-2 bg-white/5 border border-white/10 rounded-xl">
                     {preview.type === 'image'
-                        ? <img src={preview.objectUrl} alt="aperçu" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                        ? <img src={preview.objectUrl} alt="aperçu" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
                         : preview.type === 'video'
-                            ? <Play size={20} className="text-indigo-400 shrink-0" />
+                            ? <video src={preview.objectUrl} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, backgroundColor: '#000' }} preload="metadata" />
                             : <Archive size={20} className="text-slate-400 shrink-0" />
                     }
                     <p className="text-xs text-slate-300 truncate flex-1">{preview.name}</p>
@@ -328,17 +378,46 @@ const EventChat = () => {
             )}
 
             {/* Input bar */}
-            <form onSubmit={handleSend} className="flex gap-2 pt-3 border-t border-white/10 items-center">
+            <form onSubmit={handleSend} className="flex gap-2 pt-3 border-t border-white/10 items-center relative">
+                {/* Emoji Picker Popover */}
+                {showEmojiPicker && (
+                    <div 
+                        className="chat-emoji-display "
+                    >
+                        {popularEmojis.map((emoji, index) => (
+                            <button
+                                key={index}
+                                type="button"
+                                onClick={() => handleEmojiSelect(emoji)}
+                                className="text-xl hover:bg-white/10 p-1.5 rounded-lg transition active:scale-90 flex items-center justify-center"
+                                style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Smiley button */}
+                <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2 hover:scale-110 transition shrink-0 text-indigo-400 hover:text-indigo-300"
+                    title="Ajouter un emoji"
+                >
+                    <Smile size={22} />
+                </button>
+
                 {/* Bouton fichier */}
                 <button
                     type="button"
                     id="chat-attach-btn"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition disabled:opacity-40 shrink-0"
+                    className="p-2 hover:scale-110 transition disabled:opacity-40 shrink-0 text-indigo-400 hover:text-indigo-300"
                     title="Joindre une photo ou vidéo"
                 >
-                    <Paperclip size={16} className="text-indigo-400" />
+                    <Paperclip size={22} />
                 </button>
                 <input
                     ref={fileInputRef}
@@ -353,13 +432,14 @@ const EventChat = () => {
                     className="input py-3 px-4 rounded-xl border border-white/10 bg-white/5 text-xs grow text-white"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
+                    onFocus={() => setShowEmojiPicker(false)}
                 />
                 <button
                     type="submit"
                     disabled={uploading || (!text.trim() && !pendingFile)}
                     className="btn-primary py-3 px-4 flex items-center justify-center shrink-0 disabled:opacity-40"
                 >
-                    <Send size={16} />
+                    <Send size={20} />
                 </button>
             </form>
         </div>

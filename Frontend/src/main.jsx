@@ -24,6 +24,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Pricing from './components/Pricing';
 import Marketplace from './components/Marketplace';
 import ProviderProfile from './components/ProviderProfile';
+import OrganizerProfile from './components/OrganizerProfile';
 import ProviderDashboard from './components/ProviderDashboard';
 import SocialFeed from './components/SocialFeed';
 import EventChat from './components/EventChat';
@@ -69,6 +70,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="prices" element={<Pricing />} />
             <Route path="marketplace" element={<Marketplace />} />
             <Route path="providers/:id" element={<ProviderProfile />} />
+            <Route path="organizer/:id" element={<OrganizerProfile />} />
             <Route path="provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
             <Route path="social-feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
             <Route path="events/:id/chat" element={<ProtectedRoute><EventChat /></ProtectedRoute>} />

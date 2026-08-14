@@ -281,6 +281,15 @@ const searchEvents = async (req, res) => {
             return res.status(400).json({ message: 'Search query required' });
         }
 
+        const User = mongoose.model('User');
+        const matchingUsers = await User.find({
+            $or: [
+                { name: { $regex: q, $options: 'i' } },
+                { lastName: { $regex: q, $options: 'i' } }
+            ]
+        });
+        const matchingUserIds = matchingUsers.map(u => u._id);
+
         const events = await Event.find({
             $and: [
                 { status: 'active' },
@@ -290,7 +299,8 @@ const searchEvents = async (req, res) => {
                         { description: { $regex: q, $options: 'i' } },
                         { 'location.venue': { $regex: q, $options: 'i' } },
                         { 'location.city': { $regex: q, $options: 'i' } },
-                        { category: { $regex: q, $options: 'i' } }
+                        { category: { $regex: q, $options: 'i' } },
+                        { organizer: { $in: matchingUserIds } }
                     ]
                 }
             ]

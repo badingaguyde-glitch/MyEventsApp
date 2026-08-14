@@ -15,7 +15,8 @@ const Profile = () => {
         firstName: user?.name || '',
         lastName: user?.lastName || '',
         email: user?.email || '',
-        interests: user?.interests?.join(', ') || ''
+        interests: user?.interests?.join(', ') || '',
+        isProfilePublic: user?.isProfilePublic || false
     });
     const [loading, setLoading] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -34,6 +35,7 @@ const Profile = () => {
         try {
             const dataToSubmit = { 
                 ...formData, 
+                name: formData.firstName,
                 interests: formData.interests.split(',').map(i => i.trim()) 
             };
             await UserDataService.updateProfile(dataToSubmit, user.token);
@@ -114,6 +116,26 @@ const Profile = () => {
                             <Tags className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                             <input name="interests" type="text" className="input pl-12" placeholder="e.g. Music, Tech, Art" value={formData.interests} onChange={handleChange} />
                         </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-1">
+                                Public Profile
+                            </label>
+                            <span className="text-[10px] text-slate-500 block">
+                                If enabled, other attendees will be able to view your profile and interests on the event page.
+                            </span>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                name="isProfilePublic"
+                                checked={formData.isProfilePublic} 
+                                onChange={(e) => setFormData({ ...formData, isProfilePublic: e.target.checked })}
+                                className="sr-only peer" 
+                            />
+                            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
                     </div>
                     <button 
                         type="submit" 

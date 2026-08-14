@@ -52,6 +52,12 @@ const getProfile = (token) => {
     });
 };
 
+const getPublicProfile = (userId, token) => {
+    return http.get(`/user/${userId}/public`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+};
+
 const upgradePlan = (data, token) => {
     return http.post("/payment/upgrade-plan", data, {
         headers: { Authorization: `Bearer ${token}` }
@@ -81,6 +87,7 @@ const UserDataService = {
     verifyResetCode,
     resetPassword,
     getProfile,
+    getPublicProfile,
     upgradePlan,
     logout,
     getAdminStats,
