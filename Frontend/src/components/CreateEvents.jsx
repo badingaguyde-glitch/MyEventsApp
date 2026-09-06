@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import EventService from '../services/EventServices';
@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { AlertCircle, Save, X, Calendar, MapPin, Users, DollarSign, Image as ImageIcon, Tag, Clock } from 'lucide-react';
 import Loader from './Loader';
 import PromoWidget from './PromoWidget';
+import LocationPicker from './MapSelector';
 
 const CreateEvents = () => {
   const user = useSelector((state) => state.user);
@@ -14,6 +15,7 @@ const CreateEvents = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [coordinates, setCoordinates] = useState([0, 0]); // [longitude, latitude]
 
   const [formData, setFormData] = useState({
     title: '',
@@ -39,6 +41,15 @@ const CreateEvents = () => {
     } else {
       setFormData({ ...formData, [name]: value });
     }
+  };
+
+  const handleCoordinatesChange = (newCoords) => {
+    setCoordinates(newCoords);
+    setFormData(prevData => ({
+      ...prevData,
+      longitude: newCoords[0],
+      latitude: newCoords[1]
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -68,8 +79,8 @@ const CreateEvents = () => {
       data.append("location[city]", formData.city);
       data.append("location[address]", formData.address);
       data.append("location[venue]", formData.venue);
-      data.append("coordinates[0]", formData.longitude || 0);
-      data.append("coordinates[1]", formData.latitude || 0);
+      data.append("coordinates", formData.longitude || 0);
+      data.append("coordinates", formData.latitude || 0);
       data.append("clientType", "web");
 
       if (formData.image) {
@@ -245,6 +256,7 @@ const CreateEvents = () => {
                   />
                 </div>
               </div>
+              <LocationPicker coordinates={coordinates} onChangeCoordinates={handleCoordinatesChange} />
 
               {/* Date & Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

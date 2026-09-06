@@ -6,6 +6,7 @@ import JSZip from 'jszip';
 import SocialServices from '../services/SocialServices';
 import http from '../services/http-common';
 import UserDataService from '../services/UserDataServices';
+import EventDataService from '../services/EventServices';
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;   // 5 MB
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;   // 100 MB
@@ -141,6 +142,7 @@ const EventChat = () => {
     const localUser = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
 
     const [messages, setMessages] = useState([]);
+    const [eventData, setEventData] = useState(null);
     const [text, setText] = useState('');
     const [uploading, setUploading] = useState(false);
     const [uploadInfo, setUploadInfo] = useState('');
@@ -164,6 +166,7 @@ const EventChat = () => {
     useEffect(() => {
         if (token && id) {
             loadMessages();
+            loadEventDetails();
             const interval = setInterval(loadMessages, 4000);
             return () => clearInterval(interval);
         }
@@ -183,9 +186,24 @@ const EventChat = () => {
     const loadMessages = async () => {
         try {
             const res = await SocialServices.getChatMessages(id, token);
-            setIsNewMessage(messages.length === res.data.length ? false : true);
-            setMessages(res.data);
+            setMessages(prevMessages => {
+                const oldMessage = prevMessages[prevMessages.length - 1];
+                const newMessage = res.data[res.data.length - 1];
+                const hasNewMessages= oldMessage?.id !== newMessage?.id;
+                if (hasNewMessages) {
+                    setIsNewMessage(true);
+                }
+                return res.data;
+            });
         } catch (e) { console.error('Error loading chat', e); }
+    };
+
+    const loadEventDetails = async () => {
+        try {
+            const res = await EventDataService.getEventById(id, token);
+            console.log('Event data loaded:', res.data);
+            setEventData(res.data);
+        } catch (e) { console.error('Error loading event', e); }
     };
 
     // ── Sélection de fichier ─────────────────────────────────────────────────
@@ -325,6 +343,15 @@ const EventChat = () => {
 
             {/* Message list */}
             <div ref={chatContainerRef} className="chat-container chat-messages-doodle flex-grow overflow-y-auto my-4 p-6 space-y-5 rounded-2xl border border-white/5 shadow-inner">
+                <div className="chat-container-inner">
+                    <UserAvatar
+                        name={(eventData?.organizer?.name && eventData?.organizer?.lastName) ? (eventData.organizer.name + ' ' + eventData.organizer.lastName) : 'Organisateur'}
+                        onClick={() => eventData?.organizer?._id && handleUserAvatarClick(eventData.organizer._id)}
+                    />
+                    <label className="text-[10px] text-slate-400 font-medium ml-2">
+                        {eventData?.organizer ? (eventData.organizer.name + ' ' + eventData.organizer.lastName) : 'Organisateur'}
+                    </label>
+                </div>
                 {messages.length === 0 ? (
                     <p className="text-xs text-slate-400 text-center py-10 bg-slate-950/20 rounded-xl">Aucun message pour le moment. Lancez la discussion !</p>
                 ) : (

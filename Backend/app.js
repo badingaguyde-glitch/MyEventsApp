@@ -1,4 +1,5 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -40,6 +41,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Renvoyer un statut 204 pour éviter les erreurs de favicon.ico
 app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+//Route de santé pour kubernetes (Liveness et Readiness Probes)
+app.get('/health', (req,res)=> {
+  const isDbConnected = mongoose.connection.readyState ===1;
+  if (isDbConnected) {
+    return res.status(200).json({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      db: 'connected'
+    });
+  }
+  return res.status(503).json({
+    status: 'error',
+    db: 'disconnected'
+  });
+});
 
 // Middleware to restrict API access to Bantu official Web/Mobile clients
 const requireClientSecret = (req, res, next) => {

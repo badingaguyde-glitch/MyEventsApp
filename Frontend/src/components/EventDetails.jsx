@@ -14,10 +14,16 @@ const EventDetails = () => {
     const user = useSelector((state) => state.user);
 
     const [event, setEvent] = useState(null);
+    const long = event?.coordinates?.[0];
+    const lat = event?.coordinates?.[1];
+    const hasCoordinates = (lat !== undefined && long !== undefined && lat !== 0 && long !== 0);
+    const googleMapsUrl = hasCoordinates ? `https://www.google.com/maps/search/?api=1&query=${lat},${long}` :
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event?.location?.venue || ''} ${event?.location?.address || ''} ${event?.location?.city || ''}`)}`;
+
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-    console.log("event details loaded:", event); 
+    console.log("event details loaded:", event);
 
     useEffect(() => {
         fetchEvent();
@@ -44,13 +50,13 @@ const EventDetails = () => {
         setMessage({ text: '', type: '' });
 
         try {
-            
+
             const response = await TicketService.buyTicket({ eventId: id, price: event.price, user: user._id || user.id, clientType: 'web' }, user.token);
             if (response.data && response.data.stripeUrl) {
                 window.location.href = response.data.stripeUrl;
             } else {
                 setMessage({ text: 'Ticket booked successfully!', type: 'success' });
-                fetchEvent(); 
+                fetchEvent();
             }
         } catch (err) {
             setMessage({ text: err.response?.data?.message || 'Booking failed.', type: 'error' });
@@ -71,7 +77,7 @@ const EventDetails = () => {
             >
                 <div className="h-64 sm:h-80 md:h-[450px] relative">
                     <img
-                        src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'https://my-events-app-backend.vercel.app'}/uploads/${event.image || 'default.jpg'}`}
+                        src={event.image?.startsWith('http') ? event.image : `${import.meta.env.VITE_API_BASE_URL || 'https://138-68-145-245.nip.io'}/uploads/${event.image || 'default.jpg'}`}
                         alt={event.title}
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1200' }}
@@ -123,6 +129,34 @@ const EventDetails = () => {
                                     </p>
                                     <p className="text-sm text-slate-400 font-bold">In-person experience</p>
                                 </div>
+                                <div onClick={() => window.open(googleMapsUrl, '_blank', 'noopener,noreferrer')}
+                                    className='group relative w-full h-48 rounded-2xl overflow-hidden border border-light bg-slate-900 cursor-pointer shadow-lg hover:border-primary/50 transition-all duration-300'>
+                                    {hasCoordinates ? (
+                                        <iframe
+                                            title="Event Location"
+                                            width="100%"
+                                            height="100%"
+                                            frameBorder="0"
+                                            scrolling="no"
+                                            marginHeight="0"
+                                            marginWidth="0"
+                                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${long - 0.005}%2C${lat - 0.005}%2C${long + 0.005}%2C${lat + 0.005}&layer=mapnik&marker=${lat}%2C${long}`}
+                                            className="pointer-events-none filter grayscale opacity-80 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-6 text-center bg-slate-900/60">
+                                            <span className="text-3xl">📍</span>
+                                            <p className="text-sm font-bold text-white">Voir sur Google Maps</p>
+                                            <p className="text-[10px] text-slate-400 font-medium">Cliquez pour ouvrir l'itinéraire</p>
+                                        </div>
+                                    )}
+                                    {/* Overlay interactif qui s'affiche au survol */}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center pointer-events-none">
+                                        <span className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-lg flex items-center gap-2">
+                                            🗺️ Ouvrir Google Maps
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +196,7 @@ const EventDetails = () => {
                             >
                                 {booking ? 'Processing...' : <><Ticket size={20} className="gap-2" /> Purchase Secret Ticket</>}
                             </button>
-                            
+
                             <button
                                 onClick={async () => {
                                     if (!isLoggedIn) {
@@ -193,7 +227,7 @@ const EventDetails = () => {
                                 }}
                                 className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl font-bold bg-slate-800 text-white hover:bg-slate-700 transition-colors border border-slate-700"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>
                                 Rejoindre le Chat de l'Événement
                             </button>
 
