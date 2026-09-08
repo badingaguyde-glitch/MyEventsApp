@@ -6,6 +6,21 @@ const User = require('../app_api/models/User');
 const Event = require('../app_api/models/Event');
 const Ticket = require('../app_api/models/Ticket');
 require('../app_api/models/Notification');
+
+// ---- MOCK REDIS EN MEMOIRE POUR LES TESTS ----
+// EMpêche toute tentative de connexion à 127.0.0.1:6379 durant les tests
+require.cache[require.resolve('../app_api/config/redis')] ={
+  exports: {
+    get: async () => null,
+    set: async ()=> 'OK',
+    del: async ()=> 1,
+    on: ()=> {},
+    connect: async ()=> {},
+    disconnect: async ()=> {},
+    isOpen: ()=> true
+  }
+};
+
 const { createEvent } = require('../app_api/controller/EventControllers');
 const { bulkCancelTickets } = require('../app_api/controller/TicketControllers');
 
@@ -20,7 +35,7 @@ test.describe('BANTU Pricing Tiers & Business Logic Integration Tests', () => {
 
   test.before(async () => {
     // Connect to test database
-    mongoServer = await MongoMemoryServer();
+    mongoServer = await MongoMemoryServer.create();
     const uri = await mongoServer.getUri();
     if (mongoose.connection.readyState === 0) {
       await mongoose.connect(uri);
@@ -68,6 +83,9 @@ test.describe('BANTU Pricing Tiers & Business Logic Integration Tests', () => {
     if (mongoServer){
       await mongoServer.stop();
     }
+    setTimeout(()=>{
+      process.exit(0);
+    }, 2000); // Allow time for async cleanup
   });
 
   test('Free organizer should NOT be allowed to create events with capacity > 100', async () => {
