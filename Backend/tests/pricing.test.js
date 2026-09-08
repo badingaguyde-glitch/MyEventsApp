@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const User = require('../app_api/models/User');
 const Event = require('../app_api/models/Event');
 const Ticket = require('../app_api/models/Ticket');
@@ -11,18 +12,18 @@ const { bulkCancelTickets } = require('../app_api/controller/TicketControllers')
 // Configure test environment
 require('dotenv').config();
 
-const dbURI = process.env.MONGODB_URI;
-
 test.describe('BANTU Pricing Tiers & Business Logic Integration Tests', () => {
-  let dbConnection;
+  let mongoServer;
   let testFreeUser;
   let testEnterpriseUser;
   let testCoOrganizer;
 
   test.before(async () => {
-    // Connect to Atlas test database
+    // Connect to test database
+    mongoServer = await MongoMemoryServer();
+    const uri = await mongoServer.getUri();
     if (mongoose.connection.readyState === 0) {
-      dbConnection = await mongoose.connect(dbURI);
+      await mongoose.connect(uri);
     }
     
     // Clean up any old test users
@@ -63,14 +64,10 @@ test.describe('BANTU Pricing Tiers & Business Logic Integration Tests', () => {
 
   test.after(async () => {
     // Clean up database
-    await User.deleteMany({ email: /@test-pricing-bantu\.com$/ });
-    await Event.deleteMany({ title: /Test Pricing Event/ });
-    await mongoose.connection.close();
-    
-    // Force exit process to prevent hanging due to background Redis / RabbitMQ connections
-    setTimeout(() => {
-      process.exit(0);
-    }, 500);
+    await mongoose.disconnect();
+    if (mongoServer){
+      await mongoServer.stop();
+    }
   });
 
   test('Free organizer should NOT be allowed to create events with capacity > 100', async () => {
