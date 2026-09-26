@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, Navigation } from 'lucide-react';
 
 const EventCard = ({ event, index }) => {
     return (
@@ -21,6 +21,12 @@ const EventCard = ({ event, index }) => {
                 <div className="absolute top-3 left-3 px-3 py-1 glass rounded-full text-[10px] font-bold text-white uppercase tracking-widest">
                     {event.category}
                 </div>
+                {event.distance && (
+    <div className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/75 backdrop-blur-md rounded-full text-[11px] font-bold text-emerald-400 flex items-center gap-1.5 border border-emerald-500/30">
+        <Navigation size={12} />
+        {event.distance.value} {event.distance.unit}
+    </div>
+)}
                 <div className="absolute top-3 right-3 px-3 py-1 glass rounded-full text-xs font-bold text-primary">
                     ${event.price}
                 </div>
@@ -40,6 +46,12 @@ const EventCard = ({ event, index }) => {
                             {event.location?.venue}, {event.location?.city}
                         </span>
                     </div>
+                    {event.distance && (
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold">
+                            <Navigation size={14} className="shrink-0 animate-pulse" />
+                            <span> À {event.distance.value} {event.distance.unit} de vous</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-2 text-slate-400 text-xs font-medium">
                         <Users size={14} className="text-primary shrink-0" />
                         <span>{event.capacity} total seats</span>

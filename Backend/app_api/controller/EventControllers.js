@@ -6,7 +6,7 @@ var Notification = mongoose.model('Notification');
 var client = require('../config/redis');
 var cache = require('../middleware/cache');
 require('dotenv').config();
-var calculateDistance = require('./utils/calculate');
+var { calculateDistance } = require('./utils/calculate');
 const { publishToQueue } = require('../config/rabbitmq');
 const { sendExpoPushNotifications } = require('../config/pushHelper');
 
