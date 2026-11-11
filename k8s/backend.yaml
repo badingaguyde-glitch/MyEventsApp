@@ -6,7 +6,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -32,21 +32,23 @@ spec:
             - secretRef:
                 name: bantu-secret
 
-          # Sonde de disponibilité (L'API est-elle prête à recevoir des requêtes ?)
+          # Sonde de disponibilité (L'API est-elle prête à recevoir du trafic utilisateur ?)
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 5
+            failureThreshold: 6
 
-          # Sonde de vie (L'API a-t-elle crashé ou gelé ?)
+          # Sonde de vie (Le serveur Node.js est-il actif et répond-il aux événements ?)
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/live
               port: 5000
             initialDelaySeconds: 20
             periodSeconds: 10
+            failureThreshold: 3
 
           # Contrôle strict de mémoire (128 Mo min, 256 Mo max par pod)
           resources:

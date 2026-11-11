@@ -29,7 +29,7 @@ app.set('trust proxy', true);
 // ==========================================
 app.use((req, res, next) => {
   // Ignorer les sondes Kubernetes régulières et favicon pour ne pas saturer les logs
-  if (req.path === '/health' || req.path === '/favicon.ico') {
+  if (req.path === '/health' || req.path === '/health/live' || req.path === '/favicon.ico') {
     return next();
   }
 
@@ -89,9 +89,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Renvoyer un statut 204 pour éviter les erreurs de favicon.ico
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-//Route de santé pour kubernetes (Liveness et Readiness Probes)
-app.get('/health', (req,res)=> {
-  const isDbConnected = mongoose.connection.readyState ===1;
+// Route de vivacité Kubernetes (Liveness Probe - confirme que le processus Node.js est actif)
+app.get('/health/live', (req, res) => {
+  res.status(200).json({ status: 'live', uptime: process.uptime() });
+});
+
+// Route de disponibilité pour kubernetes (Readiness Probe - vérifie que la base est prête)
+app.get('/health', (req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
   if (isDbConnected) {
     return res.status(200).json({
       status: 'ok',
@@ -101,7 +106,8 @@ app.get('/health', (req,res)=> {
     });
   }
   return res.status(503).json({
-    status: 'error',
+    status: 'degraded',
+    uptime: process.uptime(),
     db: 'disconnected'
   });
 });
