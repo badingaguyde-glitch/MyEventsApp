@@ -4,9 +4,13 @@ metadata:
   name: bantu-ingress
   namespace: bantu-production
   annotations:
-    # Indique à kubernetes d'utiliser Traefik (intégré d'office dans k3s)
+    # Indique à Kubernetes d'utiliser Traefik (intégré d'office dans k3s)
     kubernetes.io/ingress.class: traefik
 spec:
+  tls:
+    - hosts:
+        - 138-68-145-245.nip.io
+      secretName: bantu-tls
   rules:
     - host: 138-68-145-245.nip.io
       http:

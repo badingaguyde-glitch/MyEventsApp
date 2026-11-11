@@ -4,6 +4,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,6 +23,51 @@ var cors = require('cors');
 var app = express();
 
 app.set('trust proxy', true);
+
+// ==========================================
+// 🔍 MIDDLEWARE D'OBSERVABILITÉ TEMPS RÉEL (LENS & K8S)
+// ==========================================
+app.use((req, res, next) => {
+  // Ignorer les sondes Kubernetes régulières et favicon pour ne pas saturer les logs
+  if (req.path === '/health' || req.path === '/favicon.ico') {
+    return next();
+  }
+
+  // 1. Identifiant de corrélation unique par requête
+  const requestId = req.headers['x-request-id'] || crypto.randomUUID().slice(0, 8);
+  req.id = requestId;
+  res.setHeader('X-Request-Id', requestId);
+
+  const startTime = process.hrtime();
+  const timestamp = new Date().toLocaleTimeString();
+
+  // 2. Détection de l'utilisateur (via JWT si présent)
+  let userIdentifier = 'Guest';
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.decode(authHeader.split(' ')[1]);
+      if (decoded && (decoded.id || decoded._id || decoded.email)) {
+        userIdentifier = 'User:' + (decoded.email || decoded.id || decoded._id);
+      }
+    } catch (_) {}
+  }
+
+  // 3. Log d'entrée dans le flux
+  console.log(`📡 [${timestamp}] [REQ-${requestId}] ➔ ${req.method} ${req.originalUrl} | Client: ${req.ip} | ${userIdentifier}`);
+
+  // 4. Capture et log de fin avec code statut et latence
+  res.on('finish', () => {
+    const diff = process.hrtime(startTime);
+    const durationInMs = ((diff[0] * 1e9 + diff[1]) / 1e6).toFixed(2);
+    const status = res.statusCode;
+    const icon = status >= 500 ? '❌' : status >= 400 ? '⚠️' : '✅';
+
+    console.log(`${icon} [REQ-${requestId}] ⬅️ ${status} (${durationInMs} ms) | ${req.method} ${req.originalUrl}`);
+  });
+
+  next();
+});
 
 app.use(logger('dev'));
 app.use(cors());
