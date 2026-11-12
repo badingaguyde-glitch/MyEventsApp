@@ -15,3 +15,4 @@ data:
   FRONTEND_URL: "https://app.myevents.badinga.dev"
   EVENT_CREATION_FEE: "500"
   PAYMENT_TIMEOUT_HOURS: "2"
+  TASK_QUEUE_SERVER_URL: "https://138-68-146-62.nip.io/api/jobs"
