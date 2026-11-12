@@ -6,3 +6,6 @@ dist/
 secret.yaml
 k8s/secret.yaml
 *secret*.yaml
+*kubeconfig*
+*.kubeconfig
+k3s.yaml

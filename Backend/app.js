@@ -2,10 +2,12 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const redisClient = require('./app_api/config/redis');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -28,8 +30,8 @@ app.set('trust proxy', true);
 // 🔍 MIDDLEWARE D'OBSERVABILITÉ TEMPS RÉEL (LENS & K8S)
 // ==========================================
 app.use((req, res, next) => {
-  // Ignorer les sondes Kubernetes régulières et favicon pour ne pas saturer les logs
-  if (req.path === '/health' || req.path === '/health/live' || req.path === '/favicon.ico') {
+  // Ignorer les sondes Kubernetes régulières, favicon et ACME pour ne pas saturer les logs
+  if (req.path === '/health' || req.path === '/health/live' || req.path === '/favicon.ico' || req.path.startsWith('/.well-known/')) {
     return next();
   }
 
@@ -84,7 +86,31 @@ app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), stri
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow' }));
+
+// Route pour les challenges ACME Let's Encrypt / Certbot (avec Redis partagé et fallback fichier)
+app.get('/.well-known/acme-challenge/:token', async (req, res) => {
+  const token = req.params.token;
+  try {
+    if (redisClient && redisClient.isOpen) {
+      const val = await redisClient.get(`acme:${token}`);
+      if (val) {
+        res.setHeader('Content-Type', 'text/plain');
+        return res.send(val);
+      }
+    }
+  } catch (err) {
+    console.error('ACME challenge lookup error:', err);
+  }
+
+  const filePath = path.join(__dirname, 'public', '.well-known', 'acme-challenge', token);
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'text/plain');
+    return res.sendFile(filePath);
+  }
+
+  return res.status(404).send('Challenge not found');
+});
 
 // Renvoyer un statut 204 pour éviter les erreurs de favicon.ico
 app.get('/favicon.ico', (req, res) => res.status(204).end());
