@@ -35,11 +35,12 @@ const MyTickets = () => {
         try {
             await TicketService.cancelTicket(ticketid, user.token);
             dispatch({ type: "DELETE_KAYIT_SUCCESS" });
-            setMessage({ text: 'Ticket cancelled successfully.', type: 'success' });
+            setMessage({ text: 'Billet annulé avec succès.', type: 'success' });
             fetchTickets();
         } catch (err) {
-            setMessage({ text: 'Failed to cancel ticket.', type: 'error' });
-            console.error(err);
+            const errorMsg = err.response?.data?.message || "Échec de l'annulation du billet.";
+            setMessage({ text: errorMsg, type: 'error' });
+            console.error('Cancel ticket error:', err);
             dispatch({ type: "DELETE_KAYIT_FAILURE" });
         }
     };
@@ -72,7 +73,13 @@ const MyTickets = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {tickets.map((ticket, index) => (
-                    <TicketCard key={ticket._id} ticket={ticket} index={index} onCancel={handleCancel} />
+                    <TicketCard 
+                        key={ticket._id} 
+                        ticket={ticket} 
+                        index={index} 
+                        onCancel={handleCancel}
+                        isAdmin={user?.role === 'admin'}
+                    />
                 ))}
             </div>
 

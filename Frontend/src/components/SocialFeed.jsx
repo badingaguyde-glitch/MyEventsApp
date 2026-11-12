@@ -143,9 +143,21 @@ const SocialFeed = () => {
 
                                 <div className="bg-black w-full h-96 flex items-center justify-center overflow-hidden">
                                     {post.mediaType === 'image' ? (
-                                        <img src={post.mediaUrl} alt="Publication" className="w-full h-full object-cover" />
+                                        <img 
+                                            src={post.mediaUrl} 
+                                            alt="Publication" 
+                                            className="w-full h-full object-cover" 
+                                            crossOrigin="anonymous"
+                                            referrerPolicy="no-referrer"
+                                            loading="lazy"
+                                        />
                                     ) : (
-                                        <video src={post.mediaUrl} controls className="w-full h-full object-cover" />
+                                        <video 
+                                            src={post.mediaUrl} 
+                                            controls 
+                                            className="w-full h-full object-cover" 
+                                            crossOrigin="anonymous"
+                                        />
                                     )}
                                 </div>
 

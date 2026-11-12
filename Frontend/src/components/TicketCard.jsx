@@ -2,7 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const TicketCard = ({ ticket, index, onCancel }) => {
+const TicketCard = ({ ticket, index, onCancel, isAdmin }) => {
+    const isPast = ticket.event?.date ? new Date(ticket.event.date) < new Date() : false;
+    const isPending = ticket.status === 'pending_payment';
+    const isCancelled = ticket.status === 'cancelled';
+    const isUsed = ticket.status === 'used';
+    const canCancel = (!isPast && !isCancelled && !isUsed && !isPending) || isAdmin;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -14,24 +20,48 @@ const TicketCard = ({ ticket, index, onCancel }) => {
                 <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            {ticket.status === 'pending_payment' ? (
+                            {isPending ? (
                                 <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                            ) : isCancelled ? (
+                                <AlertCircle size={16} className="text-rose-500 shrink-0" />
+                            ) : isPast ? (
+                                <Calendar size={16} className="text-slate-400 shrink-0" />
                             ) : (
                                 <CheckCircle2 size={16} className="text-primary shrink-0" />
                             )}
-                            <span className={`text-[10px] font-bold uppercase tracking-widest truncate ${ticket.status === 'pending_payment' ? 'text-amber-500' : 'text-primary'}`}>
-                                {ticket.status === 'pending_payment' ? 'Pending Payment' : 'Confirmed Ticket'}
+                            <span className={`text-[10px] font-bold uppercase tracking-widest truncate ${
+                                isPending 
+                                    ? 'text-amber-500' 
+                                    : isCancelled 
+                                        ? 'text-rose-500' 
+                                        : isPast 
+                                            ? 'text-slate-400' 
+                                            : 'text-primary'
+                            }`}>
+                                {isPending 
+                                    ? 'Pending Payment' 
+                                    : isCancelled 
+                                        ? 'Cancelled' 
+                                        : isPast 
+                                            ? 'Past Event' 
+                                            : 'Confirmed Ticket'}
                             </span>
                         </div>
                         <h3 className="text-lg md:text-xl font-bold truncate">{ticket.event?.title}</h3>
                     </div>
-                    <button
-                        onClick={() => onCancel(ticket._id)}
-                        className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all bg-rose-500/10"
-                        title="Cancel Booking"
-                    >
-                        <Trash2 size={18} />
-                    </button>
+                    {canCancel ? (
+                        <button
+                            onClick={() => onCancel(ticket._id)}
+                            className="p-2 glass text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all bg-rose-500/10 cursor-pointer"
+                            title={isPast && isAdmin ? "Supprimer le billet (Admin)" : "Cancel Booking"}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    ) : (
+                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-800/60 px-2 py-1 rounded-md border border-slate-700/50 shrink-0">
+                            {isPast ? 'Event ended' : isCancelled ? 'Cancelled' : isUsed ? 'Used' : ''}
+                        </span>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

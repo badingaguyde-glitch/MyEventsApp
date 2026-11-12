@@ -367,23 +367,22 @@ const cancelTicket = async (req, res) => {
         }
 
 
-        if (ticket.status === 'used') {
+        if (ticket.status === 'used' && req.user.role !== 'admin') {
             return res.status(400).json({
                 message: 'Cannot cancel a ticket that has already been used'
             });
         }
 
-        if (ticket.status === 'cancelled') {
+        if (ticket.status === 'cancelled' && req.user.role !== 'admin') {
             return res.status(400).json({
                 message: 'Ticket is already cancelled'
             });
         }
 
-
         const eventDate = new Date(ticket.event.date);
         const now = new Date();
 
-        if (eventDate < now) {
+        if (eventDate < now && req.user.role !== 'admin') {
             return res.status(400).json({
                 message: 'Cannot cancel ticket for past events'
             });
