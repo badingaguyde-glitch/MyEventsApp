@@ -1,24 +1,35 @@
 require('dotenv').config();
 
 const dns = require('dns');
-// Configurer des DNS publics stables (Google et Cloudflare) pour contourner les problèmes de résolution SRV de certains routeurs/box internet
-dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+// N'appliquer les DNS publics de contournement que hors de Kubernetes pour préserver CoreDNS en production
+if (!process.env.KUBERNETES_SERVICE_HOST && process.env.NODE_ENV !== 'production') {
+    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+}
 
 var mongoose = require('mongoose');
 
 var dbURI = process.env.MONGODB_URI;
-mongoose.connect(dbURI).catch(err => {
-    console.error("Mongoose initial connection error:", err.message);
-});
+
+const connectWithRetry = () => {
+    mongoose.connect(dbURI, {
+        serverSelectionTimeoutMS: 5000,
+    }).catch(err => {
+        console.error("Mongoose connection error, retrying in 5 seconds:", err.message);
+        setTimeout(connectWithRetry, 5000);
+    });
+};
+
+connectWithRetry();
 
 mongoose.connection.on('connected', function(){
     console.log('Mongoose connected to ' + dbURI);
 });
-mongoose.connection.on('error',function(){
-    console.log("Mongoose connection error ");
+mongoose.connection.on('error',function(err){
+    console.log("Mongoose connection error:", err && err.message ? err.message : err);
 });
 mongoose.connection.on('disconnected',function(){
-    console.log("Mongoose disconnected");
+    console.log("Mongoose disconnected. Reconnecting in 5s...");
+    setTimeout(connectWithRetry, 5000);
 });
 
 process.on('SIGINT',function(){

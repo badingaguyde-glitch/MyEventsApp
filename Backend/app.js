@@ -27,6 +27,16 @@ var app = express();
 app.set('trust proxy', true);
 
 // ==========================================
+// 🛡️ FILTRE DE SÉCURITÉ ANTI-SCANNER (PHP, CGI, ASP, .ENV, .GIT)
+// ==========================================
+app.use((req, res, next) => {
+  if (/\.(php|asp|aspx|jsp|cgi|env|git|bak|sql|ini|yml|yaml)$/i.test(req.path) || /wp-(admin|login|content|includes)/i.test(req.path)) {
+    return res.status(404).end();
+  }
+  next();
+});
+
+// ==========================================
 // 🔍 MIDDLEWARE D'OBSERVABILITÉ TEMPS RÉEL (LENS & K8S)
 // ==========================================
 app.use((req, res, next) => {
